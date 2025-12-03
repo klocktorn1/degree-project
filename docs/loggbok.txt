@@ -1,0 +1,47 @@
+vecka 1
+måndag - Var med på föreläsningen om uppstart för exjobb, startade github repo för hela exjobbet, började på projektbeskrivningen
+tisdag - Gjorde färdigt projektbeskrivning samt började med kort "Create user database", gjorde ER diagram för user database, började med uppsättning av backend server och basic folder struktur
+onsdag - 
+torsdag -
+fredag - 
+
+vecka 2
+måndag - 
+tisdag -
+onsdag - 
+torsdag -
+fredag - 
+
+
+
+
+vecka 3
+måndag - 
+tisdag -
+onsdag - 
+torsdag -
+fredag - 
+
+vecka 4
+måndag - 
+tisdag -
+onsdag - 
+torsdag -
+fredag - 
+
+
+
+
+vecka 5
+måndag - 
+tisdag -
+onsdag - 
+torsdag -
+fredag - 
+
+vecka 6
+måndag - 
+tisdag -
+onsdag - 
+torsdag -
+fredag - 

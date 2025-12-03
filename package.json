@@ -7,6 +7,7 @@
   },
   "scripts": {
     "start": "node backend/src/server.js",
+    "dev": "nodemon backend/src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -14,7 +15,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "mysql2": "^3.15.3",
+    "nodemon": "^3.1.11",
     "sqlite3": "^5.1.7"
   }
 }
