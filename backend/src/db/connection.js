@@ -2,7 +2,6 @@ const mysql = require('mysql2/promise');
 require('dotenv').config();
 
 
-
 const connection = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
@@ -13,8 +12,5 @@ const connection = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0
 });
-
-console.log("DB PASSWORD LOADED:", !!process.env.DB_PASSWORD);
-
 
 module.exports = connection;
