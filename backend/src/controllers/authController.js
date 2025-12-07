@@ -9,12 +9,12 @@ const crypto = require('crypto');
 
 
 const createAccessToken = (user) => {
-    return jwt.sign({ user: user.id, email: user.email }, process.env.JWT_SECRET, {
+    return jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
         expiresIn: "15m"
     })
 }
 const createRefreshToken = (user) => {
-    return jwt.sign({ user: user.id, email: user.email }, process.env.JWT_REFRESH_SECRET, {
+    return jwt.sign({ id: user.id, email: user.email }, process.env.JWT_REFRESH_SECRET, {
         expiresIn: "7d"
     })
 }
@@ -28,7 +28,7 @@ const loginUser = async (req, res) => {
 
         if (!user) {
             return res.status(401).json({ message: "Invalid email or password" })
-        } else {
+        } else {            
             const match = await bcrypt.compare(password, row[0].password_hash)
             if (!match) {
                 return res.status(401).json({ message: "Invalid email or password" });
@@ -57,7 +57,10 @@ const loginUser = async (req, res) => {
     }
 };
 
-
+// if jwt.verify throws error TokenExpiredError i get 	"message": "Access token expired"
+// from server. frontend needs a way to handle this, if TokenExpiredError then point to
+// this endpoint here (refreshToken). The refresh token is saved in db so
+// frontend needs to access this and send it as payload to this endpoint
 const refreshToken = async (req, res) => {
     const { token } = req.body;
     if (!token) return res.status(401).json({ message: "No token provided" })
@@ -79,8 +82,7 @@ const refreshToken = async (req, res) => {
 const registerUser = async (req, res) => {
     const { username, email, firstname, lastname, password } = req.body;
 
-    const saltRounds = 12;
-    const password_hash = await bcrypt.hash(password, saltRounds);
+    const password_hash = await bcrypt.hash(password, 12);
     try {
         const [result] = await db.query(
             'INSERT INTO users (username, email, firstname, lastname, password_hash) VALUES (?, ?, ?, ?, ?)',
@@ -112,19 +114,23 @@ const forgotPassword = async (req, res) => {
                 const token = crypto.randomBytes(32).toString('hex');
                 const expires = new Date(Date.now() + 60 * 60 * 1000);
 
+                const token_hash = await bcrypt.hash(token, 12);
+
+
                 await db.query(
-                    'INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)',
-                    [user.id, token, expires]
+                    'UPDATE users SET reset_token_hash = ?, reset_token_expires_at = ? WHERE email = ?',
+                    [token_hash, expires, email]
                 );
-                console.log("asdasasdassadassassasadsadsda");
-                
-                const resetLink = `http://localhost:3000/auth/reset-password/${token}`;
+
+                const resetLink = `http://localhost:3000/auth/forgot-password/${user.id}/${token}`;
 
                 await sendEmail({
                     to: email,
                     subject: "reset your password",
                     html: `<p>Click <a href="${resetLink}">here</a> to reset your password</p>`
                 })
+
+                return res.json({ message: "Please check your email" })
 
             }
 
@@ -142,28 +148,32 @@ const forgotPassword = async (req, res) => {
 
 
 const resetPassword = async (req, res) => {
-    const { token } = req.params;
+    const { id, token } = req.params;
     const { newPassword } = req.body;
 
     try {
 
-        const [rows] = await db.query('SELECT * FROM password_resets WHERE token = ? AND expires_at > NOW()', [token])
+        const [rows] = await db.query('SELECT * FROM users WHERE id = ?', [id])
+        const user = rows[0]
+        const resetTokenMatch = await bcrypt.compare(token, user.reset_token_hash)
+        const passwordMatch = await bcrypt.compare(newPassword, user.password_hash)
 
-        if (rows.length === 0) {
+        if (!resetTokenMatch) {
             return res.status(400).json({ message: "Invalid or expired reset token" })
+        } else if (passwordMatch) {
+            return res.status(400).json({ message: "Please do not reuse old password!" })
         } else {
-            const resetRecord = rows[0]
             const password_hash = await bcrypt.hash(newPassword, 12);
 
-            await db.query('UPDATE users SET password_hash = ? WHERE id = ?', [password_hash, resetRecord.user_id])
-            await db.query('DELETE from password_resets WHERE token = ?', [token])
+            await db.query('UPDATE users SET password_hash = ? WHERE id = ?;', [password_hash, user.id])
+            await db.query('UPDATE users SET reset_token_hash = NULL, reset_token_expires_at = NULL WHERE id = ?;', [user.id])
 
-            res.json({ message: "Password has been reset successfully" })
+            return res.json({ message: "Password has been reset successfully" })
 
         }
 
     } catch (err) {
-        res.status(500).json({ error: `resetPassword inside authController ${err.message}` })
+        res.status(500).json({ error: `resetPassword inside authController: ${err.message}` })
     }
 
 }

@@ -1,6 +1,16 @@
 -add on delete cascade on users database schema where needed
 
+-hash refresh token
 
+-maybe rename middleware validations to ex validateExercisePayload etc
+
+-make sure i return the res on the endpoints in controllers
+
+-deleted users saved in deleted_users table. should be able to recover from there
+
+-could make more efficient authorization checkers with middleware, future project if i have time
+
+-rate limiter if i have time
 
 MyStrongP@ssw0rd123
 

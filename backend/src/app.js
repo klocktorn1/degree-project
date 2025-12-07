@@ -21,7 +21,7 @@ app.use('/exercise_results', requireAuth, exerciseResultsRouter);
 app.use('/auth', authRouter);
 
 app.use((req, res, next) => {
-    res.status(404).json({ error: 'Not Found' });
+    res.status(404).json({ error: 'Endpoint Not Found' });
 });
 
 app.use((err, req, res, next) => {

@@ -14,7 +14,7 @@ const getExerciseById = async (req, res) => {
         if (rows.length === 0) {
             return res.status(404).json({ error: 'Exercise not found' });
         }
-        res.json({ exercises: rows[0] });
+        res.json({ exercise: rows[0] });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -32,9 +32,28 @@ const createExercise = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+const deleteExercise = async (req, res) => {
+    try {
+        const [result] = await db.query(
+            'DELETE FROM exercises WHERE id = ?',
+            [req.params.id]
+        );
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Exercise not found" });
+
+        } else {
+            return res.json({ message: "Successfuly deleted exercise" });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+
 
 module.exports = {
     getAllExercises,
     getExerciseById,
     createExercise,
+    deleteExercise
 };

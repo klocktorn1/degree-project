@@ -2,8 +2,8 @@ vecka 1
 måndag - Var med på föreläsningen om uppstart för exjobb, startade github repo för hela exjobbet, började på projektbeskrivningen
 tisdag - Gjorde färdigt projektbeskrivning samt började med kort "Create user database", gjorde ER diagram för user database, började med uppsättning av backend server och basic folder struktur
 onsdag - Början av dagen fixade med endpoints för users db. Insåg att jag ville ändra från MySQLite till MySQL pga mer anpassat för livesättning. Fastnade i princip mer än halva dagen med att få igång mySQL/phpmyadmin/apache. väldigt frustrerande.
-torsdag -
-fredag - 
+torsdag - Fortsatt med endpoints för user databas. implementerad JWT authentication med access och refresh token. Nästan färdig med reset password email handler. fortsätter imorgon.
+fredag - små bugfixes med jwt authentication, 
 
 vecka 2
 måndag - 

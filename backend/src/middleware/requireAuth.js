@@ -2,22 +2,20 @@ const jwt = require('jsonwebtoken')
 
 function requireAuth(req, res, next) {
     const authHeader = req.headers.authorization;
-
-    
-
-    
-
-    const [scheme, token] = authHeader.split(' ')
-        console.log(token);
+    if (!authHeader) {
+        return res.status(401).json({ message: "Missing or invalid Authoriziation header" })
+    }
+    const [scheme, token] = authHeader.split(' ');
 
 
-    if (scheme !== 'Bearer' || !token) {
+
+    if (scheme !== 'Bearer' || !token ) {
         return res.status(401).json({ message: "Missing or invalid Authoriziation header" })
     }
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = { id: decoded.id, email: decoded.email }
+        req.user = decoded
         next();
 
     } catch (err) {

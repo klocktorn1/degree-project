@@ -9,6 +9,6 @@ router.post('/login', loginUser);
 router.post('/register', validateRegisterUser, registerUser);
 router.post('/refresh', refreshToken)
 router.post('/forgot-password', forgotPassword)
-router.post('/forgot-password/:token', resetPassword)
+router.post('/forgot-password/:id/:token', resetPassword)
 
 module.exports = router;
