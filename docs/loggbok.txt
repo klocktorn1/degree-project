@@ -3,11 +3,11 @@ måndag - Var med på föreläsningen om uppstart för exjobb, startade github r
 tisdag - Gjorde färdigt projektbeskrivning samt började med kort "Create user database", gjorde ER diagram för user database, började med uppsättning av backend server och basic folder struktur
 onsdag - Början av dagen fixade med endpoints för users db. Insåg att jag ville ändra från MySQLite till MySQL pga mer anpassat för livesättning. Fastnade i princip mer än halva dagen med att få igång mySQL/phpmyadmin/apache. väldigt frustrerande.
 torsdag - Fortsatt med endpoints för user databas. implementerad JWT authentication med access och refresh token. Nästan färdig med reset password email handler. fortsätter imorgon.
-fredag - små bugfixes med jwt authentication, 
+fredag - små bugfixes med jwt authentication, färdig med endpoints (om jag inte kommer på några fler under tiden projektet går). Började kika lite på music-theory-api
 
 vecka 2
-måndag - 
-tisdag -
+måndag - Började med API. Bestämt mig för hur det ska struktureras. kommer inte använda DB, utan kör allt med algoritmiska funktioner för att få fram ackord etc. Började göra chordService och definerat notes route och notesController. Färdig med generateChord funktion och första endpointen för att hämta ett ackord.
+tisdag - 
 onsdag - 
 torsdag -
 fredag - 
