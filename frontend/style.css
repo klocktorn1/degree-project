@@ -1,0 +1,235 @@
+/* ========== Global & Reset ========== */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  height: 100%;
+  background-color: gray;
+}
+
+a {
+  text-decoration: none;
+  color: white;
+}
+
+/* ========== Layout Containers ========== */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content-container {
+  flex: 1;
+  padding: 20px;
+}
+
+.footer-container {
+  width: 100%;
+  height: 18dvh;
+  background-color: blue;
+}
+
+/* ========== Header & Navigation ========== */
+.header {
+  width: 100%;
+  height: 15dvh;
+  background-color: blue;
+  display: flex;
+  justify-content: flex-end;
+
+  ul {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    width: 30%;
+    margin-right: 10px;
+
+    li {
+      list-style: none;
+      transition: 0.4s;
+
+      &:hover {
+        cursor: pointer;
+        scale: 1.2;
+      }
+    }
+  }
+}
+
+/* ========== Mode Selection ========== */
+.mode-container {
+  display: flex;
+  gap: 20px;
+  margin-top: 50px;
+  margin-bottom: 10px;
+}
+
+/* ========== Note Builder ========== */
+.note-builder-container {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 10px;
+  background-color: dodgerblue;
+
+  button {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 1.2rem;
+    text-align: center;
+    background-color: blanchedalmond;
+  }
+}
+
+/* ========== User-Built Mode ========== */
+.user-built-mode-container {
+  display: flex;
+  padding: 10px;
+  background-color: dodgerblue;
+
+  div {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 1.2rem;
+    text-align: center;
+    background-color: blanchedalmond;
+  }
+}
+
+.user-built-notes-container {
+  display: flex;
+  padding: 10px;
+  background-color: dodgerblue;
+
+  div {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 1.2rem;
+    text-align: center;
+    background-color: blanchedalmond;
+  }
+}
+
+.undo-button-container {
+  background-color: dodgerblue;
+
+  button {
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 1.2rem;
+    text-align: center;
+    background-color: blanchedalmond;
+    margin: 5px;
+  }
+}
+
+/* ========== Chord styling ========== */
+
+.chords-container {
+  display: flex;
+  gap: 20px;
+
+}
+
+/* ========== Buttons ========== */
+button {
+  all: unset;
+}
+
+.custom-button {
+  transition: 0.1s;
+
+  &:hover {
+    cursor: pointer;
+    scale: 1.2;
+  }
+}
+
+.game-button-active {
+  background: darkgray;
+}
+
+.correct {
+  background-color: green !important;
+}
+
+/* ========== Button Containers ========== */
+.note-buttons-container,
+.number-buttons-container,
+.key-buttons-container {
+  display: flex;
+  gap: 10px;
+}
+
+.key-buttons-container {
+  border: 3px solid black;
+  width: fit-content;
+}
+
+/* ========== Game Over UI ========== */
+.game-over-message-container {
+  height: 25dvh;
+  background-color: rgb(112, 112, 112);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.game-over-disabled {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  background-color: blue;
+  opacity: 0;
+}
+
+/* ========== Animations ========== */
+.wrong {
+  animation: wrongAnimation 0.5s ease-out;
+}
+
+.correct-animation {
+  animation: correctAnimation 0.5s ease-out;
+}
+
+@keyframes wrongAnimation {
+  from {
+    background-color: red;
+  }
+
+  to {
+    background-color: inherit;
+  }
+}
+
+@keyframes correctAnimation {
+  from {
+    background-color: green;
+  }
+
+  to {
+    background-color: inherit;
+  }
+}
+
+/* ========== Utilities ========== */
+.active {
+  text-decoration: underline;
+}
+
+.not-visible {
+  display: none;
+}
