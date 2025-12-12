@@ -45,4 +45,12 @@ chord builder logic
    maybe shoelace css 
 
 
+
+User clicks exercises -> Exercises page -> User chooses an exercise (chord guesser)-> Chord Guesser Exercise Startpage
+-> at top of page user can choose 
+EASY(Chords to guess from keys: C, G, F)
+MEDIUM(Chords to guess from keys: C, G, F, D, A, B♭, E♭,), 
+HARD(C, G, F, D, A, B♭, E♭, E, B, A♭, D♭,)
+EXTREME(C, G, F, D, A, B♭, E♭, E, B, A♭, D♭, F#, C#, G#, D#, A#)
+
    

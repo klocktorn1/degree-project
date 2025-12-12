@@ -1,7 +1,7 @@
 module Games.ChordGuesserExercise exposing (..)
 
 import Games.TheoryApi as TheoryApi
-import Html exposing (Html)
+import Html exposing (Html, s)
 import Html.Attributes as HA
 import Html.Events as HE
 import Http
@@ -12,6 +12,9 @@ import String
 
 type alias Model =
     { maybeChords : Maybe (List TheoryApi.Chord2)
+    , isGameStarted : Bool
+    , chosenDifficulty : Difficulty
+    , rootNotes : List String
     , maybeChosenChord : Maybe TheoryApi.Chord2
     , randomizedChord : Maybe TheoryApi.Chord2
     , lastRandomIndex : Maybe Int
@@ -24,9 +27,18 @@ type alias Model =
 type Msg
     = GotChordData (Result Http.Error (List TheoryApi.Chord2))
     | RandomChordPicked Int
+    | DifficultyChosen Difficulty
     | ChordChosen TheoryApi.Chord2
+    | ChordGroupChosen (List String)
     | ResetChordGuesser
     | GoBack
+
+
+type Difficulty
+    = Easy
+    | Medium
+    | Hard
+    | Extreme
 
 
 type alias Flags =
@@ -34,9 +46,12 @@ type alias Flags =
 
 
 init : Flags -> ( Model, Cmd Msg )
-init flags =
+init _ =
     ( { maybeChords = Nothing
       , maybeChosenChord = Nothing
+      , isGameStarted = False
+      , chosenDifficulty = Easy
+      , rootNotes = [ "C", "G", "F" ]
       , randomizedChord = Nothing
       , lastRandomIndex = Nothing
       , score = 0
@@ -47,14 +62,15 @@ init flags =
     )
 
 
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    Sub.none
 
--- initial fetch used by Main when entering chord exercise
 
-
-initialFetch : Cmd Msg
-initialFetch =
+initialFetch : String -> List String -> Cmd Msg
+initialFetch root chordTypes =
     -- adjust root and types as desired; Main should call this when route is chord-exercise
-    TheoryApi.fetchChords2 "C" [ "major", "minor", "dom7", "sus4" ] GotChordData
+    TheoryApi.fetchChords2 root chordTypes GotChordData
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -75,6 +91,16 @@ update msg model =
         GotChordData (Err _) ->
             -- keep things simple: don't change state on error (or log if you want)
             ( model, Cmd.none )
+
+        DifficultyChosen difficulty ->
+            let
+                newDifficulty =
+                    difficulty
+            in
+            ( { model | chosenDifficulty = newDifficulty, rootNotes = setRootNotes model newDifficulty }, Cmd.none )
+
+        ChordGroupChosen chordTypes ->
+            ( { model | isGameStarted = True }, TheoryApi.fetchChords2 model.rootNotes chordTypes GotChordData )
 
         RandomChordPicked randomIndex ->
             let
@@ -123,15 +149,76 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    Html.div []
-        [ Html.text "Chord guesser"
-        , viewRandomizedChord model
-        , viewChords model
-        , Html.p [] [ Html.text <| "Score:  " ++ String.fromInt model.score ]
-        , Html.p [] [ Html.text <| "Mistakes:  " ++ String.fromInt model.mistakes ]
-        , Html.button [ HA.class "custom-button", HE.onClick ResetChordGuesser ] [ Html.text "Reset" ]
-        , Html.button [ HA.class "custom-button", HE.onClick GoBack ] [ Html.text " <-- Go Back" ]
-        ]
+    if model.isGameStarted then
+        Html.div []
+            [ Html.text "Chord guesser"
+            , viewRandomizedChord model
+            , viewChords model
+            , Html.p [] [ Html.text <| "Score:  " ++ String.fromInt model.score ]
+            , Html.p [] [ Html.text <| "Mistakes:  " ++ String.fromInt model.mistakes ]
+            , Html.button [ HA.class "custom-button", HE.onClick ResetChordGuesser ] [ Html.text "Reset" ]
+            ]
+
+    else
+        Html.section []
+            [ Html.h2 [] [ Html.text "Chord Guesser Exercise" ]
+            , Html.button [ HA.class "custom-button", HE.onClick (DifficultyChosen Easy) ] [ Html.text "Easy" ]
+            , Html.button [ HA.class "custom-button", HE.onClick (DifficultyChosen Medium) ] [ Html.text "Medium" ]
+            , Html.button [ HA.class "custom-button", HE.onClick (DifficultyChosen Hard) ] [ Html.text "Hard" ]
+            , Html.button [ HA.class "custom-button", HE.onClick (DifficultyChosen Extreme) ] [ Html.text "Extreme" ]
+            , Html.div []
+                [ Html.text ("Chosen difficulty: " ++ stringFromDifficulty model.chosenDifficulty)
+                ]
+            , Html.div []
+                [ Html.ul []
+                    [ Html.li [ HE.onClick (ChordGroupChosen [ "major", "minor" ]) ] [ Html.text "Major and minor" ]
+                    , Html.li [ HE.onClick (ChordGroupChosen [ "dom7", "maj7", "minor7" ]) ] [ Html.text "Dom7, Maj7 and Minor7" ]
+                    , Html.li [ HE.onClick (ChordGroupChosen [ "diminished", "dim7", "minor7flat5" ]) ] [ Html.text "Dim, dim7 and m7b5" ]
+                    , Html.li [ HE.onClick (ChordGroupChosen [ "augmented", "aug7", "maj7sharp5" ]) ] [ Html.text "Aug, aug7 and maj7#5" ]
+                    , Html.li [ HE.onClick (ChordGroupChosen [ "sus2", "sus4" ]) ] [ Html.text "Sus2 and sus4" ]
+                    , Html.li [ HE.onClick (ChordGroupChosen [ "major6", "minor6" ]) ] [ Html.text "6 and m6" ]
+                    , Html.li [ HE.onClick (ChordGroupChosen [ "dom9", "maj9", "minor9" ]) ] [ Html.text "Dom9, maj9 and minor9" ]
+                    , Html.li [ HE.onClick (ChordGroupChosen [ "dom11", "maj11", "minor11" ]) ] [ Html.text "Dom11, maj11 and minor11" ]
+                    , Html.li [ HE.onClick (ChordGroupChosen [ "dom13", "maj13", "minor13" ]) ] [ Html.text "Dom13, maj13 and minor13" ]
+                    , Html.li [ HE.onClick (ChordGroupChosen [ "dom7flat9", "dom7sharp9", "dom7sharp11" ]) ] [ Html.text "7b9, 7#9 and 7#11" ]
+                    , Html.li [ HE.onClick (ChordGroupChosen [ "dom7flat13", "dom7sharp5", "dom7flat5" ]) ] [ Html.text "7b13, 7#5 and 7b5" ]
+                    , Html.li [ HE.onClick (ChordGroupChosen [ "sus13", "minorMaj7", "dim9" ]) ] [ Html.text "sus13, mMaj7 and dim9" ]
+                    ]
+                ]
+            , Html.button [ HA.class "custom-button", HE.onClick GoBack ] [ Html.text "< Back" ]
+            ]
+
+
+setRootNotes : Model -> Difficulty -> Model
+setRootNotes model difficulty =
+    case difficulty of
+        Easy ->
+            { model | rootNotes = [ "C", "G", "F" ] }
+
+        Medium ->
+            { model | rootNotes = [ "C", "G", "F", "D", "A", "B♭", "E♭" ] }
+
+        Hard ->
+            { model | rootNotes = [ "C", "G", "F", "D", "A", "B♭", "E♭", "E", "B", "A♭", "D♭" ] }
+
+        Extreme ->
+            { model | rootNotes = [ "C", "G", "F", "D", "A", "B♭", "E♭", "E", "B", "A♭", "D♭", "F#", "C#", "G#", "D#", "A#" ] }
+
+
+stringFromDifficulty : Difficulty -> String
+stringFromDifficulty difficulty =
+    case difficulty of
+        Easy ->
+            "Easy"
+
+        Medium ->
+            "Medium"
+
+        Hard ->
+            "Hard"
+
+        Extreme ->
+            "Extreme"
 
 
 viewChords : Model -> Html Msg
@@ -161,10 +248,10 @@ viewRandomizedChord model =
             Html.p [] [ Html.text "No chord found" ]
 
 
-
 viewRandomizedChordNotes : List String -> String
 viewRandomizedChordNotes notes =
     String.join ", " notes
+
 
 defaultChord : TheoryApi.Chord2
 defaultChord =

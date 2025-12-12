@@ -4959,6 +4959,69 @@ function _Browser_load(url)
 }
 
 
+function _Url_percentEncode(string)
+{
+	return encodeURIComponent(string);
+}
+
+function _Url_percentDecode(string)
+{
+	try
+	{
+		return $elm$core$Maybe$Just(decodeURIComponent(string));
+	}
+	catch (e)
+	{
+		return $elm$core$Maybe$Nothing;
+	}
+}
+
+
+function _Time_now(millisToPosix)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(millisToPosix(Date.now())));
+	});
+}
+
+var _Time_setInterval = F2(function(interval, task)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var id = setInterval(function() { _Scheduler_rawSpawn(task); }, interval);
+		return function() { clearInterval(id); };
+	});
+});
+
+function _Time_here()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(
+			A2($elm$time$Time$customZone, -(new Date().getTimezoneOffset()), _List_Nil)
+		));
+	});
+}
+
+
+function _Time_getZoneName()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		try
+		{
+			var name = $elm$time$Time$Name(Intl.DateTimeFormat().resolvedOptions().timeZone);
+		}
+		catch (e)
+		{
+			var name = $elm$time$Time$Offset(new Date().getTimezoneOffset());
+		}
+		callback(_Scheduler_succeed(name));
+	});
+}
+
+
 
 // SEND REQUEST
 
@@ -5132,70 +5195,7 @@ function _Http_track(router, xhr, tracker)
 			size: event.lengthComputable ? $elm$core$Maybe$Just(event.total) : $elm$core$Maybe$Nothing
 		}))));
 	});
-}
-
-function _Url_percentEncode(string)
-{
-	return encodeURIComponent(string);
-}
-
-function _Url_percentDecode(string)
-{
-	try
-	{
-		return $elm$core$Maybe$Just(decodeURIComponent(string));
-	}
-	catch (e)
-	{
-		return $elm$core$Maybe$Nothing;
-	}
-}
-
-
-function _Time_now(millisToPosix)
-{
-	return _Scheduler_binding(function(callback)
-	{
-		callback(_Scheduler_succeed(millisToPosix(Date.now())));
-	});
-}
-
-var _Time_setInterval = F2(function(interval, task)
-{
-	return _Scheduler_binding(function(callback)
-	{
-		var id = setInterval(function() { _Scheduler_rawSpawn(task); }, interval);
-		return function() { clearInterval(id); };
-	});
-});
-
-function _Time_here()
-{
-	return _Scheduler_binding(function(callback)
-	{
-		callback(_Scheduler_succeed(
-			A2($elm$time$Time$customZone, -(new Date().getTimezoneOffset()), _List_Nil)
-		));
-	});
-}
-
-
-function _Time_getZoneName()
-{
-	return _Scheduler_binding(function(callback)
-	{
-		try
-		{
-			var name = $elm$time$Time$Name(Intl.DateTimeFormat().resolvedOptions().timeZone);
-		}
-		catch (e)
-		{
-			var name = $elm$time$Time$Offset(new Date().getTimezoneOffset());
-		}
-		callback(_Scheduler_succeed(name));
-	});
-}
-var $author$project$Main$LinkClicked = function (a) {
+}var $author$project$Main$LinkClicked = function (a) {
 	return {$: 'LinkClicked', a: a};
 };
 var $author$project$Main$UrlChanged = function (a) {
@@ -10802,450 +10802,40 @@ var $elm$core$Basics$never = function (_v0) {
 	}
 };
 var $elm$browser$Browser$application = _Browser_application;
-var $author$project$Main$ChordExerciseMsg = function (a) {
-	return {$: 'ChordExerciseMsg', a: a};
-};
-var $author$project$Main$FretboardGameMsg = function (a) {
-	return {$: 'FretboardGameMsg', a: a};
-};
-var $author$project$Main$GotTheoryDb = function (a) {
-	return {$: 'GotTheoryDb', a: a};
-};
-var $krisajenkins$remotedata$RemoteData$Loading = {$: 'Loading'};
-var $author$project$Main$ModeExerciseMsg = function (a) {
-	return {$: 'ModeExerciseMsg', a: a};
+var $author$project$Main$ExercisesMsg = function (a) {
+	return {$: 'ExercisesMsg', a: a};
 };
 var $author$project$Main$NotFound = {$: 'NotFound'};
-var $author$project$Main$NoteExerciseMsg = function (a) {
-	return {$: 'NoteExerciseMsg', a: a};
+var $author$project$Exercises$ChordGuesserMsg = function (a) {
+	return {$: 'ChordGuesserMsg', a: a};
 };
-var $elm$http$Http$BadStatus_ = F2(
-	function (a, b) {
-		return {$: 'BadStatus_', a: a, b: b};
-	});
-var $elm$http$Http$BadUrl_ = function (a) {
-	return {$: 'BadUrl_', a: a};
-};
-var $elm$http$Http$GoodStatus_ = F2(
-	function (a, b) {
-		return {$: 'GoodStatus_', a: a, b: b};
-	});
-var $elm$http$Http$NetworkError_ = {$: 'NetworkError_'};
-var $elm$http$Http$Receiving = function (a) {
-	return {$: 'Receiving', a: a};
-};
-var $elm$http$Http$Sending = function (a) {
-	return {$: 'Sending', a: a};
-};
-var $elm$http$Http$Timeout_ = {$: 'Timeout_'};
-var $elm$core$Maybe$isJust = function (maybe) {
-	if (maybe.$ === 'Just') {
-		return true;
-	} else {
-		return false;
-	}
-};
-var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
-var $elm$http$Http$expectStringResponse = F2(
-	function (toMsg, toResult) {
-		return A3(
-			_Http_expect,
-			'',
-			$elm$core$Basics$identity,
-			A2($elm$core$Basics$composeR, toResult, toMsg));
-	});
-var $elm$core$Result$mapError = F2(
-	function (f, result) {
-		if (result.$ === 'Ok') {
-			var v = result.a;
-			return $elm$core$Result$Ok(v);
-		} else {
-			var e = result.a;
-			return $elm$core$Result$Err(
-				f(e));
-		}
-	});
-var $elm$http$Http$BadBody = function (a) {
-	return {$: 'BadBody', a: a};
-};
-var $elm$http$Http$BadStatus = function (a) {
-	return {$: 'BadStatus', a: a};
-};
-var $elm$http$Http$BadUrl = function (a) {
-	return {$: 'BadUrl', a: a};
-};
-var $elm$http$Http$NetworkError = {$: 'NetworkError'};
-var $elm$http$Http$Timeout = {$: 'Timeout'};
-var $elm$http$Http$resolve = F2(
-	function (toResult, response) {
-		switch (response.$) {
-			case 'BadUrl_':
-				var url = response.a;
-				return $elm$core$Result$Err(
-					$elm$http$Http$BadUrl(url));
-			case 'Timeout_':
-				return $elm$core$Result$Err($elm$http$Http$Timeout);
-			case 'NetworkError_':
-				return $elm$core$Result$Err($elm$http$Http$NetworkError);
-			case 'BadStatus_':
-				var metadata = response.a;
-				return $elm$core$Result$Err(
-					$elm$http$Http$BadStatus(metadata.statusCode));
-			default:
-				var body = response.b;
-				return A2(
-					$elm$core$Result$mapError,
-					$elm$http$Http$BadBody,
-					toResult(body));
-		}
-	});
-var $elm$http$Http$expectJson = F2(
-	function (toMsg, decoder) {
-		return A2(
-			$elm$http$Http$expectStringResponse,
-			toMsg,
-			$elm$http$Http$resolve(
-				function (string) {
-					return A2(
-						$elm$core$Result$mapError,
-						$elm$json$Json$Decode$errorToString,
-						A2($elm$json$Json$Decode$decodeString, decoder, string));
-				}));
-	});
-var $elm$http$Http$emptyBody = _Http_emptyBody;
-var $elm$http$Http$Request = function (a) {
-	return {$: 'Request', a: a};
-};
-var $elm$http$Http$State = F2(
-	function (reqs, subs) {
-		return {reqs: reqs, subs: subs};
-	});
-var $elm$http$Http$init = $elm$core$Task$succeed(
-	A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
-var $elm$core$Process$kill = _Scheduler_kill;
-var $elm$core$Process$spawn = _Scheduler_spawn;
-var $elm$http$Http$updateReqs = F3(
-	function (router, cmds, reqs) {
-		updateReqs:
-		while (true) {
-			if (!cmds.b) {
-				return $elm$core$Task$succeed(reqs);
-			} else {
-				var cmd = cmds.a;
-				var otherCmds = cmds.b;
-				if (cmd.$ === 'Cancel') {
-					var tracker = cmd.a;
-					var _v2 = A2($elm$core$Dict$get, tracker, reqs);
-					if (_v2.$ === 'Nothing') {
-						var $temp$router = router,
-							$temp$cmds = otherCmds,
-							$temp$reqs = reqs;
-						router = $temp$router;
-						cmds = $temp$cmds;
-						reqs = $temp$reqs;
-						continue updateReqs;
-					} else {
-						var pid = _v2.a;
-						return A2(
-							$elm$core$Task$andThen,
-							function (_v3) {
-								return A3(
-									$elm$http$Http$updateReqs,
-									router,
-									otherCmds,
-									A2($elm$core$Dict$remove, tracker, reqs));
-							},
-							$elm$core$Process$kill(pid));
-					}
-				} else {
-					var req = cmd.a;
-					return A2(
-						$elm$core$Task$andThen,
-						function (pid) {
-							var _v4 = req.tracker;
-							if (_v4.$ === 'Nothing') {
-								return A3($elm$http$Http$updateReqs, router, otherCmds, reqs);
-							} else {
-								var tracker = _v4.a;
-								return A3(
-									$elm$http$Http$updateReqs,
-									router,
-									otherCmds,
-									A3($elm$core$Dict$insert, tracker, pid, reqs));
-							}
-						},
-						$elm$core$Process$spawn(
-							A3(
-								_Http_toTask,
-								router,
-								$elm$core$Platform$sendToApp(router),
-								req)));
-				}
-			}
-		}
-	});
-var $elm$http$Http$onEffects = F4(
-	function (router, cmds, subs, state) {
-		return A2(
-			$elm$core$Task$andThen,
-			function (reqs) {
-				return $elm$core$Task$succeed(
-					A2($elm$http$Http$State, reqs, subs));
-			},
-			A3($elm$http$Http$updateReqs, router, cmds, state.reqs));
-	});
-var $elm$http$Http$maybeSend = F4(
-	function (router, desiredTracker, progress, _v0) {
-		var actualTracker = _v0.a;
-		var toMsg = _v0.b;
-		return _Utils_eq(desiredTracker, actualTracker) ? $elm$core$Maybe$Just(
-			A2(
-				$elm$core$Platform$sendToApp,
-				router,
-				toMsg(progress))) : $elm$core$Maybe$Nothing;
-	});
-var $elm$http$Http$onSelfMsg = F3(
-	function (router, _v0, state) {
-		var tracker = _v0.a;
-		var progress = _v0.b;
-		return A2(
-			$elm$core$Task$andThen,
-			function (_v1) {
-				return $elm$core$Task$succeed(state);
-			},
-			$elm$core$Task$sequence(
-				A2(
-					$elm$core$List$filterMap,
-					A3($elm$http$Http$maybeSend, router, tracker, progress),
-					state.subs)));
-	});
-var $elm$http$Http$Cancel = function (a) {
-	return {$: 'Cancel', a: a};
-};
-var $elm$http$Http$cmdMap = F2(
-	function (func, cmd) {
-		if (cmd.$ === 'Cancel') {
-			var tracker = cmd.a;
-			return $elm$http$Http$Cancel(tracker);
-		} else {
-			var r = cmd.a;
-			return $elm$http$Http$Request(
-				{
-					allowCookiesFromOtherDomains: r.allowCookiesFromOtherDomains,
-					body: r.body,
-					expect: A2(_Http_mapExpect, func, r.expect),
-					headers: r.headers,
-					method: r.method,
-					timeout: r.timeout,
-					tracker: r.tracker,
-					url: r.url
-				});
-		}
-	});
-var $elm$http$Http$MySub = F2(
-	function (a, b) {
-		return {$: 'MySub', a: a, b: b};
-	});
-var $elm$http$Http$subMap = F2(
-	function (func, _v0) {
-		var tracker = _v0.a;
-		var toMsg = _v0.b;
-		return A2(
-			$elm$http$Http$MySub,
-			tracker,
-			A2($elm$core$Basics$composeR, toMsg, func));
-	});
-_Platform_effectManagers['Http'] = _Platform_createManager($elm$http$Http$init, $elm$http$Http$onEffects, $elm$http$Http$onSelfMsg, $elm$http$Http$cmdMap, $elm$http$Http$subMap);
-var $elm$http$Http$command = _Platform_leaf('Http');
-var $elm$http$Http$subscription = _Platform_leaf('Http');
-var $elm$http$Http$request = function (r) {
-	return $elm$http$Http$command(
-		$elm$http$Http$Request(
-			{allowCookiesFromOtherDomains: false, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
-};
-var $elm$http$Http$get = function (r) {
-	return $elm$http$Http$request(
-		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
-};
-var $author$project$Games$TheoryApi$TheoryDb = F4(
-	function (majorScalesAndKeys, modes, allNotes, chords) {
-		return {allNotes: allNotes, chords: chords, majorScalesAndKeys: majorScalesAndKeys, modes: modes};
-	});
-var $author$project$Games$TheoryApi$Chord2 = F5(
-	function (chord, root, formula, degrees, notes) {
-		return {chord: chord, degrees: degrees, formula: formula, notes: notes, root: root};
-	});
-var $author$project$Games$TheoryApi$chord2Decoder = A6(
-	$elm$json$Json$Decode$map5,
-	$author$project$Games$TheoryApi$Chord2,
-	A2($elm$json$Json$Decode$field, 'chord', $elm$json$Json$Decode$string),
-	A2($elm$json$Json$Decode$field, 'root', $elm$json$Json$Decode$string),
-	A2(
-		$elm$json$Json$Decode$field,
-		'formula',
-		$elm$json$Json$Decode$list($elm$json$Json$Decode$int)),
-	A2(
-		$elm$json$Json$Decode$field,
-		'degrees',
-		$elm$json$Json$Decode$list($elm$json$Json$Decode$string)),
-	A2(
-		$elm$json$Json$Decode$field,
-		'notes',
-		$elm$json$Json$Decode$list($elm$json$Json$Decode$string)));
-var $author$project$Games$TheoryApi$MajorScaleAndKey = F2(
-	function (key, notes) {
-		return {key: key, notes: notes};
-	});
-var $elm$core$Tuple$pair = F2(
-	function (a, b) {
-		return _Utils_Tuple2(a, b);
-	});
-var $author$project$Games$TheoryApi$majorScaleAndKeyDecoder = A3(
-	$elm$json$Json$Decode$map2,
-	$author$project$Games$TheoryApi$MajorScaleAndKey,
-	A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string),
-	A2(
-		$elm$json$Json$Decode$map,
-		$elm$core$List$indexedMap($elm$core$Tuple$pair),
-		A2(
-			$elm$json$Json$Decode$field,
-			'notes',
-			$elm$json$Json$Decode$list($elm$json$Json$Decode$string))));
-var $elm$json$Json$Decode$map4 = _Json_map4;
-var $author$project$Games$TheoryApi$Mode = F2(
-	function (mode, formula) {
-		return {formula: formula, mode: mode};
-	});
-var $author$project$Games$TheoryApi$modeDecoder = A3(
-	$elm$json$Json$Decode$map2,
-	$author$project$Games$TheoryApi$Mode,
-	A2($elm$json$Json$Decode$field, 'mode', $elm$json$Json$Decode$string),
-	A2(
-		$elm$json$Json$Decode$field,
-		'formula',
-		$elm$json$Json$Decode$list($elm$json$Json$Decode$string)));
-var $author$project$Games$TheoryApi$theoryDbDecoder = A5(
-	$elm$json$Json$Decode$map4,
-	$author$project$Games$TheoryApi$TheoryDb,
-	A2(
-		$elm$json$Json$Decode$field,
-		'major-scales',
-		$elm$json$Json$Decode$list($author$project$Games$TheoryApi$majorScaleAndKeyDecoder)),
-	A2(
-		$elm$json$Json$Decode$field,
-		'modes',
-		$elm$json$Json$Decode$list($author$project$Games$TheoryApi$modeDecoder)),
-	A2(
-		$elm$json$Json$Decode$field,
-		'all-notes',
-		$elm$json$Json$Decode$list($elm$json$Json$Decode$string)),
-	A2(
-		$elm$json$Json$Decode$field,
-		'chords',
-		$elm$json$Json$Decode$list($author$project$Games$TheoryApi$chord2Decoder)));
-var $author$project$Games$TheoryApi$fetchTheoryDb = function (toMsg) {
-	return $elm$http$Http$get(
-		{
-			expect: A2($elm$http$Http$expectJson, toMsg, $author$project$Games$TheoryApi$theoryDbDecoder),
-			url: 'http://localhost:5019/theory-db'
-		});
-};
-var $author$project$Games$ChordGuesserExercise$init = function (flags) {
-	return _Utils_Tuple2(
-		{gameOver: false, lastRandomIndex: $elm$core$Maybe$Nothing, maybeChords: $elm$core$Maybe$Nothing, maybeChosenChord: $elm$core$Maybe$Nothing, mistakes: 0, randomizedChord: $elm$core$Maybe$Nothing, score: 0},
-		$elm$core$Platform$Cmd$none);
-};
-var $author$project$Games$FretboardGame$init = function (_v0) {
+var $author$project$Games$ChordGuesserExercise$Easy = {$: 'Easy'};
+var $author$project$Games$ChordGuesserExercise$init = function (_v0) {
 	return _Utils_Tuple2(
 		{
-			fretCount: 12,
-			isOnPage: false,
-			player: {fret: 0, string: 1},
-			stringCount: 6,
-			targetNote: 'C',
-			userPosition: _Utils_Tuple2(24, 14)
-		},
-		$elm$core$Platform$Cmd$none);
-};
-var $author$project$Games$ModeExercise$init = function (_v0) {
-	return _Utils_Tuple2(
-		{
-			allNotes: $elm$core$Maybe$Nothing,
-			chosenGameMode: $elm$core$Maybe$Nothing,
-			chosenKey: $elm$core$Maybe$Nothing,
-			errorMessage: $elm$core$Maybe$Nothing,
+			chosenDifficulty: $author$project$Games$ChordGuesserExercise$Easy,
 			gameOver: false,
-			isCorrect: false,
-			isWrong: false,
-			majorScalesAndKeys: $elm$core$Maybe$Nothing,
-			modeGuessed: $elm$core$Maybe$Nothing,
-			modes: $elm$core$Maybe$Nothing,
-			modesErrorMessage: $elm$core$Maybe$Nothing,
-			numberOfWrongs: 0,
-			randomizedMode: {formula: _List_Nil, mode: 'No mode randomized yet'},
-			result: $elm$core$Maybe$Nothing,
-			resultMessage: '',
-			score: 0,
-			userBuiltMode: _List_Nil
+			isGameStarted: false,
+			lastRandomIndex: $elm$core$Maybe$Nothing,
+			maybeChords: $elm$core$Maybe$Nothing,
+			maybeChosenChord: $elm$core$Maybe$Nothing,
+			mistakes: 0,
+			randomizedChord: $elm$core$Maybe$Nothing,
+			rootNotes: _List_fromArray(
+				['C', 'G', 'F']),
+			score: 0
 		},
 		$elm$core$Platform$Cmd$none);
 };
-var $elm$core$Set$Set_elm_builtin = function (a) {
-	return {$: 'Set_elm_builtin', a: a};
+var $author$project$Exercises$init = function (flags) {
+	var _v0 = $author$project$Games$ChordGuesserExercise$init(flags);
+	var chordModel = _v0.a;
+	var chordCmd = _v0.b;
+	return _Utils_Tuple2(
+		{chordGuesserModel: chordModel, currentGame: $elm$core$Maybe$Nothing},
+		A2($elm$core$Platform$Cmd$map, $author$project$Exercises$ChordGuesserMsg, chordCmd));
 };
-var $elm$core$Set$empty = $elm$core$Set$Set_elm_builtin($elm$core$Dict$empty);
 var $author$project$Games$Stopwatch$init = {running: false, stopwatchInMs: 0};
-var $author$project$Games$NoteExercise$init = function (flags) {
-	return _Utils_Tuple2(
-		{
-			correctPairs: $elm$core$Set$empty,
-			errorMessage: $elm$core$Maybe$Nothing,
-			exerciseStep: 0,
-			gameOver: false,
-			isButtonDisabled: true,
-			maybeChosenScale: $elm$core$Maybe$Nothing,
-			maybeMajorScalesAndKeys: $elm$core$Maybe$Nothing,
-			noteAndOriginalIndexTuplePrompted: $elm$core$Maybe$Nothing,
-			numberIndex: 7,
-			numberOfWins: A2(
-				$elm$core$Maybe$withDefault,
-				0,
-				$elm$core$String$toInt(flags)),
-			numberOfWrongs: 0,
-			result: $elm$core$Maybe$Nothing,
-			score: 0,
-			showStopwatch: false,
-			stopwatch: $author$project$Games$Stopwatch$init,
-			userWins: false,
-			wrongPair: $elm$core$Maybe$Nothing
-		},
-		$elm$core$Platform$Cmd$none);
-};
-var $author$project$Games$ChordGuesserExercise$GotChordData = function (a) {
-	return {$: 'GotChordData', a: a};
-};
-var $author$project$Games$TheoryApi$baseUrl = 'http://localhost:5000';
-var $author$project$Games$TheoryApi$chord2ListDecoder = $elm$json$Json$Decode$list($author$project$Games$TheoryApi$chord2Decoder);
-var $author$project$Games$TheoryApi$parseChordTypes = function (chordTypes) {
-	return function (s) {
-		return '?types=' + s;
-	}(
-		A2($elm$core$String$join, '&types=', chordTypes));
-};
-var $author$project$Games$TheoryApi$fetchChords2 = F3(
-	function (root, chordTypes, toMsg) {
-		return $elm$http$Http$get(
-			{
-				expect: A2($elm$http$Http$expectJson, toMsg, $author$project$Games$TheoryApi$chord2ListDecoder),
-				url: $author$project$Games$TheoryApi$baseUrl + ('/api/v1/chords/' + (root + $author$project$Games$TheoryApi$parseChordTypes(chordTypes)))
-			});
-	});
-var $author$project$Games$ChordGuesserExercise$initialFetch = A3(
-	$author$project$Games$TheoryApi$fetchChords2,
-	'C',
-	_List_fromArray(
-		['major', 'minor', 'dom7', 'sus4']),
-	$author$project$Games$ChordGuesserExercise$GotChordData);
 var $elm$url$Url$Parser$State = F5(
 	function (visited, unvisited, params, frag, value) {
 		return {frag: frag, params: params, unvisited: unvisited, value: value, visited: visited};
@@ -11365,9 +10955,7 @@ var $elm$url$Url$Parser$parse = F2(
 					url.fragment,
 					$elm$core$Basics$identity)));
 	});
-var $author$project$Main$Game = function (a) {
-	return {$: 'Game', a: a};
-};
+var $author$project$Main$ExercisesRoute = {$: 'ExercisesRoute'};
 var $author$project$Main$Home = {$: 'Home'};
 var $elm$url$Url$Parser$Parser = function (a) {
 	return {$: 'Parser', a: a};
@@ -11442,52 +11030,6 @@ var $elm$url$Url$Parser$s = function (str) {
 			}
 		});
 };
-var $elm$url$Url$Parser$slash = F2(
-	function (_v0, _v1) {
-		var parseBefore = _v0.a;
-		var parseAfter = _v1.a;
-		return $elm$url$Url$Parser$Parser(
-			function (state) {
-				return A2(
-					$elm$core$List$concatMap,
-					parseAfter,
-					parseBefore(state));
-			});
-	});
-var $elm$url$Url$Parser$custom = F2(
-	function (tipe, stringToSomething) {
-		return $elm$url$Url$Parser$Parser(
-			function (_v0) {
-				var visited = _v0.visited;
-				var unvisited = _v0.unvisited;
-				var params = _v0.params;
-				var frag = _v0.frag;
-				var value = _v0.value;
-				if (!unvisited.b) {
-					return _List_Nil;
-				} else {
-					var next = unvisited.a;
-					var rest = unvisited.b;
-					var _v2 = stringToSomething(next);
-					if (_v2.$ === 'Just') {
-						var nextValue = _v2.a;
-						return _List_fromArray(
-							[
-								A5(
-								$elm$url$Url$Parser$State,
-								A2($elm$core$List$cons, next, visited),
-								rest,
-								params,
-								frag,
-								value(nextValue))
-							]);
-					} else {
-						return _List_Nil;
-					}
-				}
-			});
-	});
-var $elm$url$Url$Parser$string = A2($elm$url$Url$Parser$custom, 'STRING', $elm$core$Maybe$Just);
 var $elm$url$Url$Parser$top = $elm$url$Url$Parser$Parser(
 	function (state) {
 		return _List_fromArray(
@@ -11500,14 +11042,11 @@ var $author$project$Main$routeParser = $elm$url$Url$Parser$oneOf(
 			$elm$url$Url$Parser$map,
 			$author$project$Main$Home,
 			$elm$url$Url$Parser$s('home')),
-			A2($elm$url$Url$Parser$map, $author$project$Main$Home, $elm$url$Url$Parser$top),
 			A2(
 			$elm$url$Url$Parser$map,
-			$author$project$Main$Game,
-			A2(
-				$elm$url$Url$Parser$slash,
-				$elm$url$Url$Parser$s('game'),
-				$elm$url$Url$Parser$string))
+			$author$project$Main$ExercisesRoute,
+			$elm$url$Url$Parser$s('exercises')),
+			A2($elm$url$Url$Parser$map, $author$project$Main$Home, $elm$url$Url$Parser$top)
 		]));
 var $author$project$Main$init = F3(
 	function (flags, url, key) {
@@ -11516,371 +11055,38 @@ var $author$project$Main$init = F3(
 			$elm$core$Maybe$withDefault,
 			$author$project$Main$NotFound,
 			A2($elm$url$Url$Parser$parse, $author$project$Main$routeParser, url));
-		var chordFetchOnStart = function () {
-			if ((route.$ === 'Game') && (route.a === 'chord-exercise')) {
-				return A2($elm$core$Platform$Cmd$map, $author$project$Main$ChordExerciseMsg, $author$project$Games$ChordGuesserExercise$initialFetch);
+		var exercisesFetchOnStart = function () {
+			if (route.$ === 'ExercisesRoute') {
+				return $elm$core$Platform$Cmd$none;
 			} else {
 				return $elm$core$Platform$Cmd$none;
 			}
 		}();
-		var _v0 = $author$project$Games$NoteExercise$init(flags);
-		var noteExerciseModel = _v0.a;
-		var noteExerciseCmd = _v0.b;
-		var _v1 = $author$project$Games$ModeExercise$init(flags);
-		var modeExerciseModel = _v1.a;
-		var modeExerciseCmd = _v1.b;
-		var _v2 = $author$project$Games$FretboardGame$init(_Utils_Tuple0);
-		var fretboardGameModel = _v2.a;
-		var fretboardGameCmd = _v2.b;
-		var _v3 = $author$project$Games$ChordGuesserExercise$init(flags);
-		var chordExerciseModel = _v3.a;
-		var chordExerciseCmd = _v3.b;
+		var _v0 = $author$project$Exercises$init(flags);
+		var exercisesModel = _v0.a;
+		var exercisesCmd = _v0.b;
 		return _Utils_Tuple2(
-			{chordExerciseModel: chordExerciseModel, fretboardGameModel: fretboardGameModel, isOnFretboardPage: false, key: key, modeExerciseModel: modeExerciseModel, noteExerciseModel: noteExerciseModel, route: route, stopwatchModel: stopwatchModel, theoryDb: $krisajenkins$remotedata$RemoteData$Loading, url: url},
+			{exercisesModel: exercisesModel, key: key, route: route, stopwatchModel: stopwatchModel, url: url},
 			$elm$core$Platform$Cmd$batch(
 				_List_fromArray(
 					[
-						A2($elm$core$Platform$Cmd$map, $author$project$Main$NoteExerciseMsg, noteExerciseCmd),
-						A2($elm$core$Platform$Cmd$map, $author$project$Main$ModeExerciseMsg, modeExerciseCmd),
-						A2($elm$core$Platform$Cmd$map, $author$project$Main$ChordExerciseMsg, chordExerciseCmd),
-						A2($elm$core$Platform$Cmd$map, $author$project$Main$FretboardGameMsg, fretboardGameCmd),
-						$author$project$Games$TheoryApi$fetchTheoryDb($author$project$Main$GotTheoryDb),
-						chordFetchOnStart
+						A2($elm$core$Platform$Cmd$map, $author$project$Main$ExercisesMsg, exercisesCmd),
+						exercisesFetchOnStart
 					])));
 	});
 var $author$project$Main$StopwatchMsg = function (a) {
 	return {$: 'StopwatchMsg', a: a};
 };
 var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $author$project$Games$FretboardGame$KeyDown = function (a) {
-	return {$: 'KeyDown', a: a};
+var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $author$project$Games$ChordGuesserExercise$subscriptions = function (_v0) {
+	return $elm$core$Platform$Sub$none;
 };
-var $author$project$Games$FretboardGame$KeyUp = function (a) {
-	return {$: 'KeyUp', a: a};
-};
-var $author$project$Games$FretboardGame$Tick = function (a) {
-	return {$: 'Tick', a: a};
-};
-var $author$project$Games$FretboardGame$keyDecoder = A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string);
-var $elm$browser$Browser$AnimationManager$Time = function (a) {
-	return {$: 'Time', a: a};
-};
-var $elm$browser$Browser$AnimationManager$State = F3(
-	function (subs, request, oldTime) {
-		return {oldTime: oldTime, request: request, subs: subs};
-	});
-var $elm$browser$Browser$AnimationManager$init = $elm$core$Task$succeed(
-	A3($elm$browser$Browser$AnimationManager$State, _List_Nil, $elm$core$Maybe$Nothing, 0));
-var $elm$browser$Browser$AnimationManager$now = _Browser_now(_Utils_Tuple0);
-var $elm$browser$Browser$AnimationManager$rAF = _Browser_rAF(_Utils_Tuple0);
-var $elm$browser$Browser$AnimationManager$onEffects = F3(
-	function (router, subs, _v0) {
-		var request = _v0.request;
-		var oldTime = _v0.oldTime;
-		var _v1 = _Utils_Tuple2(request, subs);
-		if (_v1.a.$ === 'Nothing') {
-			if (!_v1.b.b) {
-				var _v2 = _v1.a;
-				return $elm$browser$Browser$AnimationManager$init;
-			} else {
-				var _v4 = _v1.a;
-				return A2(
-					$elm$core$Task$andThen,
-					function (pid) {
-						return A2(
-							$elm$core$Task$andThen,
-							function (time) {
-								return $elm$core$Task$succeed(
-									A3(
-										$elm$browser$Browser$AnimationManager$State,
-										subs,
-										$elm$core$Maybe$Just(pid),
-										time));
-							},
-							$elm$browser$Browser$AnimationManager$now);
-					},
-					$elm$core$Process$spawn(
-						A2(
-							$elm$core$Task$andThen,
-							$elm$core$Platform$sendToSelf(router),
-							$elm$browser$Browser$AnimationManager$rAF)));
-			}
-		} else {
-			if (!_v1.b.b) {
-				var pid = _v1.a.a;
-				return A2(
-					$elm$core$Task$andThen,
-					function (_v3) {
-						return $elm$browser$Browser$AnimationManager$init;
-					},
-					$elm$core$Process$kill(pid));
-			} else {
-				return $elm$core$Task$succeed(
-					A3($elm$browser$Browser$AnimationManager$State, subs, request, oldTime));
-			}
-		}
-	});
-var $elm$time$Time$Posix = function (a) {
-	return {$: 'Posix', a: a};
-};
-var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
-var $elm$browser$Browser$AnimationManager$onSelfMsg = F3(
-	function (router, newTime, _v0) {
-		var subs = _v0.subs;
-		var oldTime = _v0.oldTime;
-		var send = function (sub) {
-			if (sub.$ === 'Time') {
-				var tagger = sub.a;
-				return A2(
-					$elm$core$Platform$sendToApp,
-					router,
-					tagger(
-						$elm$time$Time$millisToPosix(newTime)));
-			} else {
-				var tagger = sub.a;
-				return A2(
-					$elm$core$Platform$sendToApp,
-					router,
-					tagger(newTime - oldTime));
-			}
-		};
-		return A2(
-			$elm$core$Task$andThen,
-			function (pid) {
-				return A2(
-					$elm$core$Task$andThen,
-					function (_v1) {
-						return $elm$core$Task$succeed(
-							A3(
-								$elm$browser$Browser$AnimationManager$State,
-								subs,
-								$elm$core$Maybe$Just(pid),
-								newTime));
-					},
-					$elm$core$Task$sequence(
-						A2($elm$core$List$map, send, subs)));
-			},
-			$elm$core$Process$spawn(
-				A2(
-					$elm$core$Task$andThen,
-					$elm$core$Platform$sendToSelf(router),
-					$elm$browser$Browser$AnimationManager$rAF)));
-	});
-var $elm$browser$Browser$AnimationManager$Delta = function (a) {
-	return {$: 'Delta', a: a};
-};
-var $elm$browser$Browser$AnimationManager$subMap = F2(
-	function (func, sub) {
-		if (sub.$ === 'Time') {
-			var tagger = sub.a;
-			return $elm$browser$Browser$AnimationManager$Time(
-				A2($elm$core$Basics$composeL, func, tagger));
-		} else {
-			var tagger = sub.a;
-			return $elm$browser$Browser$AnimationManager$Delta(
-				A2($elm$core$Basics$composeL, func, tagger));
-		}
-	});
-_Platform_effectManagers['Browser.AnimationManager'] = _Platform_createManager($elm$browser$Browser$AnimationManager$init, $elm$browser$Browser$AnimationManager$onEffects, $elm$browser$Browser$AnimationManager$onSelfMsg, 0, $elm$browser$Browser$AnimationManager$subMap);
-var $elm$browser$Browser$AnimationManager$subscription = _Platform_leaf('Browser.AnimationManager');
-var $elm$browser$Browser$AnimationManager$onAnimationFrame = function (tagger) {
-	return $elm$browser$Browser$AnimationManager$subscription(
-		$elm$browser$Browser$AnimationManager$Time(tagger));
-};
-var $elm$browser$Browser$Events$onAnimationFrame = $elm$browser$Browser$AnimationManager$onAnimationFrame;
-var $elm$browser$Browser$Events$Document = {$: 'Document'};
-var $elm$browser$Browser$Events$MySub = F3(
-	function (a, b, c) {
-		return {$: 'MySub', a: a, b: b, c: c};
-	});
-var $elm$browser$Browser$Events$State = F2(
-	function (subs, pids) {
-		return {pids: pids, subs: subs};
-	});
-var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
-	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
-var $elm$browser$Browser$Events$nodeToKey = function (node) {
-	if (node.$ === 'Document') {
-		return 'd_';
-	} else {
-		return 'w_';
-	}
-};
-var $elm$browser$Browser$Events$addKey = function (sub) {
-	var node = sub.a;
-	var name = sub.b;
-	return _Utils_Tuple2(
-		_Utils_ap(
-			$elm$browser$Browser$Events$nodeToKey(node),
-			name),
-		sub);
-};
-var $elm$browser$Browser$Events$Event = F2(
-	function (key, event) {
-		return {event: event, key: key};
-	});
-var $elm$browser$Browser$Events$spawn = F3(
-	function (router, key, _v0) {
-		var node = _v0.a;
-		var name = _v0.b;
-		var actualNode = function () {
-			if (node.$ === 'Document') {
-				return _Browser_doc;
-			} else {
-				return _Browser_window;
-			}
-		}();
-		return A2(
-			$elm$core$Task$map,
-			function (value) {
-				return _Utils_Tuple2(key, value);
-			},
-			A3(
-				_Browser_on,
-				actualNode,
-				name,
-				function (event) {
-					return A2(
-						$elm$core$Platform$sendToSelf,
-						router,
-						A2($elm$browser$Browser$Events$Event, key, event));
-				}));
-	});
-var $elm$core$Dict$union = F2(
-	function (t1, t2) {
-		return A3($elm$core$Dict$foldl, $elm$core$Dict$insert, t2, t1);
-	});
-var $elm$browser$Browser$Events$onEffects = F3(
-	function (router, subs, state) {
-		var stepRight = F3(
-			function (key, sub, _v6) {
-				var deads = _v6.a;
-				var lives = _v6.b;
-				var news = _v6.c;
-				return _Utils_Tuple3(
-					deads,
-					lives,
-					A2(
-						$elm$core$List$cons,
-						A3($elm$browser$Browser$Events$spawn, router, key, sub),
-						news));
-			});
-		var stepLeft = F3(
-			function (_v4, pid, _v5) {
-				var deads = _v5.a;
-				var lives = _v5.b;
-				var news = _v5.c;
-				return _Utils_Tuple3(
-					A2($elm$core$List$cons, pid, deads),
-					lives,
-					news);
-			});
-		var stepBoth = F4(
-			function (key, pid, _v2, _v3) {
-				var deads = _v3.a;
-				var lives = _v3.b;
-				var news = _v3.c;
-				return _Utils_Tuple3(
-					deads,
-					A3($elm$core$Dict$insert, key, pid, lives),
-					news);
-			});
-		var newSubs = A2($elm$core$List$map, $elm$browser$Browser$Events$addKey, subs);
-		var _v0 = A6(
-			$elm$core$Dict$merge,
-			stepLeft,
-			stepBoth,
-			stepRight,
-			state.pids,
-			$elm$core$Dict$fromList(newSubs),
-			_Utils_Tuple3(_List_Nil, $elm$core$Dict$empty, _List_Nil));
-		var deadPids = _v0.a;
-		var livePids = _v0.b;
-		var makeNewPids = _v0.c;
-		return A2(
-			$elm$core$Task$andThen,
-			function (pids) {
-				return $elm$core$Task$succeed(
-					A2(
-						$elm$browser$Browser$Events$State,
-						newSubs,
-						A2(
-							$elm$core$Dict$union,
-							livePids,
-							$elm$core$Dict$fromList(pids))));
-			},
-			A2(
-				$elm$core$Task$andThen,
-				function (_v1) {
-					return $elm$core$Task$sequence(makeNewPids);
-				},
-				$elm$core$Task$sequence(
-					A2($elm$core$List$map, $elm$core$Process$kill, deadPids))));
-	});
-var $elm$browser$Browser$Events$onSelfMsg = F3(
-	function (router, _v0, state) {
-		var key = _v0.key;
-		var event = _v0.event;
-		var toMessage = function (_v2) {
-			var subKey = _v2.a;
-			var _v3 = _v2.b;
-			var node = _v3.a;
-			var name = _v3.b;
-			var decoder = _v3.c;
-			return _Utils_eq(subKey, key) ? A2(_Browser_decodeEvent, decoder, event) : $elm$core$Maybe$Nothing;
-		};
-		var messages = A2($elm$core$List$filterMap, toMessage, state.subs);
-		return A2(
-			$elm$core$Task$andThen,
-			function (_v1) {
-				return $elm$core$Task$succeed(state);
-			},
-			$elm$core$Task$sequence(
-				A2(
-					$elm$core$List$map,
-					$elm$core$Platform$sendToApp(router),
-					messages)));
-	});
-var $elm$browser$Browser$Events$subMap = F2(
-	function (func, _v0) {
-		var node = _v0.a;
-		var name = _v0.b;
-		var decoder = _v0.c;
-		return A3(
-			$elm$browser$Browser$Events$MySub,
-			node,
-			name,
-			A2($elm$json$Json$Decode$map, func, decoder));
-	});
-_Platform_effectManagers['Browser.Events'] = _Platform_createManager($elm$browser$Browser$Events$init, $elm$browser$Browser$Events$onEffects, $elm$browser$Browser$Events$onSelfMsg, 0, $elm$browser$Browser$Events$subMap);
-var $elm$browser$Browser$Events$subscription = _Platform_leaf('Browser.Events');
-var $elm$browser$Browser$Events$on = F3(
-	function (node, name, decoder) {
-		return $elm$browser$Browser$Events$subscription(
-			A3($elm$browser$Browser$Events$MySub, node, name, decoder));
-	});
-var $elm$browser$Browser$Events$onKeyDown = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'keydown');
-var $elm$browser$Browser$Events$onKeyUp = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'keyup');
-var $author$project$Games$FretboardGame$subscriptions = function (model) {
-	return model.isOnPage ? $elm$core$Platform$Sub$batch(
-		_List_fromArray(
-			[
-				$elm$browser$Browser$Events$onKeyDown(
-				A2($elm$json$Json$Decode$map, $author$project$Games$FretboardGame$KeyDown, $author$project$Games$FretboardGame$keyDecoder)),
-				$elm$browser$Browser$Events$onKeyUp(
-				A2($elm$json$Json$Decode$map, $author$project$Games$FretboardGame$KeyUp, $author$project$Games$FretboardGame$keyDecoder)),
-				$elm$browser$Browser$Events$onAnimationFrame($author$project$Games$FretboardGame$Tick)
-			])) : $elm$core$Platform$Sub$batch(
-		_List_fromArray(
-			[
-				$elm$browser$Browser$Events$onKeyDown(
-				A2($elm$json$Json$Decode$map, $author$project$Games$FretboardGame$KeyDown, $author$project$Games$FretboardGame$keyDecoder)),
-				$elm$browser$Browser$Events$onKeyUp(
-				A2($elm$json$Json$Decode$map, $author$project$Games$FretboardGame$KeyUp, $author$project$Games$FretboardGame$keyDecoder))
-			]));
-};
-var $author$project$Games$NoteExercise$StopwatchMsg = function (a) {
-	return {$: 'StopwatchMsg', a: a};
+var $author$project$Exercises$subscriptions = function (model) {
+	return A2(
+		$elm$core$Platform$Sub$map,
+		$author$project$Exercises$ChordGuesserMsg,
+		$author$project$Games$ChordGuesserExercise$subscriptions(model.chordGuesserModel));
 };
 var $author$project$Games$Stopwatch$Tick = function (a) {
 	return {$: 'Tick', a: a};
@@ -11916,6 +11122,8 @@ var $elm$time$Time$addMySub = F2(
 				state);
 		}
 	});
+var $elm$core$Process$kill = _Scheduler_kill;
+var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
 var $elm$time$Time$Name = function (a) {
 	return {$: 'Name', a: a};
 };
@@ -11928,6 +11136,7 @@ var $elm$time$Time$Zone = F2(
 	});
 var $elm$time$Time$customZone = $elm$time$Time$Zone;
 var $elm$time$Time$setInterval = _Time_setInterval;
+var $elm$core$Process$spawn = _Scheduler_spawn;
 var $elm$time$Time$spawnHelp = F3(
 	function (router, intervals, processes) {
 		if (!intervals.b) {
@@ -12016,6 +11225,10 @@ var $elm$time$Time$onEffects = F3(
 				},
 				killTask));
 	});
+var $elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
 var $elm$time$Time$now = _Time_now($elm$time$Time$millisToPosix);
 var $elm$time$Time$onSelfMsg = F3(
 	function (router, interval, state) {
@@ -12060,15 +11273,8 @@ var $elm$time$Time$every = F2(
 		return $elm$time$Time$subscription(
 			A2($elm$time$Time$Every, interval, tagger));
 	});
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Games$Stopwatch$subscriptions = function (model) {
 	return model.running ? A2($elm$time$Time$every, 10, $author$project$Games$Stopwatch$Tick) : $elm$core$Platform$Sub$none;
-};
-var $author$project$Games$NoteExercise$subscriptions = function (model) {
-	return A2(
-		$elm$core$Platform$Sub$map,
-		$author$project$Games$NoteExercise$StopwatchMsg,
-		$author$project$Games$Stopwatch$subscriptions(model.stopwatch));
 };
 var $author$project$Main$subscriptions = function (model) {
 	return $elm$core$Platform$Sub$batch(
@@ -12076,137 +11282,16 @@ var $author$project$Main$subscriptions = function (model) {
 			[
 				A2(
 				$elm$core$Platform$Sub$map,
-				$author$project$Main$FretboardGameMsg,
-				$author$project$Games$FretboardGame$subscriptions(model.fretboardGameModel)),
-				A2(
-				$elm$core$Platform$Sub$map,
 				$author$project$Main$StopwatchMsg,
 				$author$project$Games$Stopwatch$subscriptions(model.stopwatchModel)),
 				A2(
 				$elm$core$Platform$Sub$map,
-				$author$project$Main$NoteExerciseMsg,
-				$author$project$Games$NoteExercise$subscriptions(model.noteExerciseModel))
+				$author$project$Main$ExercisesMsg,
+				$author$project$Exercises$subscriptions(model.exercisesModel))
 			]));
-};
-var $author$project$Games$ModeExercise$GotTheoryDb = function (a) {
-	return {$: 'GotTheoryDb', a: a};
-};
-var $author$project$Games$NoteExercise$GotTheoryDb = function (a) {
-	return {$: 'GotTheoryDb', a: a};
-};
-var $krisajenkins$remotedata$RemoteData$Success = function (a) {
-	return {$: 'Success', a: a};
 };
 var $elm$browser$Browser$Navigation$load = _Browser_load;
 var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
-var $author$project$Games$FretboardGame$SetIsOnPage = function (a) {
-	return {$: 'SetIsOnPage', a: a};
-};
-var $author$project$Games$FretboardGame$Down = {$: 'Down'};
-var $author$project$Games$FretboardGame$Up = {$: 'Up'};
-var $author$project$Games$FretboardGame$lerp = F3(
-	function (a, b, t) {
-		return a + ((b - a) * t);
-	});
-var $author$project$Games$FretboardGame$clamp = F3(
-	function (lo, hi, val) {
-		return (_Utils_cmp(val, lo) < 0) ? lo : ((_Utils_cmp(val, hi) > 0) ? hi : val);
-	});
-var $author$project$Games$FretboardGame$move = F4(
-	function (key, upOrDown, pos, model) {
-		switch (key) {
-			case 'ArrowLeft':
-				return _Utils_eq(upOrDown, $author$project$Games$FretboardGame$Down) ? _Utils_update(
-					pos,
-					{
-						fret: A3($author$project$Games$FretboardGame$clamp, 0, model.fretCount - 1, pos.fret - 1)
-					}) : _Utils_update(
-					pos,
-					{
-						fret: A3($author$project$Games$FretboardGame$clamp, 0, model.fretCount - 1, pos.fret - 0)
-					});
-			case 'ArrowRight':
-				return _Utils_eq(upOrDown, $author$project$Games$FretboardGame$Down) ? _Utils_update(
-					pos,
-					{
-						fret: A3($author$project$Games$FretboardGame$clamp, 0, model.fretCount - 1, pos.fret + 1)
-					}) : _Utils_update(
-					pos,
-					{
-						fret: A3($author$project$Games$FretboardGame$clamp, 0, model.fretCount - 1, pos.fret + 0)
-					});
-			case 'ArrowUp':
-				return _Utils_eq(upOrDown, $author$project$Games$FretboardGame$Down) ? _Utils_update(
-					pos,
-					{
-						string: A3($author$project$Games$FretboardGame$clamp, 1, model.stringCount, pos.string - 1)
-					}) : pos;
-			case 'ArrowDown':
-				return _Utils_eq(upOrDown, $author$project$Games$FretboardGame$Down) ? _Utils_update(
-					pos,
-					{
-						string: A3($author$project$Games$FretboardGame$clamp, 1, model.stringCount, pos.string + 1)
-					}) : pos;
-			default:
-				return pos;
-		}
-	});
-var $author$project$Games$FretboardGame$posToXY = function (pos) {
-	var stringSpacing = 28;
-	var fretWidth = 48;
-	return _Utils_Tuple2((pos.fret * fretWidth) + (fretWidth / 2), ((pos.string - 1) * stringSpacing) + (stringSpacing / 2));
-};
-var $author$project$Games$FretboardGame$update = F2(
-	function (msg, model) {
-		switch (msg.$) {
-			case 'KeyDown':
-				var key = msg.a;
-				var newPos = A4($author$project$Games$FretboardGame$move, key, $author$project$Games$FretboardGame$Down, model.player, model);
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{player: newPos}),
-					$elm$core$Platform$Cmd$none);
-			case 'KeyUp':
-				var key = msg.a;
-				var newPos = A4($author$project$Games$FretboardGame$move, key, $author$project$Games$FretboardGame$Up, model.player, model);
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{player: newPos}),
-					$elm$core$Platform$Cmd$none);
-			case 'Tick':
-				var target = $author$project$Games$FretboardGame$posToXY(model.player);
-				var _v1 = model.userPosition;
-				var x = _v1.a;
-				var y = _v1.b;
-				var _v2 = target;
-				var tx = _v2.a;
-				var ty = _v2.b;
-				var newuserPosition = _Utils_Tuple2(
-					A3($author$project$Games$FretboardGame$lerp, x, tx, 0.2),
-					A3($author$project$Games$FretboardGame$lerp, y, ty, 0.2));
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{userPosition: newuserPosition}),
-					$elm$core$Platform$Cmd$none);
-			default:
-				var isOnPage = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{isOnPage: isOnPage}),
-					$elm$core$Platform$Cmd$none);
-		}
-	});
-var $author$project$Games$FretboardGame$setIsOnPage = F2(
-	function (isOnPage, model) {
-		return A2(
-			$author$project$Games$FretboardGame$update,
-			$author$project$Games$FretboardGame$SetIsOnPage(isOnPage),
-			model);
-	});
 var $elm$url$Url$addPort = F2(
 	function (maybePort, starter) {
 		if (maybePort.$ === 'Nothing') {
@@ -12250,6 +11335,9 @@ var $elm$url$Url$toString = function (url) {
 					url.port_,
 					_Utils_ap(http, url.host)),
 				url.path)));
+};
+var $author$project$Games$ChordGuesserExercise$GotChordData = function (a) {
+	return {$: 'GotChordData', a: a};
 };
 var $author$project$Games$ChordGuesserExercise$RandomChordPicked = function (a) {
 	return {$: 'RandomChordPicked', a: a};
@@ -12415,6 +11503,288 @@ var $author$project$Games$ChordGuesserExercise$checkIfChordIsCorrect = function 
 		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 	}
 };
+var $author$project$Games$TheoryApi$baseUrl = 'http://localhost:5000';
+var $author$project$Games$TheoryApi$Chord2 = F5(
+	function (chord, root, formula, degrees, notes) {
+		return {chord: chord, degrees: degrees, formula: formula, notes: notes, root: root};
+	});
+var $author$project$Games$TheoryApi$chord2Decoder = A6(
+	$elm$json$Json$Decode$map5,
+	$author$project$Games$TheoryApi$Chord2,
+	A2($elm$json$Json$Decode$field, 'chord', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'root', $elm$json$Json$Decode$string),
+	A2(
+		$elm$json$Json$Decode$field,
+		'formula',
+		$elm$json$Json$Decode$list($elm$json$Json$Decode$int)),
+	A2(
+		$elm$json$Json$Decode$field,
+		'degrees',
+		$elm$json$Json$Decode$list($elm$json$Json$Decode$string)),
+	A2(
+		$elm$json$Json$Decode$field,
+		'notes',
+		$elm$json$Json$Decode$list($elm$json$Json$Decode$string)));
+var $author$project$Games$TheoryApi$chord2ListDecoder = $elm$json$Json$Decode$list($author$project$Games$TheoryApi$chord2Decoder);
+var $elm$http$Http$BadStatus_ = F2(
+	function (a, b) {
+		return {$: 'BadStatus_', a: a, b: b};
+	});
+var $elm$http$Http$BadUrl_ = function (a) {
+	return {$: 'BadUrl_', a: a};
+};
+var $elm$http$Http$GoodStatus_ = F2(
+	function (a, b) {
+		return {$: 'GoodStatus_', a: a, b: b};
+	});
+var $elm$http$Http$NetworkError_ = {$: 'NetworkError_'};
+var $elm$http$Http$Receiving = function (a) {
+	return {$: 'Receiving', a: a};
+};
+var $elm$http$Http$Sending = function (a) {
+	return {$: 'Sending', a: a};
+};
+var $elm$http$Http$Timeout_ = {$: 'Timeout_'};
+var $elm$core$Maybe$isJust = function (maybe) {
+	if (maybe.$ === 'Just') {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm$http$Http$expectStringResponse = F2(
+	function (toMsg, toResult) {
+		return A3(
+			_Http_expect,
+			'',
+			$elm$core$Basics$identity,
+			A2($elm$core$Basics$composeR, toResult, toMsg));
+	});
+var $elm$core$Result$mapError = F2(
+	function (f, result) {
+		if (result.$ === 'Ok') {
+			var v = result.a;
+			return $elm$core$Result$Ok(v);
+		} else {
+			var e = result.a;
+			return $elm$core$Result$Err(
+				f(e));
+		}
+	});
+var $elm$http$Http$BadBody = function (a) {
+	return {$: 'BadBody', a: a};
+};
+var $elm$http$Http$BadStatus = function (a) {
+	return {$: 'BadStatus', a: a};
+};
+var $elm$http$Http$BadUrl = function (a) {
+	return {$: 'BadUrl', a: a};
+};
+var $elm$http$Http$NetworkError = {$: 'NetworkError'};
+var $elm$http$Http$Timeout = {$: 'Timeout'};
+var $elm$http$Http$resolve = F2(
+	function (toResult, response) {
+		switch (response.$) {
+			case 'BadUrl_':
+				var url = response.a;
+				return $elm$core$Result$Err(
+					$elm$http$Http$BadUrl(url));
+			case 'Timeout_':
+				return $elm$core$Result$Err($elm$http$Http$Timeout);
+			case 'NetworkError_':
+				return $elm$core$Result$Err($elm$http$Http$NetworkError);
+			case 'BadStatus_':
+				var metadata = response.a;
+				return $elm$core$Result$Err(
+					$elm$http$Http$BadStatus(metadata.statusCode));
+			default:
+				var body = response.b;
+				return A2(
+					$elm$core$Result$mapError,
+					$elm$http$Http$BadBody,
+					toResult(body));
+		}
+	});
+var $elm$http$Http$expectJson = F2(
+	function (toMsg, decoder) {
+		return A2(
+			$elm$http$Http$expectStringResponse,
+			toMsg,
+			$elm$http$Http$resolve(
+				function (string) {
+					return A2(
+						$elm$core$Result$mapError,
+						$elm$json$Json$Decode$errorToString,
+						A2($elm$json$Json$Decode$decodeString, decoder, string));
+				}));
+	});
+var $elm$http$Http$emptyBody = _Http_emptyBody;
+var $elm$http$Http$Request = function (a) {
+	return {$: 'Request', a: a};
+};
+var $elm$http$Http$State = F2(
+	function (reqs, subs) {
+		return {reqs: reqs, subs: subs};
+	});
+var $elm$http$Http$init = $elm$core$Task$succeed(
+	A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
+var $elm$http$Http$updateReqs = F3(
+	function (router, cmds, reqs) {
+		updateReqs:
+		while (true) {
+			if (!cmds.b) {
+				return $elm$core$Task$succeed(reqs);
+			} else {
+				var cmd = cmds.a;
+				var otherCmds = cmds.b;
+				if (cmd.$ === 'Cancel') {
+					var tracker = cmd.a;
+					var _v2 = A2($elm$core$Dict$get, tracker, reqs);
+					if (_v2.$ === 'Nothing') {
+						var $temp$router = router,
+							$temp$cmds = otherCmds,
+							$temp$reqs = reqs;
+						router = $temp$router;
+						cmds = $temp$cmds;
+						reqs = $temp$reqs;
+						continue updateReqs;
+					} else {
+						var pid = _v2.a;
+						return A2(
+							$elm$core$Task$andThen,
+							function (_v3) {
+								return A3(
+									$elm$http$Http$updateReqs,
+									router,
+									otherCmds,
+									A2($elm$core$Dict$remove, tracker, reqs));
+							},
+							$elm$core$Process$kill(pid));
+					}
+				} else {
+					var req = cmd.a;
+					return A2(
+						$elm$core$Task$andThen,
+						function (pid) {
+							var _v4 = req.tracker;
+							if (_v4.$ === 'Nothing') {
+								return A3($elm$http$Http$updateReqs, router, otherCmds, reqs);
+							} else {
+								var tracker = _v4.a;
+								return A3(
+									$elm$http$Http$updateReqs,
+									router,
+									otherCmds,
+									A3($elm$core$Dict$insert, tracker, pid, reqs));
+							}
+						},
+						$elm$core$Process$spawn(
+							A3(
+								_Http_toTask,
+								router,
+								$elm$core$Platform$sendToApp(router),
+								req)));
+				}
+			}
+		}
+	});
+var $elm$http$Http$onEffects = F4(
+	function (router, cmds, subs, state) {
+		return A2(
+			$elm$core$Task$andThen,
+			function (reqs) {
+				return $elm$core$Task$succeed(
+					A2($elm$http$Http$State, reqs, subs));
+			},
+			A3($elm$http$Http$updateReqs, router, cmds, state.reqs));
+	});
+var $elm$http$Http$maybeSend = F4(
+	function (router, desiredTracker, progress, _v0) {
+		var actualTracker = _v0.a;
+		var toMsg = _v0.b;
+		return _Utils_eq(desiredTracker, actualTracker) ? $elm$core$Maybe$Just(
+			A2(
+				$elm$core$Platform$sendToApp,
+				router,
+				toMsg(progress))) : $elm$core$Maybe$Nothing;
+	});
+var $elm$http$Http$onSelfMsg = F3(
+	function (router, _v0, state) {
+		var tracker = _v0.a;
+		var progress = _v0.b;
+		return A2(
+			$elm$core$Task$andThen,
+			function (_v1) {
+				return $elm$core$Task$succeed(state);
+			},
+			$elm$core$Task$sequence(
+				A2(
+					$elm$core$List$filterMap,
+					A3($elm$http$Http$maybeSend, router, tracker, progress),
+					state.subs)));
+	});
+var $elm$http$Http$Cancel = function (a) {
+	return {$: 'Cancel', a: a};
+};
+var $elm$http$Http$cmdMap = F2(
+	function (func, cmd) {
+		if (cmd.$ === 'Cancel') {
+			var tracker = cmd.a;
+			return $elm$http$Http$Cancel(tracker);
+		} else {
+			var r = cmd.a;
+			return $elm$http$Http$Request(
+				{
+					allowCookiesFromOtherDomains: r.allowCookiesFromOtherDomains,
+					body: r.body,
+					expect: A2(_Http_mapExpect, func, r.expect),
+					headers: r.headers,
+					method: r.method,
+					timeout: r.timeout,
+					tracker: r.tracker,
+					url: r.url
+				});
+		}
+	});
+var $elm$http$Http$MySub = F2(
+	function (a, b) {
+		return {$: 'MySub', a: a, b: b};
+	});
+var $elm$http$Http$subMap = F2(
+	function (func, _v0) {
+		var tracker = _v0.a;
+		var toMsg = _v0.b;
+		return A2(
+			$elm$http$Http$MySub,
+			tracker,
+			A2($elm$core$Basics$composeR, toMsg, func));
+	});
+_Platform_effectManagers['Http'] = _Platform_createManager($elm$http$Http$init, $elm$http$Http$onEffects, $elm$http$Http$onSelfMsg, $elm$http$Http$cmdMap, $elm$http$Http$subMap);
+var $elm$http$Http$command = _Platform_leaf('Http');
+var $elm$http$Http$subscription = _Platform_leaf('Http');
+var $elm$http$Http$request = function (r) {
+	return $elm$http$Http$command(
+		$elm$http$Http$Request(
+			{allowCookiesFromOtherDomains: false, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
+};
+var $elm$http$Http$get = function (r) {
+	return $elm$http$Http$request(
+		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
+};
+var $author$project$Games$TheoryApi$parseChordTypes = function (chordTypes) {
+	return function (s) {
+		return '?types=' + s;
+	}(
+		A2($elm$core$String$join, '&types=', chordTypes));
+};
+var $author$project$Games$TheoryApi$fetchChords2 = F3(
+	function (root, chordTypes, toMsg) {
+		return $elm$http$Http$get(
+			{
+				expect: A2($elm$http$Http$expectJson, toMsg, $author$project$Games$TheoryApi$chord2ListDecoder),
+				url: $author$project$Games$TheoryApi$baseUrl + ('/api/v1/chords/' + (root + $author$project$Games$TheoryApi$parseChordTypes(chordTypes)))
+			});
+	});
 var $author$project$Games$ChordGuesserExercise$defaultChord = {chord: 'No chord found', degrees: _List_Nil, formula: _List_Nil, notes: _List_Nil, root: ''};
 var $elm$core$List$head = function (list) {
 	if (list.b) {
@@ -12468,6 +11838,20 @@ var $author$project$Games$ChordGuesserExercise$update = F2(
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
+			case 'DifficultyChosen':
+				var difficulty = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{chosenDifficulty: difficulty}),
+					$elm$core$Platform$Cmd$none);
+			case 'ChordGroupChosen':
+				var chordTypes = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{isGameStarted: true}),
+					A3($author$project$Games$TheoryApi$fetchChords2, 'C', chordTypes, $author$project$Games$ChordGuesserExercise$GotChordData));
 			case 'RandomChordPicked':
 				var randomIndex = msg.a;
 				var newRandomChord = A2($author$project$Games$ChordGuesserExercise$pickRandomChord, model.maybeChords, randomIndex);
@@ -12517,424 +11901,36 @@ var $author$project$Games$ChordGuesserExercise$update = F2(
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
-var $author$project$Games$ModeExercise$Lose = {$: 'Lose'};
-var $author$project$Games$ModeExercise$Submitted = function (a) {
-	return {$: 'Submitted', a: a};
-};
-var $author$project$Games$ModeExercise$Win = {$: 'Win'};
-var $elm$core$String$replace = F3(
-	function (before, after, string) {
-		return A2(
-			$elm$core$String$join,
-			after,
-			A2($elm$core$String$split, before, string));
-	});
-var $author$project$Games$ModeExercise$constructMode = F2(
-	function (mode, key) {
-		return A2(
-			$elm$core$List$map,
-			A2($elm$core$String$replace, 'b#', ''),
-			A2(
-				$elm$core$List$map,
-				A2($elm$core$String$replace, '#b', ''),
-				A3($elm$core$List$map2, $elm$core$Basics$append, key, mode)));
-	});
-var $author$project$Games$ModeExercise$notesToListString = function (key) {
-	return A2($elm$core$List$map, $elm$core$Tuple$second, key.notes);
-};
-var $author$project$Games$ModeExercise$isCorrectHelper = function (model) {
-	var _v0 = model.chosenKey;
-	if (_v0.$ === 'Just') {
-		var chosenKey = _v0.a;
-		return _Utils_eq(
-			$elm$core$List$reverse(model.userBuiltMode),
-			A2(
-				$author$project$Games$ModeExercise$constructMode,
-				model.randomizedMode.formula,
-				$author$project$Games$ModeExercise$notesToListString(chosenKey)));
-	} else {
-		return false;
-	}
-};
-var $elm$core$Process$sleep = _Process_sleep;
-var $author$project$Games$ModeExercise$checkIfModeBuiltCorrect = function (model) {
-	return $author$project$Games$ModeExercise$isCorrectHelper(model) ? _Utils_Tuple2(
-		_Utils_update(
-			model,
-			{gameOver: true}),
-		A2(
-			$elm$core$Task$perform,
-			function (_v0) {
-				return $author$project$Games$ModeExercise$Submitted($author$project$Games$ModeExercise$Win);
-			},
-			$elm$core$Process$sleep(100))) : _Utils_Tuple2(
-		_Utils_update(
-			model,
-			{gameOver: true}),
-		A2(
-			$elm$core$Task$perform,
-			function (_v1) {
-				return $author$project$Games$ModeExercise$Submitted($author$project$Games$ModeExercise$Lose);
-			},
-			$elm$core$Process$sleep(100)));
-};
-var $author$project$Games$ModeExercise$RandomizeMode = {$: 'RandomizeMode'};
-var $author$project$Games$ModeExercise$ResetWrong = {$: 'ResetWrong'};
-var $author$project$Games$ModeExercise$checkIfModeGuessCorrect = function (model) {
-	if (_Utils_eq(
-		model.modeGuessed,
-		$elm$core$Maybe$Just(model.randomizedMode.mode))) {
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{isCorrect: true, isWrong: false, resultMessage: 'Correct!', score: model.score + 1}),
-			A2(
-				$elm$core$Task$perform,
-				function (_v0) {
-					return $author$project$Games$ModeExercise$RandomizeMode;
-				},
-				$elm$core$Process$sleep(500)));
-	} else {
-		var resetCmd = A2(
-			$elm$core$Task$perform,
-			function (_v1) {
-				return $author$project$Games$ModeExercise$ResetWrong;
-			},
-			$elm$core$Process$sleep(500));
-		var newNumberOfWrongs = model.numberOfWrongs + 1;
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{isWrong: true, numberOfWrongs: newNumberOfWrongs, resultMessage: 'Wrong, try again.'}),
-			resetCmd);
-	}
-};
-var $author$project$Games$ModeExercise$pickRandomMode = F2(
-	function (maybeModes, randomIndex) {
-		if (maybeModes.$ === 'Just') {
-			var modes = maybeModes.a;
-			var maybeRandomModeObject = function () {
-				var _v1 = A2(
-					$elm$core$Array$get,
-					randomIndex,
-					$elm$core$Array$fromList(modes));
-				if (_v1.$ === 'Just') {
-					var randomModeObject = _v1.a;
-					return randomModeObject;
-				} else {
-					return {formula: _List_Nil, mode: 'No mode found at given index'};
-				}
-			}();
-			return maybeRandomModeObject;
-		} else {
-			return {formula: _List_Nil, mode: 'No mode found'};
-		}
-	});
-var $author$project$Games$ModeExercise$PickRandomMode = function (a) {
-	return {$: 'PickRandomMode', a: a};
-};
-var $author$project$Games$ModeExercise$randomizeMode = A2(
-	$elm$random$Random$generate,
-	$author$project$Games$ModeExercise$PickRandomMode,
-	A2($elm$random$Random$int, 0, 6));
-var $author$project$Games$ModeExercise$update = F2(
+var $author$project$Exercises$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
-			case 'GotTheoryDb':
-				var db = msg.a;
+			case 'ChordGuesserMsg':
+				var sub = msg.a;
+				var _v1 = A2($author$project$Games$ChordGuesserExercise$update, sub, model.chordGuesserModel);
+				var updated = _v1.a;
+				var cmd = _v1.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{chordGuesserModel: updated}),
+					A2($elm$core$Platform$Cmd$map, $author$project$Exercises$ChordGuesserMsg, cmd));
+			case 'SelectGame':
+				var game = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							allNotes: $elm$core$Maybe$Just(db.allNotes),
-							majorScalesAndKeys: $elm$core$Maybe$Just(db.majorScalesAndKeys),
-							modes: $elm$core$Maybe$Just(db.modes)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'ChooseGame':
-				var gameMode = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							chosenGameMode: $elm$core$Maybe$Just(gameMode)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'GoBack':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{chosenGameMode: $elm$core$Maybe$Nothing}),
-					$elm$core$Platform$Cmd$none);
-			case 'ChooseKey':
-				var key = msg.a;
-				var newModel = _Utils_update(
-					model,
-					{
-						chosenKey: $elm$core$Maybe$Just(key),
-						resultMessage: ''
-					});
-				return _Utils_Tuple2(newModel, $author$project$Games$ModeExercise$randomizeMode);
-			case 'PickRandomMode':
-				var randomIndex = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							isCorrect: false,
-							randomizedMode: A2($author$project$Games$ModeExercise$pickRandomMode, model.modes, randomIndex)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'ModeGuessed':
-				var mode = msg.a;
-				var modelWithModeGuessed = _Utils_update(
-					model,
-					{
-						modeGuessed: $elm$core$Maybe$Just(mode)
-					});
-				var modelWithResult = $author$project$Games$ModeExercise$checkIfModeGuessCorrect(modelWithModeGuessed);
-				return modelWithResult;
-			case 'RandomizeMode':
-				return _Utils_Tuple2(model, $author$project$Games$ModeExercise$randomizeMode);
-			case 'ResetWrong':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{isWrong: false}),
-					$elm$core$Platform$Cmd$none);
-			case 'AddToModeBuilderList':
-				var note = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							userBuiltMode: A2($elm$core$List$cons, note, model.userBuiltMode)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'SubmitBuiltMode':
-				return $author$project$Games$ModeExercise$checkIfModeBuiltCorrect(model);
-			case 'Submitted':
-				var result = msg.a;
-				if (result.$ === 'Win') {
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								result: $elm$core$Maybe$Just(result)
-							}),
-						$elm$core$Platform$Cmd$none);
-				} else {
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								result: $elm$core$Maybe$Just(result)
-							}),
-						$elm$core$Platform$Cmd$none);
-				}
-			case 'Undo':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							userBuiltMode: A2($elm$core$List$drop, 1, model.userBuiltMode)
+							currentGame: $elm$core$Maybe$Just(game)
 						}),
 					$elm$core$Platform$Cmd$none);
 			default:
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{gameOver: false, result: $elm$core$Maybe$Nothing, userBuiltMode: _List_Nil}),
-					$author$project$Games$ModeExercise$randomizeMode);
+						{currentGame: $elm$core$Maybe$Nothing}),
+					$elm$core$Platform$Cmd$none);
 		}
 	});
-var $author$project$Games$NoteExercise$Shuffled = function (a) {
-	return {$: 'Shuffled', a: a};
-};
-var $author$project$Games$NoteExercise$Lose = {$: 'Lose'};
-var $author$project$Games$NoteExercise$Win = {$: 'Win'};
-var $elm$core$Maybe$andThen = F2(
-	function (callback, maybeValue) {
-		if (maybeValue.$ === 'Just') {
-			var value = maybeValue.a;
-			return callback(value);
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $elm$core$Set$insert = F2(
-	function (key, _v0) {
-		var dict = _v0.a;
-		return $elm$core$Set$Set_elm_builtin(
-			A3($elm$core$Dict$insert, key, _Utils_Tuple0, dict));
-	});
-var $elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return $elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $elm$json$Json$Encode$int = _Json_wrap;
-var $author$project$Games$NoteExercise$sendToLocalStorage = _Platform_outgoingPort('sendToLocalStorage', $elm$json$Json$Encode$string);
-var $author$project$Games$NoteExercise$saveWins = function (numberOfWins) {
-	return $author$project$Games$NoteExercise$sendToLocalStorage(
-		A2(
-			$elm$json$Json$Encode$encode,
-			0,
-			$elm$json$Json$Encode$int(numberOfWins)));
-};
-var $elm$core$Set$size = function (_v0) {
-	var dict = _v0.a;
-	return $elm$core$Dict$size(dict);
-};
-var $author$project$Games$NoteExercise$checkClickedValues = function (model) {
-	var _v0 = model.noteAndOriginalIndexTuplePrompted;
-	if (_v0.$ === 'Just') {
-		var _v1 = _v0.a;
-		var originalIndex = _v1.a;
-		if (_Utils_eq(originalIndex, model.numberIndex)) {
-			var nextExerciseStep = model.exerciseStep + 1;
-			var newScore = $elm$core$Set$size(model.correctPairs);
-			var newPair = _Utils_Tuple2(originalIndex, model.numberIndex);
-			var newNumberOfWins = model.numberOfWins + 1;
-			var newCorrectPairs = A2($elm$core$Set$insert, newPair, model.correctPairs);
-			var maybeNextNote = A2(
-				$elm$core$Maybe$andThen,
-				$elm$core$List$head,
-				A2(
-					$elm$core$Maybe$map,
-					function (scale) {
-						return A2($elm$core$List$drop, nextExerciseStep, scale.notes);
-					},
-					model.maybeChosenScale));
-			var newModelAndCmd = function () {
-				if (maybeNextNote.$ === 'Just') {
-					var nextNote = maybeNextNote.a;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								correctPairs: newCorrectPairs,
-								exerciseStep: nextExerciseStep,
-								noteAndOriginalIndexTuplePrompted: $elm$core$Maybe$Just(nextNote),
-								score: newScore
-							}),
-						$elm$core$Platform$Cmd$none);
-				} else {
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								gameOver: true,
-								numberOfWins: newNumberOfWins,
-								result: $elm$core$Maybe$Just($author$project$Games$NoteExercise$Win)
-							}),
-						$elm$core$Platform$Cmd$batch(
-							_List_fromArray(
-								[
-									$author$project$Games$NoteExercise$saveWins(newNumberOfWins)
-								])));
-				}
-			}();
-			return newModelAndCmd;
-		} else {
-			var newWrongPair = _Utils_Tuple2(originalIndex, model.numberIndex);
-			var newNumberOfWrongs = model.numberOfWrongs + 1;
-			var newModelAndCmd = (newNumberOfWrongs === 3) ? _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						gameOver: true,
-						result: $elm$core$Maybe$Just($author$project$Games$NoteExercise$Lose)
-					}),
-				$elm$core$Platform$Cmd$none) : _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						numberOfWrongs: newNumberOfWrongs,
-						wrongPair: $elm$core$Maybe$Just(newWrongPair)
-					}),
-				$elm$core$Platform$Cmd$none);
-			return newModelAndCmd;
-		}
-	} else {
-		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-	}
-};
-var $elm$random$Random$maxInt = 2147483647;
-var $elm$random$Random$minInt = -2147483648;
-var $elm_community$random_extra$Random$List$anyInt = A2($elm$random$Random$int, $elm$random$Random$minInt, $elm$random$Random$maxInt);
-var $elm$random$Random$map3 = F4(
-	function (func, _v0, _v1, _v2) {
-		var genA = _v0.a;
-		var genB = _v1.a;
-		var genC = _v2.a;
-		return $elm$random$Random$Generator(
-			function (seed0) {
-				var _v3 = genA(seed0);
-				var a = _v3.a;
-				var seed1 = _v3.b;
-				var _v4 = genB(seed1);
-				var b = _v4.a;
-				var seed2 = _v4.b;
-				var _v5 = genC(seed2);
-				var c = _v5.a;
-				var seed3 = _v5.b;
-				return _Utils_Tuple2(
-					A3(func, a, b, c),
-					seed3);
-			});
-	});
-var $elm$core$Bitwise$or = _Bitwise_or;
-var $elm$random$Random$independentSeed = $elm$random$Random$Generator(
-	function (seed0) {
-		var makeIndependentSeed = F3(
-			function (state, b, c) {
-				return $elm$random$Random$next(
-					A2($elm$random$Random$Seed, state, (1 | (b ^ c)) >>> 0));
-			});
-		var gen = A2($elm$random$Random$int, 0, 4294967295);
-		return A2(
-			$elm$random$Random$step,
-			A4($elm$random$Random$map3, makeIndependentSeed, gen, gen, gen),
-			seed0);
-	});
-var $elm$core$List$sortBy = _List_sortBy;
-var $elm_community$random_extra$Random$List$shuffle = function (list) {
-	return A2(
-		$elm$random$Random$map,
-		function (independentSeed) {
-			return A2(
-				$elm$core$List$map,
-				$elm$core$Tuple$first,
-				A2(
-					$elm$core$List$sortBy,
-					$elm$core$Tuple$second,
-					A3(
-						$elm$core$List$foldl,
-						F2(
-							function (item, _v0) {
-								var acc = _v0.a;
-								var seed = _v0.b;
-								var _v1 = A2($elm$random$Random$step, $elm_community$random_extra$Random$List$anyInt, seed);
-								var tag = _v1.a;
-								var nextSeed = _v1.b;
-								return _Utils_Tuple2(
-									A2(
-										$elm$core$List$cons,
-										_Utils_Tuple2(item, tag),
-										acc),
-									nextSeed);
-							}),
-						_Utils_Tuple2(_List_Nil, independentSeed),
-						list).a));
-		},
-		$elm$random$Random$independentSeed);
-};
 var $author$project$Games$Stopwatch$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -12958,156 +11954,29 @@ var $author$project$Games$Stopwatch$update = F2(
 					$elm$core$Platform$Cmd$none);
 		}
 	});
-var $author$project$Games$NoteExercise$update = F2(
-	function (msg, model) {
-		switch (msg.$) {
-			case 'NumberClicked':
-				var number = msg.a;
-				var modelWithNumber = _Utils_update(
-					model,
-					{numberIndex: number, wrongPair: $elm$core$Maybe$Nothing});
-				var newModel = $author$project$Games$NoteExercise$checkClickedValues(modelWithNumber);
-				return newModel;
-			case 'GotTheoryDb':
-				var db = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							maybeMajorScalesAndKeys: $elm$core$Maybe$Just(db.majorScalesAndKeys)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'Shuffle':
-				var _v1 = model.maybeChosenScale;
-				if (_v1.$ === 'Just') {
-					var scale = _v1.a;
-					return _Utils_Tuple2(
-						model,
-						A2(
-							$elm$random$Random$generate,
-							$author$project$Games$NoteExercise$Shuffled,
-							$elm_community$random_extra$Random$List$shuffle(scale.notes)));
-				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
-			case 'Shuffled':
-				var newNotes = msg.a;
-				var _v2 = model.maybeChosenScale;
-				if (_v2.$ === 'Just') {
-					var scale = _v2.a;
-					var newScale = _Utils_update(
-						scale,
-						{notes: newNotes});
-					var maybeFirstNote = $elm$core$List$head(newNotes);
-					if (maybeFirstNote.$ === 'Just') {
-						var firstNote = maybeFirstNote.a;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									correctPairs: $elm$core$Set$empty,
-									exerciseStep: 0,
-									maybeChosenScale: $elm$core$Maybe$Just(newScale),
-									noteAndOriginalIndexTuplePrompted: $elm$core$Maybe$Just(firstNote),
-									numberIndex: 7,
-									wrongPair: $elm$core$Maybe$Nothing
-								}),
-							$elm$core$Platform$Cmd$none);
-					} else {
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-					}
-				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
-			case 'KeyChosen':
-				var scale = msg.a;
-				var newModel = _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							correctPairs: $elm$core$Set$empty,
-							gameOver: false,
-							maybeChosenScale: $elm$core$Maybe$Just(scale),
-							noteAndOriginalIndexTuplePrompted: $elm$core$Maybe$Nothing,
-							numberIndex: 7,
-							numberOfWrongs: 0,
-							score: 0,
-							showStopwatch: true,
-							wrongPair: $elm$core$Maybe$Nothing
-						}),
-					A2(
-						$elm$random$Random$generate,
-						$author$project$Games$NoteExercise$Shuffled,
-						$elm_community$random_extra$Random$List$shuffle(scale.notes)));
-				return newModel;
-			case 'Reset':
-				var shuffle = msg.a;
-				var _v4 = model.maybeChosenScale;
-				if (_v4.$ === 'Just') {
-					var scale = _v4.a;
-					var firstNote = $elm$core$List$head(scale.notes);
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								correctPairs: $elm$core$Set$empty,
-								exerciseStep: 0,
-								gameOver: false,
-								maybeChosenScale: $elm$core$Maybe$Just(scale),
-								noteAndOriginalIndexTuplePrompted: firstNote,
-								numberIndex: 7,
-								numberOfWrongs: 0,
-								wrongPair: $elm$core$Maybe$Nothing
-							}),
-						shuffle ? A2(
-							$elm$random$Random$generate,
-							$author$project$Games$NoteExercise$Shuffled,
-							$elm_community$random_extra$Random$List$shuffle(scale.notes)) : $elm$core$Platform$Cmd$none);
-				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
-			default:
-				var subMsg = msg.a;
-				var _v5 = A2($author$project$Games$Stopwatch$update, subMsg, model.stopwatch);
-				var updatedStopwatch = _v5.a;
-				var cmd = _v5.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{stopwatch: updatedStopwatch}),
-					A2($elm$core$Platform$Cmd$map, $author$project$Games$NoteExercise$StopwatchMsg, cmd));
-		}
-	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
 			case 'UrlChanged':
 				var newUrl = msg.a;
-				var setIsOnFretboardPage = newUrl.path === '/game/fretboard-game';
 				var newRoute = A2(
 					$elm$core$Maybe$withDefault,
 					$author$project$Main$NotFound,
 					A2($elm$url$Url$Parser$parse, $author$project$Main$routeParser, newUrl));
-				var chordFetchCmd = function () {
-					if ((newRoute.$ === 'Game') && (newRoute.a === 'chord-exercise')) {
-						return A2($elm$core$Platform$Cmd$map, $author$project$Main$ChordExerciseMsg, $author$project$Games$ChordGuesserExercise$initialFetch);
+				var exercisesFetchCmd = function () {
+					if (newRoute.$ === 'ExercisesRoute') {
+						return $elm$core$Platform$Cmd$none;
 					} else {
 						return $elm$core$Platform$Cmd$none;
 					}
 				}();
-				var _v1 = A2($author$project$Games$FretboardGame$setIsOnPage, setIsOnFretboardPage, model.fretboardGameModel);
-				var updatedFretboardModel = _v1.a;
-				var fretboardCmd = _v1.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{fretboardGameModel: updatedFretboardModel, isOnFretboardPage: setIsOnFretboardPage, route: newRoute, url: newUrl}),
+						{route: newRoute, url: newUrl}),
 					$elm$core$Platform$Cmd$batch(
 						_List_fromArray(
-							[
-								A2($elm$core$Platform$Cmd$map, $author$project$Main$FretboardGameMsg, fretboardCmd),
-								chordFetchCmd
-							])));
+							[exercisesFetchCmd])));
 			case 'LinkClicked':
 				var urlRequest = msg.a;
 				if (urlRequest.$ === 'Internal') {
@@ -13124,89 +11993,26 @@ var $author$project$Main$update = F2(
 						model,
 						$elm$browser$Browser$Navigation$load(href));
 				}
-			case 'NoteExerciseMsg':
+			case 'ExercisesMsg':
 				var subMsg = msg.a;
-				var _v4 = A2($author$project$Games$NoteExercise$update, subMsg, model.noteExerciseModel);
-				var updatedGameModel = _v4.a;
+				var _v3 = A2($author$project$Exercises$update, subMsg, model.exercisesModel);
+				var updatedExercisesModel = _v3.a;
+				var cmd = _v3.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{exercisesModel: updatedExercisesModel}),
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$ExercisesMsg, cmd));
+			default:
+				var subMsg = msg.a;
+				var _v4 = A2($author$project$Games$Stopwatch$update, subMsg, model.stopwatchModel);
+				var updatedStopwatch = _v4.a;
 				var cmd = _v4.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{noteExerciseModel: updatedGameModel}),
-					A2($elm$core$Platform$Cmd$map, $author$project$Main$NoteExerciseMsg, cmd));
-			case 'ModeExerciseMsg':
-				var subMsg = msg.a;
-				var _v5 = A2($author$project$Games$ModeExercise$update, subMsg, model.modeExerciseModel);
-				var updatedGameModel = _v5.a;
-				var cmd = _v5.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{modeExerciseModel: updatedGameModel}),
-					A2($elm$core$Platform$Cmd$map, $author$project$Main$ModeExerciseMsg, cmd));
-			case 'ChordExerciseMsg':
-				var subMsg = msg.a;
-				var _v6 = A2($author$project$Games$ChordGuesserExercise$update, subMsg, model.chordExerciseModel);
-				var updatedGameModel = _v6.a;
-				var cmd = _v6.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{chordExerciseModel: updatedGameModel}),
-					A2($elm$core$Platform$Cmd$map, $author$project$Main$ChordExerciseMsg, cmd));
-			case 'FretboardGameMsg':
-				var subMsg = msg.a;
-				var _v7 = A2($author$project$Games$FretboardGame$update, subMsg, model.fretboardGameModel);
-				var updatedGameModel = _v7.a;
-				var cmd = _v7.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{fretboardGameModel: updatedGameModel}),
-					A2($elm$core$Platform$Cmd$map, $author$project$Main$FretboardGameMsg, cmd));
-			case 'StopwatchMsg':
-				var subMsg = msg.a;
-				var _v8 = A2($author$project$Games$Stopwatch$update, subMsg, model.stopwatchModel);
-				var updatedStopwatch = _v8.a;
-				var cmd = _v8.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{stopwatchModel: updatedStopwatch}),
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$StopwatchMsg, cmd));
-			default:
-				if (msg.a.$ === 'Ok') {
-					var db = msg.a.a;
-					var _v9 = A2(
-						$author$project$Games$NoteExercise$update,
-						$author$project$Games$NoteExercise$GotTheoryDb(db),
-						model.noteExerciseModel);
-					var updatedNoteModel = _v9.a;
-					var noteCmd = _v9.b;
-					var _v10 = A2(
-						$author$project$Games$ModeExercise$update,
-						$author$project$Games$ModeExercise$GotTheoryDb(db),
-						model.modeExerciseModel);
-					var updatedModeModel = _v10.a;
-					var modeCmd = _v10.b;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								modeExerciseModel: updatedModeModel,
-								noteExerciseModel: updatedNoteModel,
-								theoryDb: $krisajenkins$remotedata$RemoteData$Success(db)
-							}),
-						$elm$core$Platform$Cmd$batch(
-							_List_fromArray(
-								[
-									A2($elm$core$Platform$Cmd$map, $author$project$Main$NoteExerciseMsg, noteCmd),
-									A2($elm$core$Platform$Cmd$map, $author$project$Main$ModeExerciseMsg, modeCmd)
-								])));
-				} else {
-					var error = msg.a.a;
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
 		}
 	});
 var $elm$html$Html$main_ = _VirtualDom_node('main');
@@ -13311,35 +12117,42 @@ var $author$project$Main$viewHeader = function (currentPath) {
 								_List_Nil,
 								_List_fromArray(
 									[
-										A3($author$project$Main$viewLink, 'Note exercise', '/game/note-exercise', currentPath)
-									])),
-								A2(
-								$elm$html$Html$li,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A3($author$project$Main$viewLink, 'Mode exercise', '/game/mode-exercise', currentPath)
-									])),
-								A2(
-								$elm$html$Html$li,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A3($author$project$Main$viewLink, 'Chord Exercise', '/game/chord-exercise', currentPath)
-									])),
-								A2(
-								$elm$html$Html$li,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A3($author$project$Main$viewLink, 'Fretboard Game', '/game/fretboard-game', currentPath)
+										A3($author$project$Main$viewLink, 'Exercises', '/exercises', currentPath)
 									]))
 							]))
 					]))
 			]));
 };
+var $author$project$Exercises$BackToList = {$: 'BackToList'};
+var $author$project$Exercises$ChordGuesser = {$: 'ChordGuesser'};
+var $author$project$Exercises$SelectGame = function (a) {
+	return {$: 'SelectGame', a: a};
+};
+var $elm$html$Html$h2 = _VirtualDom_node('h2');
+var $author$project$Games$ChordGuesserExercise$ChordGroupChosen = function (a) {
+	return {$: 'ChordGroupChosen', a: a};
+};
+var $author$project$Games$ChordGuesserExercise$DifficultyChosen = function (a) {
+	return {$: 'DifficultyChosen', a: a};
+};
+var $author$project$Games$ChordGuesserExercise$Extreme = {$: 'Extreme'};
 var $author$project$Games$ChordGuesserExercise$GoBack = {$: 'GoBack'};
+var $author$project$Games$ChordGuesserExercise$Hard = {$: 'Hard'};
+var $author$project$Games$ChordGuesserExercise$Medium = {$: 'Medium'};
 var $author$project$Games$ChordGuesserExercise$ResetChordGuesser = {$: 'ResetChordGuesser'};
+var $elm$html$Html$section = _VirtualDom_node('section');
+var $author$project$Games$ChordGuesserExercise$stringFromDifficulty = function (difficulty) {
+	switch (difficulty.$) {
+		case 'Easy':
+			return 'Easy';
+		case 'Medium':
+			return 'Medium';
+		case 'Hard':
+			return 'Hard';
+		default:
+			return 'Extreme';
+	}
+};
 var $author$project$Games$ChordGuesserExercise$ChordChosen = function (a) {
 	return {$: 'ChordChosen', a: a};
 };
@@ -13404,7 +12217,7 @@ var $author$project$Games$ChordGuesserExercise$viewRandomizedChord = function (m
 	}
 };
 var $author$project$Games$ChordGuesserExercise$view = function (model) {
-	return A2(
+	return model.isGameStarted ? A2(
 		$elm$html$Html$div,
 		_List_Nil,
 		_List_fromArray(
@@ -13438,6 +12251,242 @@ var $author$project$Games$ChordGuesserExercise$view = function (model) {
 				_List_fromArray(
 					[
 						$elm$html$Html$text('Reset')
+					]))
+			])) : A2(
+		$elm$html$Html$section,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$h2,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Chord Guesser Exercise')
+					])),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('custom-button'),
+						$elm$html$Html$Events$onClick(
+						$author$project$Games$ChordGuesserExercise$DifficultyChosen($author$project$Games$ChordGuesserExercise$Easy))
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Easy')
+					])),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('custom-button'),
+						$elm$html$Html$Events$onClick(
+						$author$project$Games$ChordGuesserExercise$DifficultyChosen($author$project$Games$ChordGuesserExercise$Medium))
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Medium')
+					])),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('custom-button'),
+						$elm$html$Html$Events$onClick(
+						$author$project$Games$ChordGuesserExercise$DifficultyChosen($author$project$Games$ChordGuesserExercise$Hard))
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Hard')
+					])),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('custom-button'),
+						$elm$html$Html$Events$onClick(
+						$author$project$Games$ChordGuesserExercise$DifficultyChosen($author$project$Games$ChordGuesserExercise$Extreme))
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Extreme')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						'Chosen difficulty: ' + $author$project$Games$ChordGuesserExercise$stringFromDifficulty(model.chosenDifficulty))
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$ul,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$li,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick(
+										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+											_List_fromArray(
+												['major', 'minor'])))
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Major and minor')
+									])),
+								A2(
+								$elm$html$Html$li,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick(
+										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+											_List_fromArray(
+												['dom7', 'maj7', 'minor7'])))
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Dom7, Maj7 and Minor7')
+									])),
+								A2(
+								$elm$html$Html$li,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick(
+										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+											_List_fromArray(
+												['diminished', 'dim7', 'minor7flat5'])))
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Dim, dim7 and m7b5')
+									])),
+								A2(
+								$elm$html$Html$li,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick(
+										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+											_List_fromArray(
+												['augmented', 'aug7', 'maj7sharp5'])))
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Aug, aug7 and maj7#5')
+									])),
+								A2(
+								$elm$html$Html$li,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick(
+										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+											_List_fromArray(
+												['sus2', 'sus4'])))
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Sus2 and sus4')
+									])),
+								A2(
+								$elm$html$Html$li,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick(
+										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+											_List_fromArray(
+												['major6', 'minor6'])))
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('6 and m6')
+									])),
+								A2(
+								$elm$html$Html$li,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick(
+										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+											_List_fromArray(
+												['dom9', 'maj9', 'minor9'])))
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Dom9, maj9 and minor9')
+									])),
+								A2(
+								$elm$html$Html$li,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick(
+										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+											_List_fromArray(
+												['dom11', 'maj11', 'minor11'])))
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Dom11, maj11 and minor11')
+									])),
+								A2(
+								$elm$html$Html$li,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick(
+										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+											_List_fromArray(
+												['dom13', 'maj13', 'minor13'])))
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Dom13, maj13 and minor13')
+									])),
+								A2(
+								$elm$html$Html$li,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick(
+										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+											_List_fromArray(
+												['dom7flat9', 'dom7sharp9', 'dom7sharp11'])))
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('7b9, 7#9 and 7#11')
+									])),
+								A2(
+								$elm$html$Html$li,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick(
+										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+											_List_fromArray(
+												['dom7flat13', 'dom7sharp5', 'dom7flat5'])))
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('7b13, 7#5 and 7b5')
+									])),
+								A2(
+								$elm$html$Html$li,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick(
+										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+											_List_fromArray(
+												['sus13', 'minorMaj7', 'dim9'])))
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('sus13, mMaj7 and dim9')
+									]))
+							]))
 					])),
 				A2(
 				$elm$html$Html$button,
@@ -13448,632 +12497,34 @@ var $author$project$Games$ChordGuesserExercise$view = function (model) {
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text(' <-- Go Back')
+						$elm$html$Html$text('< Back')
 					]))
 			]));
 };
-var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
-var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
-var $elm$core$Basics$round = _Basics_round;
-var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
-var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
-var $elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
-var $elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
-var $elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
-var $elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
-var $author$project$Games$FretboardGame$drawFretboard = function (model) {
-	var stringSpacing = 28;
-	var fretWidth = 48;
-	return $elm$core$List$concat(
-		_List_fromArray(
-			[
-				A2(
-				$elm$core$List$map,
-				function (f) {
-					return A2(
-						$elm$svg$Svg$line,
-						A2(
-							$elm$core$List$append,
-							_List_fromArray(
-								[
-									$elm$svg$Svg$Attributes$x1(
-									$elm$core$String$fromFloat(f * fretWidth)),
-									$elm$svg$Svg$Attributes$x2(
-									$elm$core$String$fromFloat(f * fretWidth)),
-									$elm$svg$Svg$Attributes$y1('14'),
-									$elm$svg$Svg$Attributes$y2(
-									$elm$core$String$fromFloat((model.stringCount * stringSpacing) - 14))
-								]),
-							(f === 1) ? _List_fromArray(
-								[
-									$elm$svg$Svg$Attributes$strokeWidth('10'),
-									$elm$svg$Svg$Attributes$stroke('black')
-								]) : _List_fromArray(
-								[
-									$elm$svg$Svg$Attributes$strokeWidth('1'),
-									$elm$svg$Svg$Attributes$stroke('#ccc')
-								])),
-						_List_Nil);
-				},
-				A2(
-					$elm$core$List$range,
-					0,
-					$elm$core$Basics$round(model.fretCount))),
-				A2(
-				$elm$core$List$map,
-				function (i) {
-					return A2(
-						$elm$svg$Svg$line,
-						_List_fromArray(
-							[
-								$elm$svg$Svg$Attributes$x1('0'),
-								$elm$svg$Svg$Attributes$x2(
-								$elm$core$String$fromFloat(model.fretCount * fretWidth)),
-								$elm$svg$Svg$Attributes$y1(
-								$elm$core$String$fromFloat(((i - 1) * stringSpacing) + (stringSpacing / 2))),
-								$elm$svg$Svg$Attributes$y2(
-								$elm$core$String$fromFloat(((i - 1) * stringSpacing) + (stringSpacing / 2))),
-								$elm$svg$Svg$Attributes$stroke('black'),
-								$elm$svg$Svg$Attributes$strokeWidth('1')
-							]),
-						_List_Nil);
-				},
-				A2(
-					$elm$core$List$range,
-					1,
-					$elm$core$Basics$round(model.stringCount)))
-			]));
-};
-var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
-var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
-var $elm$svg$Svg$g = $elm$svg$Svg$trustedNode('g');
-var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
-var $elm$svg$Svg$Attributes$transform = _VirtualDom_attribute('transform');
-var $author$project$Games$FretboardGame$drawPlayer = function (model) {
-	var _v0 = model.userPosition;
-	var x = _v0.a;
-	var y = _v0.b;
-	return A2(
-		$elm$svg$Svg$g,
-		_List_fromArray(
-			[
-				$elm$svg$Svg$Attributes$transform(
-				'translate(' + ($elm$core$String$fromFloat(x) + (',' + ($elm$core$String$fromFloat(y) + ')'))))
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$svg$Svg$circle,
-				_List_fromArray(
-					[
-						$elm$svg$Svg$Attributes$r('10'),
-						$elm$svg$Svg$Attributes$fill('red')
-					]),
-				_List_Nil)
-			]));
-};
-var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
-var $elm$svg$Svg$Attributes$style = _VirtualDom_attribute('style');
-var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
-var $elm$core$Debug$toString = _Debug_toString;
-var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
-var $author$project$Games$FretboardGame$view = function (model) {
-	return A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Find note: ' + model.targetNote)
-					])),
-				A2(
-				$elm$html$Html$p,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$elm$core$Debug$toString(model.userPosition))
-					])),
-				model.isOnPage ? A2(
-				$elm$svg$Svg$svg,
-				_List_fromArray(
-					[
-						$elm$svg$Svg$Attributes$width('800'),
-						$elm$svg$Svg$Attributes$height('200'),
-						$elm$svg$Svg$Attributes$style('background:#f0f0f0')
-					]),
-				_Utils_ap(
-					$author$project$Games$FretboardGame$drawFretboard(model),
-					_List_fromArray(
-						[
-							$author$project$Games$FretboardGame$drawPlayer(model)
-						]))) : A2($elm$html$Html$div, _List_Nil, _List_Nil)
-			]));
-};
-var $author$project$Games$ModeExercise$ChooseGame = function (a) {
-	return {$: 'ChooseGame', a: a};
-};
-var $author$project$Games$ModeExercise$GoBack = {$: 'GoBack'};
-var $author$project$Games$ModeExercise$ModeBuilderGame = {$: 'ModeBuilderGame'};
-var $author$project$Games$ModeExercise$ModeGuesserGame = {$: 'ModeGuesserGame'};
-var $elm$html$Html$br = _VirtualDom_node('br');
-var $author$project$Games$ModeExercise$Reset = {$: 'Reset'};
-var $author$project$Games$ModeExercise$viewGameOverOrWinMessage = function (model) {
-	var _v0 = model.result;
+var $author$project$Exercises$view = function (model) {
+	var _v0 = model.currentGame;
 	if (_v0.$ === 'Just') {
-		if (_v0.a.$ === 'Win') {
-			var _v1 = _v0.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('game-over-message-container'),
-						(!model.gameOver) ? A2($elm$html$Html$Attributes$style, 'display', 'none') : A2($elm$html$Html$Attributes$style, 'display', '')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('You win!')
-							])),
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick($author$project$Games$ModeExercise$Reset),
-										$elm$html$Html$Attributes$class('custom-button')
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Play again')
-									]))
-							]))
-					]));
-		} else {
-			var _v2 = _v0.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('game-over-message-container'),
-						(!model.gameOver) ? A2($elm$html$Html$Attributes$style, 'display', 'none') : A2($elm$html$Html$Attributes$style, 'display', '')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Game over')
-							])),
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick($author$project$Games$ModeExercise$Reset),
-										$elm$html$Html$Attributes$class('custom-button')
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Try again')
-									]))
-							]))
-					]));
-		}
-	} else {
-		return A2($elm$html$Html$div, _List_Nil, _List_Nil);
-	}
-};
-var $author$project$Games$ModeExercise$ChooseKey = function (a) {
-	return {$: 'ChooseKey', a: a};
-};
-var $author$project$Games$ModeExercise$viewKeyButtons = function (key) {
-	return A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('custom-button'),
-						$elm$html$Html$Events$onClick(
-						$author$project$Games$ModeExercise$ChooseKey(key))
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text(key.key)
-					]))
-			]));
-};
-var $author$project$Games$ModeExercise$viewKeysOrError = function (model) {
-	var _v0 = model.errorMessage;
-	if (_v0.$ === 'Just') {
-		var error = _v0.a;
+		var _v1 = _v0.a;
 		return A2(
 			$elm$html$Html$div,
 			_List_Nil,
 			_List_fromArray(
 				[
-					$elm$html$Html$text(error)
-				]));
-	} else {
-		var _v1 = model.majorScalesAndKeys;
-		if (_v1.$ === 'Just') {
-			var majorScalesAndKeys = _v1.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('key-buttons-container')
-					]),
-				A2($elm$core$List$map, $author$project$Games$ModeExercise$viewKeyButtons, majorScalesAndKeys));
-		} else {
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('something else')
-					]));
-		}
-	}
-};
-var $author$project$Games$ModeExercise$AddToModeBuilderList = function (a) {
-	return {$: 'AddToModeBuilderList', a: a};
-};
-var $author$project$Games$ModeExercise$SubmitBuiltMode = {$: 'SubmitBuiltMode'};
-var $author$project$Games$ModeExercise$Undo = {$: 'Undo'};
-var $elm_community$list_extra$List$Extra$findIndexHelp = F3(
-	function (index, predicate, list) {
-		findIndexHelp:
-		while (true) {
-			if (!list.b) {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var x = list.a;
-				var xs = list.b;
-				if (predicate(x)) {
-					return $elm$core$Maybe$Just(index);
-				} else {
-					var $temp$index = index + 1,
-						$temp$predicate = predicate,
-						$temp$list = xs;
-					index = $temp$index;
-					predicate = $temp$predicate;
-					list = $temp$list;
-					continue findIndexHelp;
-				}
-			}
-		}
-	});
-var $elm_community$list_extra$List$Extra$findIndex = $elm_community$list_extra$List$Extra$findIndexHelp(0);
-var $elm$core$List$takeReverse = F3(
-	function (n, list, kept) {
-		takeReverse:
-		while (true) {
-			if (n <= 0) {
-				return kept;
-			} else {
-				if (!list.b) {
-					return kept;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs,
-						$temp$kept = A2($elm$core$List$cons, x, kept);
-					n = $temp$n;
-					list = $temp$list;
-					kept = $temp$kept;
-					continue takeReverse;
-				}
-			}
-		}
-	});
-var $elm$core$List$takeTailRec = F2(
-	function (n, list) {
-		return $elm$core$List$reverse(
-			A3($elm$core$List$takeReverse, n, list, _List_Nil));
-	});
-var $elm$core$List$takeFast = F3(
-	function (ctr, n, list) {
-		if (n <= 0) {
-			return _List_Nil;
-		} else {
-			var _v0 = _Utils_Tuple2(n, list);
-			_v0$1:
-			while (true) {
-				_v0$5:
-				while (true) {
-					if (!_v0.b.b) {
-						return list;
-					} else {
-						if (_v0.b.b.b) {
-							switch (_v0.a) {
-								case 1:
-									break _v0$1;
-								case 2:
-									var _v2 = _v0.b;
-									var x = _v2.a;
-									var _v3 = _v2.b;
-									var y = _v3.a;
-									return _List_fromArray(
-										[x, y]);
-								case 3:
-									if (_v0.b.b.b.b) {
-										var _v4 = _v0.b;
-										var x = _v4.a;
-										var _v5 = _v4.b;
-										var y = _v5.a;
-										var _v6 = _v5.b;
-										var z = _v6.a;
-										return _List_fromArray(
-											[x, y, z]);
-									} else {
-										break _v0$5;
-									}
-								default:
-									if (_v0.b.b.b.b && _v0.b.b.b.b.b) {
-										var _v7 = _v0.b;
-										var x = _v7.a;
-										var _v8 = _v7.b;
-										var y = _v8.a;
-										var _v9 = _v8.b;
-										var z = _v9.a;
-										var _v10 = _v9.b;
-										var w = _v10.a;
-										var tl = _v10.b;
-										return (ctr > 1000) ? A2(
-											$elm$core$List$cons,
-											x,
-											A2(
-												$elm$core$List$cons,
-												y,
-												A2(
-													$elm$core$List$cons,
-													z,
-													A2(
-														$elm$core$List$cons,
-														w,
-														A2($elm$core$List$takeTailRec, n - 4, tl))))) : A2(
-											$elm$core$List$cons,
-											x,
-											A2(
-												$elm$core$List$cons,
-												y,
-												A2(
-													$elm$core$List$cons,
-													z,
-													A2(
-														$elm$core$List$cons,
-														w,
-														A3($elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
-									} else {
-										break _v0$5;
-									}
-							}
-						} else {
-							if (_v0.a === 1) {
-								break _v0$1;
-							} else {
-								break _v0$5;
-							}
-						}
-					}
-				}
-				return list;
-			}
-			var _v1 = _v0.b;
-			var x = _v1.a;
-			return _List_fromArray(
-				[x]);
-		}
-	});
-var $elm$core$List$take = F2(
-	function (n, list) {
-		return A3($elm$core$List$takeFast, 0, n, list);
-	});
-var $elm_community$list_extra$List$Extra$splitAt = F2(
-	function (n, xs) {
-		return _Utils_Tuple2(
-			A2($elm$core$List$take, n, xs),
-			A2($elm$core$List$drop, n, xs));
-	});
-var $author$project$Games$NoteBuilder$rotateList = F2(
-	function (note, allNotes) {
-		var _v0 = A2(
-			$elm_community$list_extra$List$Extra$findIndex,
-			function (noteFromList) {
-				return _Utils_eq(note, noteFromList);
-			},
-			allNotes);
-		if (_v0.$ === 'Just') {
-			var index = _v0.a;
-			var _v1 = A2($elm_community$list_extra$List$Extra$splitAt, index, allNotes);
-			var start = _v1.a;
-			var end = _v1.b;
-			return _Utils_ap(end, start);
-		} else {
-			return _List_Nil;
-		}
-	});
-var $author$project$Games$NoteBuilder$viewNoteButtons = F2(
-	function (toMsg, note) {
-		return A2(
-			$elm$html$Html$button,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('custom-button'),
-					$elm$html$Html$Events$onClick(
-					toMsg(note))
-				]),
-			_List_fromArray(
-				[
-					$elm$html$Html$text(note)
-				]));
-	});
-var $author$project$Games$NoteBuilder$viewNotesWithFlats = function (allNotes) {
-	return A2(
-		$elm$core$List$filter,
-		function (note) {
-			return A3($elm$core$String$slice, 1, 2, note) === 'b';
-		},
-		allNotes);
-};
-var $author$project$Games$NoteBuilder$viewNotesWithSharps = function (allNotes) {
-	return A2(
-		$elm$core$List$filter,
-		function (note) {
-			return A3($elm$core$String$slice, 1, 2, note) === '#';
-		},
-		allNotes);
-};
-var $author$project$Games$NoteBuilder$viewNotesWithoutAccidentals = function (allNotes) {
-	return A2(
-		$elm$core$List$filter,
-		function (note) {
-			return $elm$core$String$length(note) === 1;
-		},
-		allNotes);
-};
-var $author$project$Games$NoteBuilder$viewNotes = F3(
-	function (toMsg, maybeAllNotes, chosenKey) {
-		if (maybeAllNotes.$ === 'Just') {
-			var allNotes = maybeAllNotes.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('note-builder-container')
-							]),
-						A2(
-							$elm$core$List$map,
-							$author$project$Games$NoteBuilder$viewNoteButtons(toMsg),
-							$author$project$Games$NoteBuilder$viewNotesWithSharps(
-								A2($author$project$Games$NoteBuilder$rotateList, chosenKey, allNotes)))),
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('note-builder-container')
-							]),
-						A2(
-							$elm$core$List$map,
-							$author$project$Games$NoteBuilder$viewNoteButtons(toMsg),
-							$author$project$Games$NoteBuilder$viewNotesWithoutAccidentals(
-								A2($author$project$Games$NoteBuilder$rotateList, chosenKey, allNotes)))),
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('note-builder-container')
-							]),
-						A2(
-							$elm$core$List$map,
-							$author$project$Games$NoteBuilder$viewNoteButtons(toMsg),
-							$author$project$Games$NoteBuilder$viewNotesWithFlats(
-								A2($author$project$Games$NoteBuilder$rotateList, chosenKey, allNotes))))
-					]));
-		} else {
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('No notes')
-					]));
-		}
-	});
-var $author$project$Games$ModeExercise$viewUserBuiltMode = function (note) {
-	return A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				$elm$html$Html$text(note + ' ')
-			]));
-};
-var $author$project$Games$ModeExercise$viewModeBuilderGame = function (model) {
-	var _v0 = model.chosenKey;
-	if (_v0.$ === 'Just') {
-		var chosenKey = _v0.a;
-		return A2(
-			$elm$html$Html$div,
-			_List_Nil,
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$p,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text('Please build the ' + (chosenKey.key + (' ' + (model.randomizedMode.mode + ' mode'))))
-						])),
-					A3($author$project$Games$NoteBuilder$viewNotes, $author$project$Games$ModeExercise$AddToModeBuilderList, model.allNotes, chosenKey.key),
-					A2(
-					$elm$html$Html$p,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$class('user-built-notes-container')
-						]),
-					$elm$core$List$reverse(
-						A2($elm$core$List$map, $author$project$Games$ModeExercise$viewUserBuiltMode, model.userBuiltMode))),
-					_Utils_eq(model.userBuiltMode, _List_Nil) ? A2($elm$html$Html$div, _List_Nil, _List_Nil) : A2(
-					$elm$html$Html$div,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$class('undo-button-container')
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$elm$html$Html$button,
-							_List_fromArray(
-								[
-									$elm$html$Html$Attributes$class('custom-button'),
-									$elm$html$Html$Events$onClick($author$project$Games$ModeExercise$Undo)
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Undo')
-								]))
-						])),
 					A2(
 					$elm$html$Html$button,
 					_List_fromArray(
 						[
 							$elm$html$Html$Attributes$class('custom-button'),
-							$elm$html$Html$Events$onClick($author$project$Games$ModeExercise$SubmitBuiltMode)
+							$elm$html$Html$Events$onClick($author$project$Exercises$BackToList)
 						]),
 					_List_fromArray(
 						[
-							$elm$html$Html$text('Submit')
-						]))
+							$elm$html$Html$text('< Back')
+						])),
+					A2(
+					$elm$html$Html$map,
+					$author$project$Exercises$ChordGuesserMsg,
+					$author$project$Games$ChordGuesserExercise$view(model.chordGuesserModel))
 				]));
 	} else {
 		return A2(
@@ -14081,728 +12532,39 @@ var $author$project$Games$ModeExercise$viewModeBuilderGame = function (model) {
 			_List_Nil,
 			_List_fromArray(
 				[
-					$elm$html$Html$text('Please choose a key')
-				]));
-	}
-};
-var $author$project$Games$ModeExercise$viewConstructMode = function (constructedNote) {
-	return A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				$elm$html$Html$text(constructedNote),
-				A2($elm$html$Html$div, _List_Nil, _List_Nil)
-			]));
-};
-var $author$project$Games$ModeExercise$viewConstructedMode = F2(
-	function (chosenKey, mode) {
-		return A2(
-			$elm$html$Html$div,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('mode-container')
-				]),
-			A2(
-				$elm$core$List$append,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Mode: ')
-					]),
-				A2(
-					$elm$core$List$map,
-					$author$project$Games$ModeExercise$viewConstructMode,
 					A2(
-						$author$project$Games$ModeExercise$constructMode,
-						mode,
-						$author$project$Games$ModeExercise$notesToListString(chosenKey)))));
-	});
-var $author$project$Games$ModeExercise$ModeGuessed = function (a) {
-	return {$: 'ModeGuessed', a: a};
-};
-var $author$project$Games$ModeExercise$isModeCorrect = F2(
-	function (model, modeName) {
-		return model.isCorrect && _Utils_eq(modeName, model.randomizedMode.mode);
-	});
-var $author$project$Games$ModeExercise$isModeWrong = F2(
-	function (model, modeName) {
-		return model.isWrong && _Utils_eq(
-			model.modeGuessed,
-			$elm$core$Maybe$Just(modeName));
-	});
-var $author$project$Games$ModeExercise$viewModeButton = F2(
-	function (model, mode) {
-		return A2(
-			$elm$html$Html$button,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$classList(
-					_List_fromArray(
-						[
-							_Utils_Tuple2(
-							'correct',
-							A2($author$project$Games$ModeExercise$isModeCorrect, model, mode.mode)),
-							_Utils_Tuple2(
-							'wrong-' + $elm$core$String$fromInt(model.numberOfWrongs),
-							A2($author$project$Games$ModeExercise$isModeWrong, model, mode.mode))
-						])),
-					$elm$html$Html$Events$onClick(
-					$author$project$Games$ModeExercise$ModeGuessed(mode.mode)),
-					$elm$html$Html$Attributes$class('custom-button'),
-					A2($elm$html$Html$Attributes$style, 'margin-right', '20px')
-				]),
-			_List_fromArray(
-				[
-					$elm$html$Html$text(mode.mode)
-				]));
-	});
-var $author$project$Games$ModeExercise$viewModes = function (model) {
-	var _v0 = model.modes;
-	if (_v0.$ === 'Just') {
-		var modes = _v0.a;
-		return A2(
-			$elm$html$Html$div,
-			_List_Nil,
-			A2(
-				$elm$core$List$map,
-				$author$project$Games$ModeExercise$viewModeButton(model),
-				modes));
-	} else {
-		return A2($elm$html$Html$div, _List_Nil, _List_Nil);
-	}
-};
-var $author$project$Games$ModeExercise$viewModeGuesserGame = function (model) {
-	var _v0 = model.chosenKey;
-	if (_v0.$ === 'Just') {
-		var chosenKey = _v0.a;
-		return A2(
-			$elm$html$Html$div,
-			_List_Nil,
-			_List_fromArray(
-				[
-					A2($author$project$Games$ModeExercise$viewConstructedMode, chosenKey, model.randomizedMode.formula),
-					$author$project$Games$ModeExercise$viewModes(model),
-					A2(
-					$elm$html$Html$p,
+					$elm$html$Html$h2,
 					_List_Nil,
 					_List_fromArray(
 						[
-							$elm$html$Html$text(
-							'Score: ' + $elm$core$String$fromInt(model.score))
+							$elm$html$Html$text('Exercises')
 						])),
-					$elm$html$Html$text(model.resultMessage),
 					A2(
-					$elm$html$Html$p,
+					$elm$html$Html$ul,
 					_List_Nil,
 					_List_fromArray(
 						[
-							$elm$html$Html$text(
-							'Mistakes: ' + $elm$core$String$fromInt(model.numberOfWrongs))
-						])),
-					A2($elm$html$Html$br, _List_Nil, _List_Nil),
-					A2($elm$html$Html$br, _List_Nil, _List_Nil),
-					A2($elm$html$Html$br, _List_Nil, _List_Nil),
-					A2($elm$html$Html$br, _List_Nil, _List_Nil),
-					A2(
-					$elm$html$Html$p,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text('For testing, correct answer is: ' + model.randomizedMode.mode)
-						])),
-					A2(
-					$elm$html$Html$p,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text(
-							$elm$core$Debug$toString(
-								_Utils_eq(
-									model.modeGuessed,
-									$elm$core$Maybe$Just(model.randomizedMode.mode))))
-						])),
-					A2(
-					$elm$html$Html$p,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text(
-							'modeGuessed:     ' + $elm$core$Debug$toString(model.modeGuessed))
-						])),
-					A2(
-					$elm$html$Html$p,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text(
-							'randomizedMode:     ' + $elm$core$Debug$toString(model.randomizedMode.mode))
-						]))
-				]));
-	} else {
-		return A2(
-			$elm$html$Html$div,
-			_List_Nil,
-			_List_fromArray(
-				[
-					$elm$html$Html$text('Please choose a key')
-				]));
-	}
-};
-var $author$project$Games$ModeExercise$view = function (model) {
-	return A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				function () {
-				var _v0 = model.chosenGameMode;
-				if (_v0.$ === 'Just') {
-					if (_v0.a.$ === 'ModeGuesserGame') {
-						var _v1 = _v0.a;
-						return A2(
-							$elm$html$Html$div,
+							A2(
+							$elm$html$Html$li,
 							_List_Nil,
 							_List_fromArray(
 								[
-									$elm$html$Html$text('Choose a key below. A randomized mode \n                            (ionian, dorian, phrygian, lydian, mixolydian, aeolian or locrian) \n                            will be applied to the chosen key. Choose which mode is correct.'),
-									$author$project$Games$ModeExercise$viewKeysOrError(model),
-									$author$project$Games$ModeExercise$viewModeGuesserGame(model),
 									A2(
 									$elm$html$Html$button,
 									_List_fromArray(
 										[
-											$elm$html$Html$Attributes$class('custom-button'),
-											$elm$html$Html$Events$onClick($author$project$Games$ModeExercise$GoBack)
+											$elm$html$Html$Events$onClick(
+											$author$project$Exercises$SelectGame($author$project$Exercises$ChordGuesser)),
+											$elm$html$Html$Attributes$class('custom-button')
 										]),
 									_List_fromArray(
 										[
-											$elm$html$Html$text('<--- Go back')
+											$elm$html$Html$text('Chord Guesser')
 										]))
-								]));
-					} else {
-						var _v2 = _v0.a;
-						return A2(
-							$elm$html$Html$div,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Choose a key below. A randomized mode \n                            (ionian, dorian, phrygian, lydian, mixolydian, aeolian or locrian) \n                            will be given. Your goal is to build this mode in the chosen key'),
-									$author$project$Games$ModeExercise$viewKeysOrError(model),
-									$author$project$Games$ModeExercise$viewModeBuilderGame(model),
-									A2(
-									$elm$html$Html$button,
-									_List_fromArray(
-										[
-											$elm$html$Html$Attributes$class('custom-button'),
-											$elm$html$Html$Events$onClick($author$project$Games$ModeExercise$GoBack)
-										]),
-									_List_fromArray(
-										[
-											$elm$html$Html$text('<--- Go back')
-										])),
-									$author$project$Games$ModeExercise$viewGameOverOrWinMessage(model)
-								]));
-					}
-				} else {
-					return A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Please choose a game mode'),
-								A2(
-								$elm$html$Html$div,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A2(
-										$elm$html$Html$button,
-										_List_fromArray(
-											[
-												$elm$html$Html$Events$onClick(
-												$author$project$Games$ModeExercise$ChooseGame($author$project$Games$ModeExercise$ModeGuesserGame)),
-												$elm$html$Html$Attributes$class('custom-button')
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text('Guess the mode')
-											])),
-										A2($elm$html$Html$br, _List_Nil, _List_Nil),
-										A2(
-										$elm$html$Html$button,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('custom-button'),
-												$elm$html$Html$Events$onClick(
-												$author$project$Games$ModeExercise$ChooseGame($author$project$Games$ModeExercise$ModeBuilderGame))
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text('Build the mode')
-											]))
-									]))
-							]));
-				}
-			}()
-			]));
-};
-var $author$project$Games$NoteExercise$Reset = function (a) {
-	return {$: 'Reset', a: a};
-};
-var $author$project$Games$Stopwatch$Start = {$: 'Start'};
-var $author$project$Games$Stopwatch$Stop = {$: 'Stop'};
-var $author$project$Games$Stopwatch$splitAt = F2(
-	function (index, str) {
-		var _v0 = _Utils_Tuple2(
-			A2($elm$core$String$left, index, str),
-			A2($elm$core$String$dropLeft, index, str));
-		var leftSide = _v0.a;
-		var rightSide = _v0.b;
-		return leftSide + ('.' + rightSide);
-	});
-var $author$project$Games$Stopwatch$view = function (model) {
-	var stopwatchInMsSplit = (!model.stopwatchInMs) ? A2(
-		$author$project$Games$Stopwatch$splitAt,
-		1,
-		$elm$core$String$fromFloat(model.stopwatchInMs / 100) + '00') : A2(
-		$author$project$Games$Stopwatch$splitAt,
-		1,
-		$elm$core$String$fromFloat(model.stopwatchInMs / 100));
-	return A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				$elm$html$Html$text(stopwatchInMsSplit),
-				(!model.running) ? A2(
-				$elm$html$Html$button,
-				_List_fromArray(
-					[
-						$elm$html$Html$Events$onClick($author$project$Games$Stopwatch$Start)
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Start')
-					])) : A2(
-				$elm$html$Html$button,
-				_List_fromArray(
-					[
-						$elm$html$Html$Events$onClick($author$project$Games$Stopwatch$Stop)
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Stop')
-					]))
-			]));
-};
-var $author$project$Games$NoteExercise$viewGameOverOrWinMessage = function (model) {
-	var _v0 = model.result;
-	if (_v0.$ === 'Just') {
-		if (_v0.a.$ === 'Win') {
-			var _v1 = _v0.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('game-over-message-container'),
-						(!model.gameOver) ? A2($elm$html$Html$Attributes$style, 'display', 'none') : A2($elm$html$Html$Attributes$style, 'display', '')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('You win!')
-							])),
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$Games$NoteExercise$Reset(true)),
-										$elm$html$Html$Attributes$class('custom-button')
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Play again')
-									]))
-							]))
-					]));
-		} else {
-			var _v2 = _v0.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('game-over-message-container'),
-						(!model.gameOver) ? A2($elm$html$Html$Attributes$style, 'display', 'none') : A2($elm$html$Html$Attributes$style, 'display', '')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Game over')
-							])),
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$Games$NoteExercise$Reset(false)),
-										$elm$html$Html$Attributes$class('custom-button')
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Try again')
-									]))
-							]))
-					]));
-		}
-	} else {
-		return A2($elm$html$Html$div, _List_Nil, _List_Nil);
-	}
-};
-var $author$project$Games$NoteExercise$KeyChosen = function (a) {
-	return {$: 'KeyChosen', a: a};
-};
-var $author$project$Games$NoteExercise$viewKeyButtons = function (key) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('custom-button'),
-				$elm$html$Html$Events$onClick(
-				$author$project$Games$NoteExercise$KeyChosen(key))
-			]),
-		_List_fromArray(
-			[
-				$elm$html$Html$text(key.key)
-			]));
-};
-var $author$project$Games$NoteExercise$viewKeysOrError = function (model) {
-	var _v0 = model.errorMessage;
-	if (_v0.$ === 'Just') {
-		var errorMessage = _v0.a;
-		return A2(
-			$elm$html$Html$div,
-			_List_Nil,
-			_List_fromArray(
-				[
-					$elm$html$Html$text(errorMessage)
-				]));
-	} else {
-		var _v1 = model.maybeMajorScalesAndKeys;
-		if (_v1.$ === 'Just') {
-			var majorScalesAndKeys = _v1.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('key-buttons-container')
-					]),
-				A2($elm$core$List$map, $author$project$Games$NoteExercise$viewKeyButtons, majorScalesAndKeys));
-		} else {
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('something else')
-					]));
-		}
-	}
-};
-var $elm$html$Html$h1 = _VirtualDom_node('h1');
-var $author$project$Games$NoteExercise$viewNotePrompted = function (model) {
-	var _v0 = model.noteAndOriginalIndexTuplePrompted;
-	if (_v0.$ === 'Just') {
-		var _v1 = _v0.a;
-		var note = _v1.b;
-		return A2(
-			$elm$html$Html$div,
-			_List_Nil,
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$h1,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text(note)
-						]))
-				]));
-	} else {
-		return A2(
-			$elm$html$Html$div,
-			_List_Nil,
-			_List_fromArray(
-				[
-					$elm$html$Html$text('Please choose a key')
-				]));
-	}
-};
-var $author$project$Games$NoteExercise$NumberClicked = function (a) {
-	return {$: 'NumberClicked', a: a};
-};
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
-	});
-var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
-var $elm$core$Set$foldl = F3(
-	function (func, initialState, _v0) {
-		var dict = _v0.a;
-		return A3(
-			$elm$core$Dict$foldl,
-			F3(
-				function (key, _v1, state) {
-					return A2(func, key, state);
-				}),
-			initialState,
-			dict);
-	});
-var $elm$core$Set$fromList = function (list) {
-	return A3($elm$core$List$foldl, $elm$core$Set$insert, $elm$core$Set$empty, list);
-};
-var $elm$core$Set$map = F2(
-	function (func, set) {
-		return $elm$core$Set$fromList(
-			A3(
-				$elm$core$Set$foldl,
-				F2(
-					function (x, xs) {
-						return A2(
-							$elm$core$List$cons,
-							func(x),
-							xs);
-					}),
-				_List_Nil,
-				set));
-	});
-var $elm$core$Dict$member = F2(
-	function (key, dict) {
-		var _v0 = A2($elm$core$Dict$get, key, dict);
-		if (_v0.$ === 'Just') {
-			return true;
-		} else {
-			return false;
-		}
-	});
-var $elm$core$Set$member = F2(
-	function (key, _v0) {
-		var dict = _v0.a;
-		return A2($elm$core$Dict$member, key, dict);
-	});
-var $author$project$Games$NoteExercise$isNumberCorrect = F2(
-	function (model, numberIndex) {
-		return A2(
-			$elm$core$Set$member,
-			numberIndex,
-			A2($elm$core$Set$map, $elm$core$Tuple$second, model.correctPairs));
-	});
-var $author$project$Games$NoteExercise$isNumberWrong = F2(
-	function (model, number) {
-		var _v0 = model.wrongPair;
-		if (_v0.$ === 'Just') {
-			var wrongPair = _v0.a;
-			return _Utils_eq(wrongPair.b, number);
-		} else {
-			return false;
-		}
-	});
-var $author$project$Games$NoteExercise$viewNumberButtons = F2(
-	function (model, number) {
-		return A2(
-			$elm$html$Html$button,
-			_List_fromArray(
-				[
-					$elm$html$Html$Events$onClick(
-					$author$project$Games$NoteExercise$NumberClicked(number)),
-					$elm$html$Html$Attributes$class('custom-button'),
-					$elm$html$Html$Attributes$disabled(model.gameOver)
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$h1,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$classList(
-							_List_fromArray(
-								[
-									_Utils_Tuple2(
-									'correct-animation',
-									A2($author$project$Games$NoteExercise$isNumberCorrect, model, number)),
-									_Utils_Tuple2(
-									'wrong',
-									A2($author$project$Games$NoteExercise$isNumberWrong, model, number))
 								]))
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text(
-							$elm$core$String$fromInt(number + 1))
 						]))
 				]));
-	});
-var $author$project$Games$NoteExercise$view = function (model) {
-	return A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$classList(
-						_List_fromArray(
-							[
-								_Utils_Tuple2('game-over-disabled', model.gameOver)
-							]))
-					]),
-				_List_Nil),
-				A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Pick a major scale:')
-					])),
-				$elm$html$Html$text('Pick a key. Match the note with the corresponding number in that scale (C1 D2 E3 F4 G5 A6 B7 in C for example)'),
-				$author$project$Games$NoteExercise$viewKeysOrError(model),
-				A2(
-				$elm$html$Html$map,
-				$author$project$Games$NoteExercise$StopwatchMsg,
-				$author$project$Games$Stopwatch$view(model.stopwatch)),
-				function () {
-				var _v0 = model.maybeChosenScale;
-				if (_v0.$ === 'Just') {
-					var scale = _v0.a;
-					return A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								model.isButtonDisabled ? $elm$html$Html$text('Please start by pressing a note') : $elm$html$Html$text(''),
-								A2(
-								$elm$html$Html$div,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('note-buttons-container')
-									]),
-								_List_fromArray(
-									[
-										$author$project$Games$NoteExercise$viewNotePrompted(model)
-									])),
-								A2(
-								$elm$html$Html$div,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('number-buttons-container')
-									]),
-								A2(
-									$elm$core$List$indexedMap,
-									F2(
-										function (index, _v1) {
-											return A2($author$project$Games$NoteExercise$viewNumberButtons, model, index);
-										}),
-									_List_fromArray(
-										[1, 2, 3, 4, 5, 6, 7]))),
-								A2(
-								$elm$html$Html$div,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text(
-										'Score: ' + $elm$core$String$fromInt(
-											$elm$core$Set$size(model.correctPairs)))
-									])),
-								A2(
-								$elm$html$Html$div,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text(
-										'Mistakes: ' + $elm$core$String$fromInt(model.numberOfWrongs))
-									])),
-								A2($elm$html$Html$br, _List_Nil, _List_Nil),
-								A2(
-								$elm$html$Html$div,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text(
-										'Number of wins: ' + $elm$core$String$fromInt(model.numberOfWins))
-									])),
-								A2(
-								$elm$html$Html$div,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A2(
-										$elm$html$Html$button,
-										_List_fromArray(
-											[
-												$elm$html$Html$Events$onClick(
-												$author$project$Games$NoteExercise$Reset(true)),
-												$elm$html$Html$Attributes$class('reset-button')
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text('Reset')
-											]))
-									])),
-								$author$project$Games$NoteExercise$viewGameOverOrWinMessage(model),
-								A2(
-								$elm$html$Html$p,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text(
-										'numberIndex: ' + $elm$core$Debug$toString(model.numberIndex))
-									])),
-								A2(
-								$elm$html$Html$p,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text(
-										'noteAndOriginalIndexTuplePrompted: ' + $elm$core$Debug$toString(model.noteAndOriginalIndexTuplePrompted))
-									])),
-								A2(
-								$elm$html$Html$p,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text(
-										'correctPairs: ' + $elm$core$Debug$toString(model.correctPairs))
-									]))
-							]));
-				} else {
-					return A2($elm$html$Html$div, _List_Nil, _List_Nil);
-				}
-			}()
-			]));
+	}
 };
 var $author$project$Main$viewRoute = function (model) {
 	var _v0 = model.route;
@@ -14815,39 +12577,11 @@ var $author$project$Main$viewRoute = function (model) {
 					[
 						$elm$html$Html$text('You are at the home page')
 					]));
-		case 'Game':
-			var gameName = _v0.a;
-			var gameView = function () {
-				switch (gameName) {
-					case 'note-exercise':
-						return A2(
-							$elm$html$Html$map,
-							$author$project$Main$NoteExerciseMsg,
-							$author$project$Games$NoteExercise$view(model.noteExerciseModel));
-					case 'mode-exercise':
-						return A2(
-							$elm$html$Html$map,
-							$author$project$Main$ModeExerciseMsg,
-							$author$project$Games$ModeExercise$view(model.modeExerciseModel));
-					case 'chord-exercise':
-						return A2(
-							$elm$html$Html$map,
-							$author$project$Main$ChordExerciseMsg,
-							$author$project$Games$ChordGuesserExercise$view(model.chordExerciseModel));
-					case 'fretboard-game':
-						return A2(
-							$elm$html$Html$map,
-							$author$project$Main$FretboardGameMsg,
-							$author$project$Games$FretboardGame$view(model.fretboardGameModel));
-					default:
-						return $elm$html$Html$text('Unknown game: ' + gameName);
-				}
-			}();
+		case 'ExercisesRoute':
 			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[gameView]));
+				$elm$html$Html$map,
+				$author$project$Main$ExercisesMsg,
+				$author$project$Exercises$view(model.exercisesModel));
 		default:
 			return A2(
 				$elm$html$Html$div,
@@ -14862,9 +12596,8 @@ var $author$project$Main$viewTitle = function (route) {
 	switch (route.$) {
 		case 'Home':
 			return 'Home';
-		case 'Game':
-			var gameName = route.a;
-			return gameName;
+		case 'ExercisesRoute':
+			return 'Exercises';
 		default:
 			return 'Page not found';
 	}
@@ -14900,4 +12633,4 @@ var $author$project$Main$view = function (model) {
 };
 var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$UrlChanged, onUrlRequest: $author$project$Main$LinkClicked, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
-_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$string)({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Games.TheoryApi.Chord2":{"args":[],"type":"{ chord : String.String, root : String.String, formula : List.List Basics.Int, degrees : List.List String.String, notes : List.List String.String }"},"Games.TheoryApi.MajorScaleAndKey":{"args":[],"type":"{ key : String.String, notes : List.List ( Basics.Int, Games.TheoryApi.Note ) }"},"Games.TheoryApi.Mode":{"args":[],"type":"{ mode : String.String, formula : List.List String.String }"},"Games.TheoryApi.Note":{"args":[],"type":"String.String"},"Games.TheoryApi.TheoryDb":{"args":[],"type":"{ majorScalesAndKeys : List.List Games.TheoryApi.MajorScaleAndKey, modes : List.List Games.TheoryApi.Mode, allNotes : List.List Games.TheoryApi.Note, chords : List.List Games.TheoryApi.Chord2 }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UrlChanged":["Url.Url"],"LinkClicked":["Browser.UrlRequest"],"NoteExerciseMsg":["Games.NoteExercise.Msg"],"ModeExerciseMsg":["Games.ModeExercise.Msg"],"ChordExerciseMsg":["Games.ChordGuesserExercise.Msg"],"FretboardGameMsg":["Games.FretboardGame.Msg"],"StopwatchMsg":["Games.Stopwatch.Msg"],"GotTheoryDb":["Result.Result Http.Error Games.TheoryApi.TheoryDb"]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Games.ChordGuesserExercise.Msg":{"args":[],"tags":{"GotChordData":["Result.Result Http.Error (List.List Games.TheoryApi.Chord2)"],"RandomChordPicked":["Basics.Int"],"ChordChosen":["Games.TheoryApi.Chord2"],"ResetChordGuesser":[],"GoBack":[]}},"Games.FretboardGame.Msg":{"args":[],"tags":{"KeyDown":["String.String"],"KeyUp":["String.String"],"Tick":["Time.Posix"],"SetIsOnPage":["Basics.Bool"]}},"Games.ModeExercise.Msg":{"args":[],"tags":{"GotTheoryDb":["Games.TheoryApi.TheoryDb"],"ChooseGame":["Games.ModeExercise.GameMode"],"ChooseKey":["Games.TheoryApi.MajorScaleAndKey"],"PickRandomMode":["Basics.Int"],"ModeGuessed":["String.String"],"RandomizeMode":[],"ResetWrong":[],"GoBack":[],"AddToModeBuilderList":["String.String"],"SubmitBuiltMode":[],"Submitted":["Games.ModeExercise.SubmitResult"],"Undo":[],"Reset":[]}},"Games.NoteExercise.Msg":{"args":[],"tags":{"NumberClicked":["Basics.Int"],"GotTheoryDb":["Games.TheoryApi.TheoryDb"],"Shuffle":[],"Shuffled":["List.List ( Basics.Int, Games.TheoryApi.Note )"],"KeyChosen":["Games.TheoryApi.MajorScaleAndKey"],"StopwatchMsg":["Games.Stopwatch.Msg"],"Reset":["Basics.Bool"]}},"Games.Stopwatch.Msg":{"args":[],"tags":{"Tick":["Time.Posix"],"Start":[],"Stop":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Games.ModeExercise.GameMode":{"args":[],"tags":{"ModeGuesserGame":[],"ModeBuilderGame":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Games.ModeExercise.SubmitResult":{"args":[],"tags":{"Win":[],"Lose":[]}}}}})}});}(this));
+_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$string)({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Games.TheoryApi.Chord2":{"args":[],"type":"{ chord : String.String, root : String.String, formula : List.List Basics.Int, degrees : List.List String.String, notes : List.List String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UrlChanged":["Url.Url"],"LinkClicked":["Browser.UrlRequest"],"ExercisesMsg":["Exercises.Msg"],"StopwatchMsg":["Games.Stopwatch.Msg"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Exercises.Msg":{"args":[],"tags":{"ChordGuesserMsg":["Games.ChordGuesserExercise.Msg"],"SelectGame":["Exercises.Game"],"BackToList":[]}},"Games.Stopwatch.Msg":{"args":[],"tags":{"Tick":["Time.Posix"],"Start":[],"Stop":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Exercises.Game":{"args":[],"tags":{"ChordGuesser":[]}},"Games.ChordGuesserExercise.Msg":{"args":[],"tags":{"GotChordData":["Result.Result Http.Error (List.List Games.TheoryApi.Chord2)"],"RandomChordPicked":["Basics.Int"],"DifficultyChosen":["Games.ChordGuesserExercise.Difficulty"],"ChordChosen":["Games.TheoryApi.Chord2"],"ChordGroupChosen":["List.List String.String"],"ResetChordGuesser":[],"GoBack":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Games.ChordGuesserExercise.Difficulty":{"args":[],"tags":{"Easy":[],"Medium":[],"Hard":[],"Extreme":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"List.List":{"args":["a"],"tags":{}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}}}}})}});}(this));

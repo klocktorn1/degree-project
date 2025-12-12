@@ -2,17 +2,11 @@ module Main exposing (..)
 
 import Browser exposing (UrlRequest(..))
 import Browser.Navigation as Nav
-import Games.ChordGuesserExercise as ChordGuesserExercise
-import Games.FretboardGame as FretboardGame
-import Games.ModeExercise as ModeExercise
-import Games.NoteExercise as NoteExercise
+import Exercises
 import Games.Stopwatch as Stopwatch
-import Games.TheoryApi as TheoryApi
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
-import Http
-import RemoteData
 import Time exposing (Posix)
 import Url
 import Url.Parser as UP exposing ((</>), (<?>))
@@ -22,30 +16,21 @@ type alias Model =
     { url : Url.Url
     , key : Nav.Key
     , route : Route
-    , theoryDb : RemoteData.WebData TheoryApi.TheoryDb
-    , noteExerciseModel : NoteExercise.Model
-    , modeExerciseModel : ModeExercise.Model
-    , chordExerciseModel : ChordGuesserExercise.Model
-    , fretboardGameModel : FretboardGame.Model
+    , exercisesModel : Exercises.Model
     , stopwatchModel : Stopwatch.Model
-    , isOnFretboardPage : Bool
     }
 
 
 type Msg
     = UrlChanged Url.Url
     | LinkClicked Browser.UrlRequest
-    | NoteExerciseMsg NoteExercise.Msg
-    | ModeExerciseMsg ModeExercise.Msg
-    | ChordExerciseMsg ChordGuesserExercise.Msg
-    | FretboardGameMsg FretboardGame.Msg
+    | ExercisesMsg Exercises.Msg
     | StopwatchMsg Stopwatch.Msg
-    | GotTheoryDb (Result Http.Error TheoryApi.TheoryDb)
 
 
 type Route
     = Home
-    | Game String
+    | ExercisesRoute
     | NotFound
 
 
@@ -68,9 +53,8 @@ main =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Sub.map FretboardGameMsg (FretboardGame.subscriptions model.fretboardGameModel)
-        , Sub.map StopwatchMsg (Stopwatch.subscriptions model.stopwatchModel)
-        , Sub.map NoteExerciseMsg (NoteExercise.subscriptions model.noteExerciseModel)
+        [ Sub.map StopwatchMsg (Stopwatch.subscriptions model.stopwatchModel)
+        , Sub.map ExercisesMsg (Exercises.subscriptions model.exercisesModel)
         ]
 
 
@@ -81,25 +65,16 @@ init flags url key =
             UP.parse routeParser url
                 |> Maybe.withDefault NotFound
 
-        ( noteExerciseModel, noteExerciseCmd ) =
-            NoteExercise.init flags
-
-        ( modeExerciseModel, modeExerciseCmd ) =
-            ModeExercise.init flags
-
-        ( chordExerciseModel, chordExerciseCmd ) =
-            ChordGuesserExercise.init flags
-
-        ( fretboardGameModel, fretboardGameCmd ) =
-            FretboardGame.init ()
+        ( exercisesModel, exercisesCmd ) =
+            Exercises.init flags
 
         stopwatchModel =
             Stopwatch.init
 
-        chordFetchOnStart =
+        exercisesFetchOnStart =
             case route of
-                Game "chord-exercise" ->
-                    Cmd.map ChordExerciseMsg ChordGuesserExercise.initialFetch
+                ExercisesRoute ->
+                    Cmd.none
 
                 _ ->
                     Cmd.none
@@ -107,29 +82,12 @@ init flags url key =
     ( { url = url
       , key = key
       , route = route
-      , noteExerciseModel = noteExerciseModel
-      , modeExerciseModel = modeExerciseModel
-      , chordExerciseModel = chordExerciseModel
-      , fretboardGameModel = fretboardGameModel
-      , theoryDb = RemoteData.Loading
-      , isOnFretboardPage = False
+      , exercisesModel = exercisesModel
       , stopwatchModel = stopwatchModel
       }
     , Cmd.batch
-        [ Cmd.map
-            NoteExerciseMsg
-            noteExerciseCmd
-        , Cmd.map
-            ModeExerciseMsg
-            modeExerciseCmd
-        , Cmd.map
-            ChordExerciseMsg
-            chordExerciseCmd
-        , Cmd.map
-            FretboardGameMsg
-            fretboardGameCmd
-        , TheoryApi.fetchTheoryDb GotTheoryDb
-        , chordFetchOnStart
+        [ Cmd.map ExercisesMsg exercisesCmd
+        , exercisesFetchOnStart
         ]
     )
 
@@ -138,8 +96,10 @@ routeParser : UP.Parser (Route -> a) a
 routeParser =
     UP.oneOf
         [ UP.map Home (UP.s "home")
+        , UP.map ExercisesRoute (UP.s "exercises")
         , UP.map Home UP.top
-        , UP.map Game (UP.s "game" </> UP.string)
+
+        -- removed Game route from top-level routing; exercises and their games are handled in Exercises.elm
         ]
 
 
@@ -158,16 +118,10 @@ update msg model =
                     UP.parse routeParser newUrl
                         |> Maybe.withDefault NotFound
 
-                setIsOnFretboardPage =
-                    newUrl.path == "/game/fretboard-game"
-
-                ( updatedFretboardModel, fretboardCmd ) =
-                    FretboardGame.setIsOnPage setIsOnFretboardPage model.fretboardGameModel
-
-                chordFetchCmd =
+                exercisesFetchCmd =
                     case newRoute of
-                        Game "chord-exercise" ->
-                            Cmd.map ChordExerciseMsg ChordGuesserExercise.initialFetch
+                        ExercisesRoute ->
+                            Cmd.none
 
                         _ ->
                             Cmd.none
@@ -175,10 +129,8 @@ update msg model =
             ( { model
                 | url = newUrl
                 , route = newRoute
-                , isOnFretboardPage = setIsOnFretboardPage
-                , fretboardGameModel = updatedFretboardModel
               }
-            , Cmd.batch [Cmd.map FretboardGameMsg fretboardCmd, chordFetchCmd]
+            , Cmd.batch [ exercisesFetchCmd ]
             )
 
         LinkClicked urlRequest ->
@@ -189,40 +141,13 @@ update msg model =
                 Browser.External href ->
                     ( model, Nav.load href )
 
-        NoteExerciseMsg subMsg ->
+        ExercisesMsg subMsg ->
             let
-                ( updatedGameModel, cmd ) =
-                    NoteExercise.update subMsg model.noteExerciseModel
+                ( updatedExercisesModel, cmd ) =
+                    Exercises.update subMsg model.exercisesModel
             in
-            ( { model | noteExerciseModel = updatedGameModel }
-            , Cmd.map NoteExerciseMsg cmd
-            )
-
-        ModeExerciseMsg subMsg ->
-            let
-                ( updatedGameModel, cmd ) =
-                    ModeExercise.update subMsg model.modeExerciseModel
-            in
-            ( { model | modeExerciseModel = updatedGameModel }
-            , Cmd.map ModeExerciseMsg cmd
-            )
-
-        ChordExerciseMsg subMsg ->
-            let
-                ( updatedGameModel, cmd ) =
-                    ChordGuesserExercise.update subMsg model.chordExerciseModel
-            in
-            ( { model | chordExerciseModel = updatedGameModel }
-            , Cmd.map ChordExerciseMsg cmd
-            )
-
-        FretboardGameMsg subMsg ->
-            let
-                ( updatedGameModel, cmd ) =
-                    FretboardGame.update subMsg model.fretboardGameModel
-            in
-            ( { model | fretboardGameModel = updatedGameModel }
-            , Cmd.map FretboardGameMsg cmd
+            ( { model | exercisesModel = updatedExercisesModel }
+            , Cmd.map ExercisesMsg cmd
             )
 
         StopwatchMsg subMsg ->
@@ -233,30 +158,6 @@ update msg model =
             ( { model | stopwatchModel = updatedStopwatch }
             , Cmd.map StopwatchMsg cmd
             )
-
-        GotTheoryDb (Ok db) ->
-            let
-                ( updatedNoteModel, noteCmd ) =
-                    NoteExercise.update (NoteExercise.GotTheoryDb db) model.noteExerciseModel
-
-                ( updatedModeModel, modeCmd ) =
-                    ModeExercise.update (ModeExercise.GotTheoryDb db) model.modeExerciseModel
-
-
-            in
-            ( { model
-                | theoryDb = RemoteData.Success db
-                , noteExerciseModel = updatedNoteModel
-                , modeExerciseModel = updatedModeModel
-              }
-            , Cmd.batch
-                [ Cmd.map NoteExerciseMsg noteCmd
-                , Cmd.map ModeExerciseMsg modeCmd
-                ]
-            )
-
-        GotTheoryDb (Err error) ->
-            ( model, Cmd.none )
 
 
 view : Model -> Browser.Document Msg
@@ -280,8 +181,8 @@ viewTitle route =
         Home ->
             "Home"
 
-        Game gameName ->
-            gameName
+        ExercisesRoute ->
+            "Exercises"
 
         NotFound ->
             "Page not found"
@@ -293,10 +194,9 @@ viewHeader currentPath =
         [ Html.header [ HA.class "header" ]
             [ Html.ul []
                 [ Html.li [] [ viewLink "Home" "/home" currentPath ]
-                , Html.li [] [ viewLink "Note exercise" "/game/note-exercise" currentPath ]
-                , Html.li [] [ viewLink "Mode exercise" "/game/mode-exercise" currentPath ]
-                , Html.li [] [ viewLink "Chord Exercise" "/game/chord-exercise" currentPath ]
-                , Html.li [] [ viewLink "Fretboard Game" "/game/fretboard-game" currentPath ]
+                , Html.li [] [ viewLink "Exercises" "/exercises" currentPath ]
+
+                -- removed direct game link from top-level header; exercises page lists games
                 ]
             ]
         ]
@@ -308,26 +208,8 @@ viewRoute model =
         Home ->
             Html.div [] [ Html.text "You are at the home page" ]
 
-        Game gameName ->
-            let
-                gameView =
-                    case gameName of
-                        "note-exercise" ->
-                            Html.map NoteExerciseMsg (NoteExercise.view model.noteExerciseModel)
-
-                        "mode-exercise" ->
-                            Html.map ModeExerciseMsg (ModeExercise.view model.modeExerciseModel)
-
-                        "chord-exercise" ->
-                            Html.map ChordExerciseMsg (ChordGuesserExercise.view model.chordExerciseModel)
-
-                        "fretboard-game" ->
-                            Html.map FretboardGameMsg (FretboardGame.view model.fretboardGameModel)
-
-                        _ ->
-                            Html.text ("Unknown game: " ++ gameName)
-            in
-            Html.div [] [ gameView ]
+        ExercisesRoute ->
+            Html.map ExercisesMsg (Exercises.view model.exercisesModel)
 
         NotFound ->
             Html.div []
