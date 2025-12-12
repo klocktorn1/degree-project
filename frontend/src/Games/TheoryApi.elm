@@ -1,4 +1,4 @@
-module Games.TheoryApi exposing (Chord, Chord2, MajorScaleAndKey, Mode, Note, TheoryDb, buildErrorMessage, fetchTheoryDb)
+module Games.TheoryApi exposing (Chord, Chord2, MajorScaleAndKey, Mode, Note, TheoryDb, buildErrorMessage, fetchChords2, fetchTheoryDb)
 
 import Http
 import Json.Decode as Decode
@@ -32,6 +32,11 @@ type alias Mode =
     { mode : String
     , formula : List String
     }
+
+
+baseUrl : String
+baseUrl =
+    "http://localhost:5000"
 
 
 theoryDbDecoder : Decode.Decoder TheoryDb
@@ -112,13 +117,38 @@ chord2Decoder =
         (Decode.field "notes" (Decode.list Decode.string))
 
 
+chord2ListDecoder : Decode.Decoder (List Chord2)
+chord2ListDecoder =
+    Decode.list chord2Decoder
+
+
 fetchChord2 : String -> String -> (Result Http.Error Chord2 -> msg) -> Cmd msg
 fetchChord2 root quality toMsg =
     Http.get
         { url =
-            "https://music-theory-api-tuhh.onrender.com/api/v1/chords/"
+            baseUrl
+                ++ "/api/v1/chords/"
                 ++ root
                 ++ "/"
                 ++ quality
         , expect = Http.expectJson toMsg chord2Decoder
+        }
+
+
+parseChordTypes : List String -> String
+parseChordTypes chordTypes =
+    chordTypes
+        |> String.join "&types="
+        |> (\s -> "?types=" ++ s)
+
+
+fetchChords2 : String -> List String -> (Result Http.Error (List Chord2) -> msg) -> Cmd msg
+fetchChords2 root chordTypes toMsg =
+    Http.get
+        { url =
+            baseUrl
+                ++ "/api/v1/chords/"
+                ++ root
+                ++ parseChordTypes chordTypes
+        , expect = Http.expectJson toMsg chord2ListDecoder
         }

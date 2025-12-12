@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import Browser exposing (UrlRequest(..))
 import Browser.Navigation as Nav
-import Games.ChordExercise as ChordExercise
+import Games.ChordGuesserExercise as ChordGuesserExercise
 import Games.FretboardGame as FretboardGame
 import Games.ModeExercise as ModeExercise
 import Games.NoteExercise as NoteExercise
@@ -25,7 +25,7 @@ type alias Model =
     , theoryDb : RemoteData.WebData TheoryApi.TheoryDb
     , noteExerciseModel : NoteExercise.Model
     , modeExerciseModel : ModeExercise.Model
-    , chordExerciseModel : ChordExercise.Model
+    , chordExerciseModel : ChordGuesserExercise.Model
     , fretboardGameModel : FretboardGame.Model
     , stopwatchModel : Stopwatch.Model
     , isOnFretboardPage : Bool
@@ -37,7 +37,7 @@ type Msg
     | LinkClicked Browser.UrlRequest
     | NoteExerciseMsg NoteExercise.Msg
     | ModeExerciseMsg ModeExercise.Msg
-    | ChordExerciseMsg ChordExercise.Msg
+    | ChordExerciseMsg ChordGuesserExercise.Msg
     | FretboardGameMsg FretboardGame.Msg
     | StopwatchMsg Stopwatch.Msg
     | GotTheoryDb (Result Http.Error TheoryApi.TheoryDb)
@@ -88,13 +88,21 @@ init flags url key =
             ModeExercise.init flags
 
         ( chordExerciseModel, chordExerciseCmd ) =
-            ChordExercise.init flags
+            ChordGuesserExercise.init flags
 
         ( fretboardGameModel, fretboardGameCmd ) =
             FretboardGame.init ()
 
         stopwatchModel =
             Stopwatch.init
+
+        chordFetchOnStart =
+            case route of
+                Game "chord-exercise" ->
+                    Cmd.map ChordExerciseMsg ChordGuesserExercise.initialFetch
+
+                _ ->
+                    Cmd.none
     in
     ( { url = url
       , key = key
@@ -121,6 +129,7 @@ init flags url key =
             FretboardGameMsg
             fretboardGameCmd
         , TheoryApi.fetchTheoryDb GotTheoryDb
+        , chordFetchOnStart
         ]
     )
 
@@ -154,6 +163,14 @@ update msg model =
 
                 ( updatedFretboardModel, fretboardCmd ) =
                     FretboardGame.setIsOnPage setIsOnFretboardPage model.fretboardGameModel
+
+                chordFetchCmd =
+                    case newRoute of
+                        Game "chord-exercise" ->
+                            Cmd.map ChordExerciseMsg ChordGuesserExercise.initialFetch
+
+                        _ ->
+                            Cmd.none
             in
             ( { model
                 | url = newUrl
@@ -161,7 +178,7 @@ update msg model =
                 , isOnFretboardPage = setIsOnFretboardPage
                 , fretboardGameModel = updatedFretboardModel
               }
-            , Cmd.map FretboardGameMsg fretboardCmd
+            , Cmd.batch [Cmd.map FretboardGameMsg fretboardCmd, chordFetchCmd]
             )
 
         LinkClicked urlRequest ->
@@ -193,7 +210,7 @@ update msg model =
         ChordExerciseMsg subMsg ->
             let
                 ( updatedGameModel, cmd ) =
-                    ChordExercise.update subMsg model.chordExerciseModel
+                    ChordGuesserExercise.update subMsg model.chordExerciseModel
             in
             ( { model | chordExerciseModel = updatedGameModel }
             , Cmd.map ChordExerciseMsg cmd
@@ -225,19 +242,16 @@ update msg model =
                 ( updatedModeModel, modeCmd ) =
                     ModeExercise.update (ModeExercise.GotTheoryDb db) model.modeExerciseModel
 
-                ( updatedChordModel, chordCmd ) =
-                    ChordExercise.update (ChordExercise.GotTheoryDb db) model.chordExerciseModel
+
             in
             ( { model
                 | theoryDb = RemoteData.Success db
                 , noteExerciseModel = updatedNoteModel
                 , modeExerciseModel = updatedModeModel
-                , chordExerciseModel = updatedChordModel
               }
             , Cmd.batch
                 [ Cmd.map NoteExerciseMsg noteCmd
                 , Cmd.map ModeExerciseMsg modeCmd
-                , Cmd.map ChordExerciseMsg chordCmd
                 ]
             )
 
@@ -305,7 +319,7 @@ viewRoute model =
                             Html.map ModeExerciseMsg (ModeExercise.view model.modeExerciseModel)
 
                         "chord-exercise" ->
-                            Html.map ChordExerciseMsg (ChordExercise.view model.chordExerciseModel)
+                            Html.map ChordExerciseMsg (ChordGuesserExercise.view model.chordExerciseModel)
 
                         "fretboard-game" ->
                             Html.map FretboardGameMsg (FretboardGame.view model.fretboardGameModel)

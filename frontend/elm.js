@@ -11071,17 +11071,26 @@ var $author$project$Games$TheoryApi$TheoryDb = F4(
 	function (majorScalesAndKeys, modes, allNotes, chords) {
 		return {allNotes: allNotes, chords: chords, majorScalesAndKeys: majorScalesAndKeys, modes: modes};
 	});
-var $author$project$Games$TheoryApi$Chord = F2(
-	function (name, formula) {
-		return {formula: formula, name: name};
+var $author$project$Games$TheoryApi$Chord2 = F5(
+	function (chord, root, formula, degrees, notes) {
+		return {chord: chord, degrees: degrees, formula: formula, notes: notes, root: root};
 	});
-var $author$project$Games$TheoryApi$chordDecoder = A3(
-	$elm$json$Json$Decode$map2,
-	$author$project$Games$TheoryApi$Chord,
-	A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string),
+var $author$project$Games$TheoryApi$chord2Decoder = A6(
+	$elm$json$Json$Decode$map5,
+	$author$project$Games$TheoryApi$Chord2,
+	A2($elm$json$Json$Decode$field, 'chord', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'root', $elm$json$Json$Decode$string),
 	A2(
 		$elm$json$Json$Decode$field,
 		'formula',
+		$elm$json$Json$Decode$list($elm$json$Json$Decode$int)),
+	A2(
+		$elm$json$Json$Decode$field,
+		'degrees',
+		$elm$json$Json$Decode$list($elm$json$Json$Decode$string)),
+	A2(
+		$elm$json$Json$Decode$field,
+		'notes',
 		$elm$json$Json$Decode$list($elm$json$Json$Decode$string)));
 var $author$project$Games$TheoryApi$MajorScaleAndKey = F2(
 	function (key, notes) {
@@ -11133,7 +11142,7 @@ var $author$project$Games$TheoryApi$theoryDbDecoder = A5(
 	A2(
 		$elm$json$Json$Decode$field,
 		'chords',
-		$elm$json$Json$Decode$list($author$project$Games$TheoryApi$chordDecoder)));
+		$elm$json$Json$Decode$list($author$project$Games$TheoryApi$chord2Decoder)));
 var $author$project$Games$TheoryApi$fetchTheoryDb = function (toMsg) {
 	return $elm$http$Http$get(
 		{
@@ -11141,9 +11150,9 @@ var $author$project$Games$TheoryApi$fetchTheoryDb = function (toMsg) {
 			url: 'http://localhost:5019/theory-db'
 		});
 };
-var $author$project$Games$ChordExercise$init = function (flags) {
+var $author$project$Games$ChordGuesserExercise$init = function (flags) {
 	return _Utils_Tuple2(
-		{allNotes: $elm$core$Maybe$Nothing, builtChord: _List_Nil, chosenKeyAndScale: $elm$core$Maybe$Nothing, constructedChosenChord: _List_Nil, constructedRandomizedChord: _List_Nil, gameMode: $elm$core$Maybe$Nothing, gameOver: false, isBuiltCordCorrect: false, lastRandomIndex: $elm$core$Maybe$Nothing, maybeChords: $elm$core$Maybe$Nothing, maybeChosenChord: $elm$core$Maybe$Nothing, maybeMajorScalesAndKeys: $elm$core$Maybe$Nothing, mistakes: 0, randomizedChord: $elm$core$Maybe$Nothing, score: 0},
+		{gameOver: false, lastRandomIndex: $elm$core$Maybe$Nothing, maybeChords: $elm$core$Maybe$Nothing, maybeChosenChord: $elm$core$Maybe$Nothing, mistakes: 0, randomizedChord: $elm$core$Maybe$Nothing, score: 0},
 		$elm$core$Platform$Cmd$none);
 };
 var $author$project$Games$FretboardGame$init = function (_v0) {
@@ -11212,6 +11221,31 @@ var $author$project$Games$NoteExercise$init = function (flags) {
 		},
 		$elm$core$Platform$Cmd$none);
 };
+var $author$project$Games$ChordGuesserExercise$GotChordData = function (a) {
+	return {$: 'GotChordData', a: a};
+};
+var $author$project$Games$TheoryApi$baseUrl = 'http://localhost:5000';
+var $author$project$Games$TheoryApi$chord2ListDecoder = $elm$json$Json$Decode$list($author$project$Games$TheoryApi$chord2Decoder);
+var $author$project$Games$TheoryApi$parseChordTypes = function (chordTypes) {
+	return function (s) {
+		return '?types=' + s;
+	}(
+		A2($elm$core$String$join, '&types=', chordTypes));
+};
+var $author$project$Games$TheoryApi$fetchChords2 = F3(
+	function (root, chordTypes, toMsg) {
+		return $elm$http$Http$get(
+			{
+				expect: A2($elm$http$Http$expectJson, toMsg, $author$project$Games$TheoryApi$chord2ListDecoder),
+				url: $author$project$Games$TheoryApi$baseUrl + ('/api/v1/chords/' + (root + $author$project$Games$TheoryApi$parseChordTypes(chordTypes)))
+			});
+	});
+var $author$project$Games$ChordGuesserExercise$initialFetch = A3(
+	$author$project$Games$TheoryApi$fetchChords2,
+	'C',
+	_List_fromArray(
+		['major', 'minor', 'dom7', 'sus4']),
+	$author$project$Games$ChordGuesserExercise$GotChordData);
 var $elm$url$Url$Parser$State = F5(
 	function (visited, unvisited, params, frag, value) {
 		return {frag: frag, params: params, unvisited: unvisited, value: value, visited: visited};
@@ -11482,6 +11516,13 @@ var $author$project$Main$init = F3(
 			$elm$core$Maybe$withDefault,
 			$author$project$Main$NotFound,
 			A2($elm$url$Url$Parser$parse, $author$project$Main$routeParser, url));
+		var chordFetchOnStart = function () {
+			if ((route.$ === 'Game') && (route.a === 'chord-exercise')) {
+				return A2($elm$core$Platform$Cmd$map, $author$project$Main$ChordExerciseMsg, $author$project$Games$ChordGuesserExercise$initialFetch);
+			} else {
+				return $elm$core$Platform$Cmd$none;
+			}
+		}();
 		var _v0 = $author$project$Games$NoteExercise$init(flags);
 		var noteExerciseModel = _v0.a;
 		var noteExerciseCmd = _v0.b;
@@ -11491,7 +11532,7 @@ var $author$project$Main$init = F3(
 		var _v2 = $author$project$Games$FretboardGame$init(_Utils_Tuple0);
 		var fretboardGameModel = _v2.a;
 		var fretboardGameCmd = _v2.b;
-		var _v3 = $author$project$Games$ChordExercise$init(flags);
+		var _v3 = $author$project$Games$ChordGuesserExercise$init(flags);
 		var chordExerciseModel = _v3.a;
 		var chordExerciseCmd = _v3.b;
 		return _Utils_Tuple2(
@@ -11503,7 +11544,8 @@ var $author$project$Main$init = F3(
 						A2($elm$core$Platform$Cmd$map, $author$project$Main$ModeExerciseMsg, modeExerciseCmd),
 						A2($elm$core$Platform$Cmd$map, $author$project$Main$ChordExerciseMsg, chordExerciseCmd),
 						A2($elm$core$Platform$Cmd$map, $author$project$Main$FretboardGameMsg, fretboardGameCmd),
-						$author$project$Games$TheoryApi$fetchTheoryDb($author$project$Main$GotTheoryDb)
+						$author$project$Games$TheoryApi$fetchTheoryDb($author$project$Main$GotTheoryDb),
+						chordFetchOnStart
 					])));
 	});
 var $author$project$Main$StopwatchMsg = function (a) {
@@ -12046,9 +12088,6 @@ var $author$project$Main$subscriptions = function (model) {
 				$author$project$Games$NoteExercise$subscriptions(model.noteExerciseModel))
 			]));
 };
-var $author$project$Games$ChordExercise$GotTheoryDb = function (a) {
-	return {$: 'GotTheoryDb', a: a};
-};
 var $author$project$Games$ModeExercise$GotTheoryDb = function (a) {
 	return {$: 'GotTheoryDb', a: a};
 };
@@ -12212,88 +12251,7 @@ var $elm$url$Url$toString = function (url) {
 					_Utils_ap(http, url.host)),
 				url.path)));
 };
-var $author$project$Games$ChordExercise$listTuplesToListString = function (listOfTuples) {
-	return A2($elm$core$List$map, $elm$core$Tuple$second, listOfTuples);
-};
-var $elm$core$Basics$modBy = _Basics_modBy;
-var $elm_community$list_extra$List$Extra$indexedFoldr = F3(
-	function (func, acc, list) {
-		var step = F2(
-			function (x, _v0) {
-				var i = _v0.a;
-				var thisAcc = _v0.b;
-				return _Utils_Tuple2(
-					i - 1,
-					A3(func, i, x, thisAcc));
-			});
-		return A3(
-			$elm$core$List$foldr,
-			step,
-			_Utils_Tuple2(
-				$elm$core$List$length(list) - 1,
-				acc),
-			list).b;
-	});
-var $elm_community$list_extra$List$Extra$removeIfIndex = function (predicate) {
-	return A2(
-		$elm_community$list_extra$List$Extra$indexedFoldr,
-		F3(
-			function (index, item, acc) {
-				return predicate(index) ? acc : A2($elm$core$List$cons, item, acc);
-			}),
-		_List_Nil);
-};
-var $elm$core$String$replace = F3(
-	function (before, after, string) {
-		return A2(
-			$elm$core$String$join,
-			after,
-			A2($elm$core$String$split, before, string));
-	});
-var $author$project$Games$ChordExercise$chordConstructor = F2(
-	function (chord, maybeMajorScaleAndKey) {
-		if (maybeMajorScaleAndKey.$ === 'Just') {
-			var majorScaleAndKey = maybeMajorScaleAndKey.a;
-			return A2(
-				$elm$core$String$join,
-				' ',
-				A2(
-					$elm$core$List$map,
-					A2($elm$core$String$replace, 'b#', ''),
-					A2(
-						$elm$core$List$map,
-						A2($elm$core$String$replace, '#b', ''),
-						A3(
-							$elm$core$List$map2,
-							$elm$core$Basics$append,
-							A2(
-								$elm_community$list_extra$List$Extra$removeIfIndex,
-								function (index) {
-									return !(!A2($elm$core$Basics$modBy, 2, index));
-								},
-								$author$project$Games$ChordExercise$listTuplesToListString(majorScaleAndKey.notes)),
-							chord.formula))));
-		} else {
-			return 'Please choose a key';
-		}
-	});
-var $author$project$Games$ChordExercise$checkIfBuiltCorrectHelper = function (model) {
-	var _v0 = model.randomizedChord;
-	if (_v0.$ === 'Just') {
-		var randomizedChord = _v0.a;
-		var constructedRandomizedChordList = A2(
-			$elm$core$String$split,
-			' ',
-			A2($author$project$Games$ChordExercise$chordConstructor, randomizedChord, model.chosenKeyAndScale));
-		return _Utils_eq(
-			constructedRandomizedChordList,
-			$elm$core$List$reverse(model.builtChord));
-	} else {
-		return false;
-	}
-};
-var $elm$core$Debug$log = _Debug_log;
-var $author$project$Games$ChordExercise$RandomChordPicked = function (a) {
+var $author$project$Games$ChordGuesserExercise$RandomChordPicked = function (a) {
 	return {$: 'RandomChordPicked', a: a};
 };
 var $elm$random$Random$Generate = function (a) {
@@ -12424,43 +12382,29 @@ var $elm$random$Random$int = F2(
 				}
 			});
 	});
-var $author$project$Games$ChordExercise$randomizeChord = A2(
-	$elm$random$Random$generate,
-	$author$project$Games$ChordExercise$RandomChordPicked,
-	A2($elm$random$Random$int, 0, 3));
-var $author$project$Games$ChordExercise$checkIfChordBuiltCorrect = function (model) {
-	if ($author$project$Games$ChordExercise$checkIfBuiltCorrectHelper(model)) {
-		var _v0 = A2($elm$core$Debug$log, '', 'Win!');
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{isBuiltCordCorrect: true}),
-			$author$project$Games$ChordExercise$randomizeChord);
-	} else {
-		var _v1 = A2($elm$core$Debug$log, '', 'lose!');
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{gameOver: true}),
-			$elm$core$Platform$Cmd$none);
-	}
+var $author$project$Games$ChordGuesserExercise$randomizeChord = function (maxIndex) {
+	return (maxIndex <= 0) ? $elm$core$Platform$Cmd$none : A2(
+		$elm$random$Random$generate,
+		$author$project$Games$ChordGuesserExercise$RandomChordPicked,
+		A2($elm$random$Random$int, 0, maxIndex - 1));
 };
-var $author$project$Games$ChordExercise$checkIfChordIsCorrect = function (model) {
+var $author$project$Games$ChordGuesserExercise$checkIfChordIsCorrect = function (model) {
 	var _v0 = _Utils_Tuple2(model.maybeChosenChord, model.randomizedChord);
 	if ((_v0.a.$ === 'Just') && (_v0.b.$ === 'Just')) {
 		var chosenChord = _v0.a.a;
 		var randomizedChord = _v0.b.a;
 		if (_Utils_eq(chosenChord, randomizedChord)) {
 			var newScore = model.score + 1;
-			var _v1 = A2($elm$core$Debug$log, 'Win!', 'Win');
+			var chordCount = $elm$core$List$length(
+				A2($elm$core$Maybe$withDefault, _List_Nil, model.maybeChords));
 			return _Utils_Tuple2(
 				_Utils_update(
 					model,
 					{score: newScore}),
-				$author$project$Games$ChordExercise$randomizeChord);
+				$author$project$Games$ChordGuesserExercise$randomizeChord(chordCount));
 		} else {
-			var setGameOver = (model.mistakes === 2) ? true : false;
 			var newMistakes = model.mistakes + 1;
+			var setGameOver = (newMistakes >= 3) ? true : false;
 			return _Utils_Tuple2(
 				_Utils_update(
 					model,
@@ -12471,85 +12415,84 @@ var $author$project$Games$ChordExercise$checkIfChordIsCorrect = function (model)
 		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 	}
 };
-var $author$project$Games$ChordExercise$pickRandomChord = F2(
+var $author$project$Games$ChordGuesserExercise$defaultChord = {chord: 'No chord found', degrees: _List_Nil, formula: _List_Nil, notes: _List_Nil, root: ''};
+var $elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(x);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $elm_community$list_extra$List$Extra$getAt = F2(
+	function (idx, xs) {
+		return (idx < 0) ? $elm$core$Maybe$Nothing : $elm$core$List$head(
+			A2($elm$core$List$drop, idx, xs));
+	});
+var $author$project$Games$ChordGuesserExercise$pickRandomChord = F2(
 	function (maybeChords, randomIndex) {
 		if (maybeChords.$ === 'Just') {
 			var chords = maybeChords.a;
-			var maybeRandomChordObject = function () {
-				var _v1 = A2(
-					$elm$core$Array$get,
-					randomIndex,
-					$elm$core$Array$fromList(chords));
-				if (_v1.$ === 'Just') {
-					var randomChordObject = _v1.a;
-					return randomChordObject;
-				} else {
-					return {formula: _List_Nil, name: 'No chord found at given index'};
-				}
-			}();
-			return maybeRandomChordObject;
+			var _v1 = A2($elm_community$list_extra$List$Extra$getAt, randomIndex, chords);
+			if (_v1.$ === 'Just') {
+				var randomChordObject = _v1.a;
+				return randomChordObject;
+			} else {
+				return $author$project$Games$ChordGuesserExercise$defaultChord;
+			}
 		} else {
-			return {formula: _List_Nil, name: 'No chords found'};
+			return $author$project$Games$ChordGuesserExercise$defaultChord;
 		}
 	});
-var $author$project$Games$ChordExercise$update = F2(
+var $author$project$Games$ChordGuesserExercise$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
-			case 'GameModeChosen':
-				var gameMode = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							gameMode: $elm$core$Maybe$Just(gameMode)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'KeyAndScaleChosen':
-				var key = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							chosenKeyAndScale: $elm$core$Maybe$Just(key)
-						}),
-					$author$project$Games$ChordExercise$randomizeChord);
-			case 'GotTheoryDb':
-				var db = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							allNotes: $elm$core$Maybe$Just(db.allNotes),
-							maybeChords: $elm$core$Maybe$Just(db.chords),
-							maybeMajorScalesAndKeys: $elm$core$Maybe$Just(db.majorScalesAndKeys)
-						}),
-					$elm$core$Platform$Cmd$none);
+			case 'GotChordData':
+				if (msg.a.$ === 'Ok') {
+					var chords = msg.a.a;
+					var chordCount = $elm$core$List$length(chords);
+					return (chordCount > 0) ? _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								maybeChords: $elm$core$Maybe$Just(chords)
+							}),
+						$author$project$Games$ChordGuesserExercise$randomizeChord(chordCount)) : _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								maybeChords: $elm$core$Maybe$Just(_List_Nil)
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
 			case 'RandomChordPicked':
 				var randomIndex = msg.a;
+				var newRandomChord = A2($author$project$Games$ChordGuesserExercise$pickRandomChord, model.maybeChords, randomIndex);
+				var chordCount = $elm$core$List$length(
+					A2($elm$core$Maybe$withDefault, _List_Nil, model.maybeChords));
 				var _v1 = model.lastRandomIndex;
 				if (_v1.$ === 'Just') {
-					var lastRandomIndex = _v1.a;
-					if (_Utils_eq(lastRandomIndex, randomIndex)) {
-						return _Utils_Tuple2(model, $author$project$Games$ChordExercise$randomizeChord);
-					} else {
-						var newRandomizedChord = A2($author$project$Games$ChordExercise$pickRandomChord, model.maybeChords, randomIndex);
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									lastRandomIndex: $elm$core$Maybe$Just(randomIndex),
-									randomizedChord: $elm$core$Maybe$Just(newRandomizedChord)
-								}),
-							$elm$core$Platform$Cmd$none);
-					}
+					var lastIndex = _v1.a;
+					return (_Utils_eq(lastIndex, randomIndex) && (chordCount > 1)) ? _Utils_Tuple2(
+						model,
+						$author$project$Games$ChordGuesserExercise$randomizeChord(chordCount)) : _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								lastRandomIndex: $elm$core$Maybe$Just(randomIndex),
+								randomizedChord: $elm$core$Maybe$Just(newRandomChord)
+							}),
+						$elm$core$Platform$Cmd$none);
 				} else {
-					var newRandomizedChord = A2($author$project$Games$ChordExercise$pickRandomChord, model.maybeChords, randomIndex);
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
 								lastRandomIndex: $elm$core$Maybe$Just(randomIndex),
-								randomizedChord: $elm$core$Maybe$Just(newRandomizedChord)
+								randomizedChord: $elm$core$Maybe$Just(newRandomChord)
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
@@ -12560,43 +12503,18 @@ var $author$project$Games$ChordExercise$update = F2(
 					{
 						maybeChosenChord: $elm$core$Maybe$Just(chord)
 					});
-				var modelWithCheckedValues = $author$project$Games$ChordExercise$checkIfChordIsCorrect(modelWithChordChosen);
-				return modelWithCheckedValues;
-			case 'AddToChordBuilderList':
-				var note = msg.a;
-				var newNoteToBuiltChord = A2($elm$core$List$cons, note, model.builtChord);
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{builtChord: newNoteToBuiltChord}),
-					$elm$core$Platform$Cmd$none);
-			case 'SubmitBuiltChord':
-				return $author$project$Games$ChordExercise$checkIfChordBuiltCorrect(model);
+				var _v2 = $author$project$Games$ChordGuesserExercise$checkIfChordIsCorrect(modelWithChordChosen);
+				var updatedModel = _v2.a;
+				var cmd = _v2.b;
+				return _Utils_Tuple2(updatedModel, cmd);
 			case 'ResetChordGuesser':
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{gameOver: false, maybeChosenChord: $elm$core$Maybe$Nothing, mistakes: 0, score: 0}),
 					$elm$core$Platform$Cmd$none);
-			case 'Undo':
-				var newBuiltChord = A2($elm$core$List$drop, 1, model.builtChord);
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{builtChord: newBuiltChord}),
-					$elm$core$Platform$Cmd$none);
-			case 'ResetChordBuilder':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{builtChord: _List_Nil, isBuiltCordCorrect: false, mistakes: 0, score: 0}),
-					$elm$core$Platform$Cmd$none);
 			default:
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{gameMode: $elm$core$Maybe$Nothing}),
-					$elm$core$Platform$Cmd$none);
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Games$ModeExercise$Lose = {$: 'Lose'};
@@ -12604,6 +12522,13 @@ var $author$project$Games$ModeExercise$Submitted = function (a) {
 	return {$: 'Submitted', a: a};
 };
 var $author$project$Games$ModeExercise$Win = {$: 'Win'};
+var $elm$core$String$replace = F3(
+	function (before, after, string) {
+		return A2(
+			$elm$core$String$join,
+			after,
+			A2($elm$core$String$split, before, string));
+	});
 var $author$project$Games$ModeExercise$constructMode = F2(
 	function (mode, key) {
 		return A2(
@@ -12837,15 +12762,6 @@ var $elm$core$Maybe$andThen = F2(
 			return $elm$core$Maybe$Nothing;
 		}
 	});
-var $elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(x);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
 var $elm$core$Set$insert = F2(
 	function (key, _v0) {
 		var dict = _v0.a;
@@ -13172,6 +13088,13 @@ var $author$project$Main$update = F2(
 					$elm$core$Maybe$withDefault,
 					$author$project$Main$NotFound,
 					A2($elm$url$Url$Parser$parse, $author$project$Main$routeParser, newUrl));
+				var chordFetchCmd = function () {
+					if ((newRoute.$ === 'Game') && (newRoute.a === 'chord-exercise')) {
+						return A2($elm$core$Platform$Cmd$map, $author$project$Main$ChordExerciseMsg, $author$project$Games$ChordGuesserExercise$initialFetch);
+					} else {
+						return $elm$core$Platform$Cmd$none;
+					}
+				}();
 				var _v1 = A2($author$project$Games$FretboardGame$setIsOnPage, setIsOnFretboardPage, model.fretboardGameModel);
 				var updatedFretboardModel = _v1.a;
 				var fretboardCmd = _v1.b;
@@ -13179,7 +13102,12 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{fretboardGameModel: updatedFretboardModel, isOnFretboardPage: setIsOnFretboardPage, route: newRoute, url: newUrl}),
-					A2($elm$core$Platform$Cmd$map, $author$project$Main$FretboardGameMsg, fretboardCmd));
+					$elm$core$Platform$Cmd$batch(
+						_List_fromArray(
+							[
+								A2($elm$core$Platform$Cmd$map, $author$project$Main$FretboardGameMsg, fretboardCmd),
+								chordFetchCmd
+							])));
 			case 'LinkClicked':
 				var urlRequest = msg.a;
 				if (urlRequest.$ === 'Internal') {
@@ -13198,9 +13126,9 @@ var $author$project$Main$update = F2(
 				}
 			case 'NoteExerciseMsg':
 				var subMsg = msg.a;
-				var _v3 = A2($author$project$Games$NoteExercise$update, subMsg, model.noteExerciseModel);
-				var updatedGameModel = _v3.a;
-				var cmd = _v3.b;
+				var _v4 = A2($author$project$Games$NoteExercise$update, subMsg, model.noteExerciseModel);
+				var updatedGameModel = _v4.a;
+				var cmd = _v4.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -13208,9 +13136,9 @@ var $author$project$Main$update = F2(
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$NoteExerciseMsg, cmd));
 			case 'ModeExerciseMsg':
 				var subMsg = msg.a;
-				var _v4 = A2($author$project$Games$ModeExercise$update, subMsg, model.modeExerciseModel);
-				var updatedGameModel = _v4.a;
-				var cmd = _v4.b;
+				var _v5 = A2($author$project$Games$ModeExercise$update, subMsg, model.modeExerciseModel);
+				var updatedGameModel = _v5.a;
+				var cmd = _v5.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -13218,9 +13146,9 @@ var $author$project$Main$update = F2(
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$ModeExerciseMsg, cmd));
 			case 'ChordExerciseMsg':
 				var subMsg = msg.a;
-				var _v5 = A2($author$project$Games$ChordExercise$update, subMsg, model.chordExerciseModel);
-				var updatedGameModel = _v5.a;
-				var cmd = _v5.b;
+				var _v6 = A2($author$project$Games$ChordGuesserExercise$update, subMsg, model.chordExerciseModel);
+				var updatedGameModel = _v6.a;
+				var cmd = _v6.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -13228,9 +13156,9 @@ var $author$project$Main$update = F2(
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$ChordExerciseMsg, cmd));
 			case 'FretboardGameMsg':
 				var subMsg = msg.a;
-				var _v6 = A2($author$project$Games$FretboardGame$update, subMsg, model.fretboardGameModel);
-				var updatedGameModel = _v6.a;
-				var cmd = _v6.b;
+				var _v7 = A2($author$project$Games$FretboardGame$update, subMsg, model.fretboardGameModel);
+				var updatedGameModel = _v7.a;
+				var cmd = _v7.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -13238,9 +13166,9 @@ var $author$project$Main$update = F2(
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$FretboardGameMsg, cmd));
 			case 'StopwatchMsg':
 				var subMsg = msg.a;
-				var _v7 = A2($author$project$Games$Stopwatch$update, subMsg, model.stopwatchModel);
-				var updatedStopwatch = _v7.a;
-				var cmd = _v7.b;
+				var _v8 = A2($author$project$Games$Stopwatch$update, subMsg, model.stopwatchModel);
+				var updatedStopwatch = _v8.a;
+				var cmd = _v8.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -13249,29 +13177,22 @@ var $author$project$Main$update = F2(
 			default:
 				if (msg.a.$ === 'Ok') {
 					var db = msg.a.a;
-					var _v8 = A2(
+					var _v9 = A2(
 						$author$project$Games$NoteExercise$update,
 						$author$project$Games$NoteExercise$GotTheoryDb(db),
 						model.noteExerciseModel);
-					var updatedNoteModel = _v8.a;
-					var noteCmd = _v8.b;
-					var _v9 = A2(
+					var updatedNoteModel = _v9.a;
+					var noteCmd = _v9.b;
+					var _v10 = A2(
 						$author$project$Games$ModeExercise$update,
 						$author$project$Games$ModeExercise$GotTheoryDb(db),
 						model.modeExerciseModel);
-					var updatedModeModel = _v9.a;
-					var modeCmd = _v9.b;
-					var _v10 = A2(
-						$author$project$Games$ChordExercise$update,
-						$author$project$Games$ChordExercise$GotTheoryDb(db),
-						model.chordExerciseModel);
-					var updatedChordModel = _v10.a;
-					var chordCmd = _v10.b;
+					var updatedModeModel = _v10.a;
+					var modeCmd = _v10.b;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
-								chordExerciseModel: updatedChordModel,
 								modeExerciseModel: updatedModeModel,
 								noteExerciseModel: updatedNoteModel,
 								theoryDb: $krisajenkins$remotedata$RemoteData$Success(db)
@@ -13280,8 +13201,7 @@ var $author$project$Main$update = F2(
 							_List_fromArray(
 								[
 									A2($elm$core$Platform$Cmd$map, $author$project$Main$NoteExerciseMsg, noteCmd),
-									A2($elm$core$Platform$Cmd$map, $author$project$Main$ModeExerciseMsg, modeCmd),
-									A2($elm$core$Platform$Cmd$map, $author$project$Main$ChordExerciseMsg, chordCmd)
+									A2($elm$core$Platform$Cmd$map, $author$project$Main$ModeExerciseMsg, modeCmd)
 								])));
 				} else {
 					var error = msg.a.a;
@@ -13418,18 +13338,411 @@ var $author$project$Main$viewHeader = function (currentPath) {
 					]))
 			]));
 };
-var $author$project$Games$ChordExercise$ChordBuilderGame = {$: 'ChordBuilderGame'};
-var $author$project$Games$ChordExercise$ChordGuesserGame = {$: 'ChordGuesserGame'};
-var $author$project$Games$ChordExercise$GameModeChosen = function (a) {
-	return {$: 'GameModeChosen', a: a};
+var $author$project$Games$ChordGuesserExercise$GoBack = {$: 'GoBack'};
+var $author$project$Games$ChordGuesserExercise$ResetChordGuesser = {$: 'ResetChordGuesser'};
+var $author$project$Games$ChordGuesserExercise$ChordChosen = function (a) {
+	return {$: 'ChordChosen', a: a};
 };
+var $author$project$Games$ChordGuesserExercise$viewChord = function (chord) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('custom-button'),
+				$elm$html$Html$Events$onClick(
+				$author$project$Games$ChordGuesserExercise$ChordChosen(chord))
+			]),
+		_List_fromArray(
+			[
+				$elm$html$Html$text(chord.chord)
+			]));
+};
+var $author$project$Games$ChordGuesserExercise$viewChords = function (model) {
+	var _v0 = model.maybeChords;
+	if (_v0.$ === 'Just') {
+		var chords = _v0.a;
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('chords-container')
+				]),
+			A2($elm$core$List$map, $author$project$Games$ChordGuesserExercise$viewChord, chords));
+	} else {
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text('No chords found')
+				]));
+	}
+};
+var $author$project$Games$ChordGuesserExercise$viewRandomizedChordNotes = function (notes) {
+	return A2($elm$core$String$join, ', ', notes);
+};
+var $author$project$Games$ChordGuesserExercise$viewRandomizedChord = function (model) {
+	var _v0 = model.randomizedChord;
+	if (_v0.$ === 'Just') {
+		var randomizedChord = _v0.a;
+		return A2(
+			$elm$html$Html$p,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text(
+					'Which chord is this? ' + $author$project$Games$ChordGuesserExercise$viewRandomizedChordNotes(randomizedChord.notes))
+				]));
+	} else {
+		return A2(
+			$elm$html$Html$p,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text('No chord found')
+				]));
+	}
+};
+var $author$project$Games$ChordGuesserExercise$view = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$text('Chord guesser'),
+				$author$project$Games$ChordGuesserExercise$viewRandomizedChord(model),
+				$author$project$Games$ChordGuesserExercise$viewChords(model),
+				A2(
+				$elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						'Score:  ' + $elm$core$String$fromInt(model.score))
+					])),
+				A2(
+				$elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						'Mistakes:  ' + $elm$core$String$fromInt(model.mistakes))
+					])),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('custom-button'),
+						$elm$html$Html$Events$onClick($author$project$Games$ChordGuesserExercise$ResetChordGuesser)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Reset')
+					])),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('custom-button'),
+						$elm$html$Html$Events$onClick($author$project$Games$ChordGuesserExercise$GoBack)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(' <-- Go Back')
+					]))
+			]));
+};
+var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
+var $elm$core$Basics$round = _Basics_round;
+var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
+var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
+var $elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
+var $elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
+var $elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
+var $elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
+var $author$project$Games$FretboardGame$drawFretboard = function (model) {
+	var stringSpacing = 28;
+	var fretWidth = 48;
+	return $elm$core$List$concat(
+		_List_fromArray(
+			[
+				A2(
+				$elm$core$List$map,
+				function (f) {
+					return A2(
+						$elm$svg$Svg$line,
+						A2(
+							$elm$core$List$append,
+							_List_fromArray(
+								[
+									$elm$svg$Svg$Attributes$x1(
+									$elm$core$String$fromFloat(f * fretWidth)),
+									$elm$svg$Svg$Attributes$x2(
+									$elm$core$String$fromFloat(f * fretWidth)),
+									$elm$svg$Svg$Attributes$y1('14'),
+									$elm$svg$Svg$Attributes$y2(
+									$elm$core$String$fromFloat((model.stringCount * stringSpacing) - 14))
+								]),
+							(f === 1) ? _List_fromArray(
+								[
+									$elm$svg$Svg$Attributes$strokeWidth('10'),
+									$elm$svg$Svg$Attributes$stroke('black')
+								]) : _List_fromArray(
+								[
+									$elm$svg$Svg$Attributes$strokeWidth('1'),
+									$elm$svg$Svg$Attributes$stroke('#ccc')
+								])),
+						_List_Nil);
+				},
+				A2(
+					$elm$core$List$range,
+					0,
+					$elm$core$Basics$round(model.fretCount))),
+				A2(
+				$elm$core$List$map,
+				function (i) {
+					return A2(
+						$elm$svg$Svg$line,
+						_List_fromArray(
+							[
+								$elm$svg$Svg$Attributes$x1('0'),
+								$elm$svg$Svg$Attributes$x2(
+								$elm$core$String$fromFloat(model.fretCount * fretWidth)),
+								$elm$svg$Svg$Attributes$y1(
+								$elm$core$String$fromFloat(((i - 1) * stringSpacing) + (stringSpacing / 2))),
+								$elm$svg$Svg$Attributes$y2(
+								$elm$core$String$fromFloat(((i - 1) * stringSpacing) + (stringSpacing / 2))),
+								$elm$svg$Svg$Attributes$stroke('black'),
+								$elm$svg$Svg$Attributes$strokeWidth('1')
+							]),
+						_List_Nil);
+				},
+				A2(
+					$elm$core$List$range,
+					1,
+					$elm$core$Basics$round(model.stringCount)))
+			]));
+};
+var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
+var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
+var $elm$svg$Svg$g = $elm$svg$Svg$trustedNode('g');
+var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
+var $elm$svg$Svg$Attributes$transform = _VirtualDom_attribute('transform');
+var $author$project$Games$FretboardGame$drawPlayer = function (model) {
+	var _v0 = model.userPosition;
+	var x = _v0.a;
+	var y = _v0.b;
+	return A2(
+		$elm$svg$Svg$g,
+		_List_fromArray(
+			[
+				$elm$svg$Svg$Attributes$transform(
+				'translate(' + ($elm$core$String$fromFloat(x) + (',' + ($elm$core$String$fromFloat(y) + ')'))))
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$svg$Svg$circle,
+				_List_fromArray(
+					[
+						$elm$svg$Svg$Attributes$r('10'),
+						$elm$svg$Svg$Attributes$fill('red')
+					]),
+				_List_Nil)
+			]));
+};
+var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var $elm$svg$Svg$Attributes$style = _VirtualDom_attribute('style');
+var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
+var $elm$core$Debug$toString = _Debug_toString;
+var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var $author$project$Games$FretboardGame$view = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Find note: ' + model.targetNote)
+					])),
+				A2(
+				$elm$html$Html$p,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						$elm$core$Debug$toString(model.userPosition))
+					])),
+				model.isOnPage ? A2(
+				$elm$svg$Svg$svg,
+				_List_fromArray(
+					[
+						$elm$svg$Svg$Attributes$width('800'),
+						$elm$svg$Svg$Attributes$height('200'),
+						$elm$svg$Svg$Attributes$style('background:#f0f0f0')
+					]),
+				_Utils_ap(
+					$author$project$Games$FretboardGame$drawFretboard(model),
+					_List_fromArray(
+						[
+							$author$project$Games$FretboardGame$drawPlayer(model)
+						]))) : A2($elm$html$Html$div, _List_Nil, _List_Nil)
+			]));
+};
+var $author$project$Games$ModeExercise$ChooseGame = function (a) {
+	return {$: 'ChooseGame', a: a};
+};
+var $author$project$Games$ModeExercise$GoBack = {$: 'GoBack'};
+var $author$project$Games$ModeExercise$ModeBuilderGame = {$: 'ModeBuilderGame'};
+var $author$project$Games$ModeExercise$ModeGuesserGame = {$: 'ModeGuesserGame'};
 var $elm$html$Html$br = _VirtualDom_node('br');
-var $author$project$Games$ChordExercise$AddToChordBuilderList = function (a) {
-	return {$: 'AddToChordBuilderList', a: a};
+var $author$project$Games$ModeExercise$Reset = {$: 'Reset'};
+var $author$project$Games$ModeExercise$viewGameOverOrWinMessage = function (model) {
+	var _v0 = model.result;
+	if (_v0.$ === 'Just') {
+		if (_v0.a.$ === 'Win') {
+			var _v1 = _v0.a;
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('game-over-message-container'),
+						(!model.gameOver) ? A2($elm$html$Html$Attributes$style, 'display', 'none') : A2($elm$html$Html$Attributes$style, 'display', '')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('You win!')
+							])),
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$button,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick($author$project$Games$ModeExercise$Reset),
+										$elm$html$Html$Attributes$class('custom-button')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Play again')
+									]))
+							]))
+					]));
+		} else {
+			var _v2 = _v0.a;
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('game-over-message-container'),
+						(!model.gameOver) ? A2($elm$html$Html$Attributes$style, 'display', 'none') : A2($elm$html$Html$Attributes$style, 'display', '')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Game over')
+							])),
+						A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$button,
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick($author$project$Games$ModeExercise$Reset),
+										$elm$html$Html$Attributes$class('custom-button')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Try again')
+									]))
+							]))
+					]));
+		}
+	} else {
+		return A2($elm$html$Html$div, _List_Nil, _List_Nil);
+	}
 };
-var $author$project$Games$ChordExercise$GoBack = {$: 'GoBack'};
-var $author$project$Games$ChordExercise$SubmitBuiltChord = {$: 'SubmitBuiltChord'};
-var $author$project$Games$ChordExercise$Undo = {$: 'Undo'};
+var $author$project$Games$ModeExercise$ChooseKey = function (a) {
+	return {$: 'ChooseKey', a: a};
+};
+var $author$project$Games$ModeExercise$viewKeyButtons = function (key) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('custom-button'),
+						$elm$html$Html$Events$onClick(
+						$author$project$Games$ModeExercise$ChooseKey(key))
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(key.key)
+					]))
+			]));
+};
+var $author$project$Games$ModeExercise$viewKeysOrError = function (model) {
+	var _v0 = model.errorMessage;
+	if (_v0.$ === 'Just') {
+		var error = _v0.a;
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text(error)
+				]));
+	} else {
+		var _v1 = model.majorScalesAndKeys;
+		if (_v1.$ === 'Just') {
+			var majorScalesAndKeys = _v1.a;
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('key-buttons-container')
+					]),
+				A2($elm$core$List$map, $author$project$Games$ModeExercise$viewKeyButtons, majorScalesAndKeys));
+		} else {
+			return A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('something else')
+					]));
+		}
+	}
+};
+var $author$project$Games$ModeExercise$AddToModeBuilderList = function (a) {
+	return {$: 'AddToModeBuilderList', a: a};
+};
+var $author$project$Games$ModeExercise$SubmitBuiltMode = {$: 'SubmitBuiltMode'};
+var $author$project$Games$ModeExercise$Undo = {$: 'Undo'};
 var $elm_community$list_extra$List$Extra$findIndexHelp = F3(
 	function (index, predicate, list) {
 		findIndexHelp:
@@ -13696,707 +14009,6 @@ var $author$project$Games$NoteBuilder$viewNotes = F3(
 					]));
 		}
 	});
-var $author$project$Games$ChordExercise$viewRandomizedChord = F2(
-	function (model, showNotes) {
-		var _v0 = model.randomizedChord;
-		if (_v0.$ === 'Just') {
-			var randomizedChord = _v0.a;
-			if (showNotes) {
-				return A2(
-					$elm$html$Html$p,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text(
-							'Which chord is this? ' + A2($author$project$Games$ChordExercise$chordConstructor, randomizedChord, model.chosenKeyAndScale))
-						]));
-			} else {
-				var _v1 = model.chosenKeyAndScale;
-				if (_v1.$ === 'Just') {
-					var chosenKeyAndScale = _v1.a;
-					return A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Please build the ' + (chosenKeyAndScale.key + (randomizedChord.name + ' chord')))
-							]));
-				} else {
-					return A2($elm$html$Html$p, _List_Nil, _List_Nil);
-				}
-			}
-		} else {
-			return A2(
-				$elm$html$Html$p,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('No chord found')
-					]));
-		}
-	});
-var $author$project$Games$ChordExercise$viewUserBuiltChord = function (note) {
-	return A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				$elm$html$Html$text(note + ' ')
-			]));
-};
-var $author$project$Games$ChordExercise$viewChordBuilderGame = function (model) {
-	return A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				function () {
-				var _v0 = model.chosenKeyAndScale;
-				if (_v0.$ === 'Just') {
-					var chosenKeyAndScale = _v0.a;
-					return A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2($author$project$Games$ChordExercise$viewRandomizedChord, model, false),
-								A3($author$project$Games$NoteBuilder$viewNotes, $author$project$Games$ChordExercise$AddToChordBuilderList, model.allNotes, chosenKeyAndScale.key),
-								A2(
-								$elm$html$Html$p,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('user-built-notes-container')
-									]),
-								$elm$core$List$reverse(
-									A2($elm$core$List$map, $author$project$Games$ChordExercise$viewUserBuiltChord, model.builtChord))),
-								_Utils_eq(model.builtChord, _List_Nil) ? A2($elm$html$Html$div, _List_Nil, _List_Nil) : A2(
-								$elm$html$Html$div,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('undo-button-container')
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$elm$html$Html$button,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('custom-button'),
-												$elm$html$Html$Events$onClick($author$project$Games$ChordExercise$Undo)
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text('Undo')
-											]))
-									])),
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('custom-button'),
-										$elm$html$Html$Events$onClick($author$project$Games$ChordExercise$SubmitBuiltChord)
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Submit')
-									]))
-							]));
-				} else {
-					return A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Please select a key')
-							]));
-				}
-			}(),
-				A2(
-				$elm$html$Html$button,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('custom-button'),
-						$elm$html$Html$Events$onClick($author$project$Games$ChordExercise$GoBack)
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text(' <-- Go Back')
-					]))
-			]));
-};
-var $author$project$Games$ChordExercise$ChordChosen = function (a) {
-	return {$: 'ChordChosen', a: a};
-};
-var $author$project$Games$ChordExercise$viewChord = F2(
-	function (chosenKeyAndScale, chord) {
-		return A2(
-			$elm$html$Html$div,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('custom-button'),
-					$elm$html$Html$Events$onClick(
-					$author$project$Games$ChordExercise$ChordChosen(chord))
-				]),
-			_List_fromArray(
-				[
-					$elm$html$Html$text(
-					_Utils_ap(chosenKeyAndScale.key, chord.name))
-				]));
-	});
-var $author$project$Games$ChordExercise$viewChords = F2(
-	function (model, chosenKeyAndScale) {
-		var _v0 = model.maybeChords;
-		if (_v0.$ === 'Just') {
-			var chords = _v0.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('chords-container')
-					]),
-				A2(
-					$elm$core$List$map,
-					$author$project$Games$ChordExercise$viewChord(chosenKeyAndScale),
-					chords));
-		} else {
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('No chords found')
-					]));
-		}
-	});
-var $author$project$Games$ChordExercise$viewChordGuesserGame = function (model) {
-	return A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				function () {
-				var _v0 = model.chosenKeyAndScale;
-				if (_v0.$ === 'Just') {
-					var chosenKeyAndScale = _v0.a;
-					return A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2($author$project$Games$ChordExercise$viewRandomizedChord, model, true),
-								A2($author$project$Games$ChordExercise$viewChords, model, chosenKeyAndScale),
-								A2(
-								$elm$html$Html$p,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text(
-										'Score:  ' + $elm$core$String$fromInt(model.score))
-									])),
-								A2(
-								$elm$html$Html$p,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text(
-										'Mistakes:  ' + $elm$core$String$fromInt(model.mistakes))
-									]))
-							]));
-				} else {
-					return A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Please choose a key')
-							]));
-				}
-			}(),
-				A2(
-				$elm$html$Html$button,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('custom-button'),
-						$elm$html$Html$Events$onClick($author$project$Games$ChordExercise$GoBack)
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text(' <-- Go Back')
-					]))
-			]));
-};
-var $author$project$Games$ChordExercise$ResetChordGuesser = {$: 'ResetChordGuesser'};
-var $author$project$Games$ChordExercise$viewGameOverMessage = function (model) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('game-over-message-container'),
-				(!model.gameOver) ? A2($elm$html$Html$Attributes$style, 'display', 'none') : A2($elm$html$Html$Attributes$style, 'display', '')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$p,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('You lose')
-					])),
-				A2(
-				$elm$html$Html$p,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Events$onClick($author$project$Games$ChordExercise$ResetChordGuesser),
-								$elm$html$Html$Attributes$class('custom-button')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Try again')
-							]))
-					]))
-			]));
-};
-var $author$project$Games$ChordExercise$KeyAndScaleChosen = function (a) {
-	return {$: 'KeyAndScaleChosen', a: a};
-};
-var $author$project$Games$ChordExercise$viewKeys = function (majorScaleAndKey) {
-	return A2(
-		$elm$html$Html$button,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('custom-button'),
-				$elm$html$Html$Events$onClick(
-				$author$project$Games$ChordExercise$KeyAndScaleChosen(majorScaleAndKey))
-			]),
-		_List_fromArray(
-			[
-				$elm$html$Html$text(majorScaleAndKey.key)
-			]));
-};
-var $author$project$Games$ChordExercise$viewKeysOrError = function (model) {
-	var _v0 = model.maybeMajorScalesAndKeys;
-	if (_v0.$ === 'Just') {
-		var majorScalesAndKeys = _v0.a;
-		return A2(
-			$elm$html$Html$div,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('key-buttons-container')
-				]),
-			A2($elm$core$List$map, $author$project$Games$ChordExercise$viewKeys, majorScalesAndKeys));
-	} else {
-		return A2(
-			$elm$html$Html$div,
-			_List_Nil,
-			_List_fromArray(
-				[
-					$elm$html$Html$text('No keys found')
-				]));
-	}
-};
-var $author$project$Games$ChordExercise$ResetChordBuilder = {$: 'ResetChordBuilder'};
-var $author$project$Games$ChordExercise$viewWinMessage = function (model) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('game-over-message-container'),
-				(!model.isBuiltCordCorrect) ? A2($elm$html$Html$Attributes$style, 'display', 'none') : A2($elm$html$Html$Attributes$style, 'display', '')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$p,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('You win!')
-					])),
-				A2(
-				$elm$html$Html$p,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Events$onClick($author$project$Games$ChordExercise$ResetChordBuilder),
-								$elm$html$Html$Attributes$class('custom-button')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Play again')
-							]))
-					]))
-			]));
-};
-var $author$project$Games$ChordExercise$view = function (model) {
-	var _v0 = model.gameMode;
-	if (_v0.$ === 'Just') {
-		if (_v0.a.$ === 'ChordGuesserGame') {
-			var _v1 = _v0.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Chord guesser'),
-						$author$project$Games$ChordExercise$viewKeysOrError(model),
-						$author$project$Games$ChordExercise$viewChordGuesserGame(model),
-						$author$project$Games$ChordExercise$viewGameOverMessage(model)
-					]));
-		} else {
-			var _v2 = _v0.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Chord builder'),
-						$author$project$Games$ChordExercise$viewKeysOrError(model),
-						$author$project$Games$ChordExercise$viewChordBuilderGame(model),
-						$author$project$Games$ChordExercise$viewWinMessage(model),
-						$author$project$Games$ChordExercise$viewGameOverMessage(model)
-					]));
-		}
-	} else {
-		return A2(
-			$elm$html$Html$div,
-			_List_Nil,
-			_List_fromArray(
-				[
-					$elm$html$Html$text('Please choose a game mode'),
-					A2(
-					$elm$html$Html$p,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(
-							$elm$html$Html$button,
-							_List_fromArray(
-								[
-									$elm$html$Html$Events$onClick(
-									$author$project$Games$ChordExercise$GameModeChosen($author$project$Games$ChordExercise$ChordGuesserGame)),
-									$elm$html$Html$Attributes$class('custom-button')
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Chord guesser')
-								])),
-							A2($elm$html$Html$br, _List_Nil, _List_Nil),
-							A2(
-							$elm$html$Html$button,
-							_List_fromArray(
-								[
-									$elm$html$Html$Events$onClick(
-									$author$project$Games$ChordExercise$GameModeChosen($author$project$Games$ChordExercise$ChordBuilderGame)),
-									$elm$html$Html$Attributes$class('custom-button')
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Chord builder')
-								]))
-						]))
-				]));
-	}
-};
-var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
-var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
-var $elm$core$Basics$round = _Basics_round;
-var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
-var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
-var $elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
-var $elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
-var $elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
-var $elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
-var $author$project$Games$FretboardGame$drawFretboard = function (model) {
-	var stringSpacing = 28;
-	var fretWidth = 48;
-	return $elm$core$List$concat(
-		_List_fromArray(
-			[
-				A2(
-				$elm$core$List$map,
-				function (f) {
-					return A2(
-						$elm$svg$Svg$line,
-						A2(
-							$elm$core$List$append,
-							_List_fromArray(
-								[
-									$elm$svg$Svg$Attributes$x1(
-									$elm$core$String$fromFloat(f * fretWidth)),
-									$elm$svg$Svg$Attributes$x2(
-									$elm$core$String$fromFloat(f * fretWidth)),
-									$elm$svg$Svg$Attributes$y1('14'),
-									$elm$svg$Svg$Attributes$y2(
-									$elm$core$String$fromFloat((model.stringCount * stringSpacing) - 14))
-								]),
-							(f === 1) ? _List_fromArray(
-								[
-									$elm$svg$Svg$Attributes$strokeWidth('10'),
-									$elm$svg$Svg$Attributes$stroke('black')
-								]) : _List_fromArray(
-								[
-									$elm$svg$Svg$Attributes$strokeWidth('1'),
-									$elm$svg$Svg$Attributes$stroke('#ccc')
-								])),
-						_List_Nil);
-				},
-				A2(
-					$elm$core$List$range,
-					0,
-					$elm$core$Basics$round(model.fretCount))),
-				A2(
-				$elm$core$List$map,
-				function (i) {
-					return A2(
-						$elm$svg$Svg$line,
-						_List_fromArray(
-							[
-								$elm$svg$Svg$Attributes$x1('0'),
-								$elm$svg$Svg$Attributes$x2(
-								$elm$core$String$fromFloat(model.fretCount * fretWidth)),
-								$elm$svg$Svg$Attributes$y1(
-								$elm$core$String$fromFloat(((i - 1) * stringSpacing) + (stringSpacing / 2))),
-								$elm$svg$Svg$Attributes$y2(
-								$elm$core$String$fromFloat(((i - 1) * stringSpacing) + (stringSpacing / 2))),
-								$elm$svg$Svg$Attributes$stroke('black'),
-								$elm$svg$Svg$Attributes$strokeWidth('1')
-							]),
-						_List_Nil);
-				},
-				A2(
-					$elm$core$List$range,
-					1,
-					$elm$core$Basics$round(model.stringCount)))
-			]));
-};
-var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
-var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
-var $elm$svg$Svg$g = $elm$svg$Svg$trustedNode('g');
-var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
-var $elm$svg$Svg$Attributes$transform = _VirtualDom_attribute('transform');
-var $author$project$Games$FretboardGame$drawPlayer = function (model) {
-	var _v0 = model.userPosition;
-	var x = _v0.a;
-	var y = _v0.b;
-	return A2(
-		$elm$svg$Svg$g,
-		_List_fromArray(
-			[
-				$elm$svg$Svg$Attributes$transform(
-				'translate(' + ($elm$core$String$fromFloat(x) + (',' + ($elm$core$String$fromFloat(y) + ')'))))
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$svg$Svg$circle,
-				_List_fromArray(
-					[
-						$elm$svg$Svg$Attributes$r('10'),
-						$elm$svg$Svg$Attributes$fill('red')
-					]),
-				_List_Nil)
-			]));
-};
-var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
-var $elm$svg$Svg$Attributes$style = _VirtualDom_attribute('style');
-var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
-var $elm$core$Debug$toString = _Debug_toString;
-var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
-var $author$project$Games$FretboardGame$view = function (model) {
-	return A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Find note: ' + model.targetNote)
-					])),
-				A2(
-				$elm$html$Html$p,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$elm$core$Debug$toString(model.userPosition))
-					])),
-				model.isOnPage ? A2(
-				$elm$svg$Svg$svg,
-				_List_fromArray(
-					[
-						$elm$svg$Svg$Attributes$width('800'),
-						$elm$svg$Svg$Attributes$height('200'),
-						$elm$svg$Svg$Attributes$style('background:#f0f0f0')
-					]),
-				_Utils_ap(
-					$author$project$Games$FretboardGame$drawFretboard(model),
-					_List_fromArray(
-						[
-							$author$project$Games$FretboardGame$drawPlayer(model)
-						]))) : A2($elm$html$Html$div, _List_Nil, _List_Nil)
-			]));
-};
-var $author$project$Games$ModeExercise$ChooseGame = function (a) {
-	return {$: 'ChooseGame', a: a};
-};
-var $author$project$Games$ModeExercise$GoBack = {$: 'GoBack'};
-var $author$project$Games$ModeExercise$ModeBuilderGame = {$: 'ModeBuilderGame'};
-var $author$project$Games$ModeExercise$ModeGuesserGame = {$: 'ModeGuesserGame'};
-var $author$project$Games$ModeExercise$Reset = {$: 'Reset'};
-var $author$project$Games$ModeExercise$viewGameOverOrWinMessage = function (model) {
-	var _v0 = model.result;
-	if (_v0.$ === 'Just') {
-		if (_v0.a.$ === 'Win') {
-			var _v1 = _v0.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('game-over-message-container'),
-						(!model.gameOver) ? A2($elm$html$Html$Attributes$style, 'display', 'none') : A2($elm$html$Html$Attributes$style, 'display', '')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('You win!')
-							])),
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick($author$project$Games$ModeExercise$Reset),
-										$elm$html$Html$Attributes$class('custom-button')
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Play again')
-									]))
-							]))
-					]));
-		} else {
-			var _v2 = _v0.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('game-over-message-container'),
-						(!model.gameOver) ? A2($elm$html$Html$Attributes$style, 'display', 'none') : A2($elm$html$Html$Attributes$style, 'display', '')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Game over')
-							])),
-						A2(
-						$elm$html$Html$p,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick($author$project$Games$ModeExercise$Reset),
-										$elm$html$Html$Attributes$class('custom-button')
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Try again')
-									]))
-							]))
-					]));
-		}
-	} else {
-		return A2($elm$html$Html$div, _List_Nil, _List_Nil);
-	}
-};
-var $author$project$Games$ModeExercise$ChooseKey = function (a) {
-	return {$: 'ChooseKey', a: a};
-};
-var $author$project$Games$ModeExercise$viewKeyButtons = function (key) {
-	return A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('custom-button'),
-						$elm$html$Html$Events$onClick(
-						$author$project$Games$ModeExercise$ChooseKey(key))
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text(key.key)
-					]))
-			]));
-};
-var $author$project$Games$ModeExercise$viewKeysOrError = function (model) {
-	var _v0 = model.errorMessage;
-	if (_v0.$ === 'Just') {
-		var error = _v0.a;
-		return A2(
-			$elm$html$Html$div,
-			_List_Nil,
-			_List_fromArray(
-				[
-					$elm$html$Html$text(error)
-				]));
-	} else {
-		var _v1 = model.majorScalesAndKeys;
-		if (_v1.$ === 'Just') {
-			var majorScalesAndKeys = _v1.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('key-buttons-container')
-					]),
-				A2($elm$core$List$map, $author$project$Games$ModeExercise$viewKeyButtons, majorScalesAndKeys));
-		} else {
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('something else')
-					]));
-		}
-	}
-};
-var $author$project$Games$ModeExercise$AddToModeBuilderList = function (a) {
-	return {$: 'AddToModeBuilderList', a: a};
-};
-var $author$project$Games$ModeExercise$SubmitBuiltMode = {$: 'SubmitBuiltMode'};
-var $author$project$Games$ModeExercise$Undo = {$: 'Undo'};
 var $author$project$Games$ModeExercise$viewUserBuiltMode = function (note) {
 	return A2(
 		$elm$html$Html$div,
@@ -15221,7 +14833,7 @@ var $author$project$Main$viewRoute = function (model) {
 						return A2(
 							$elm$html$Html$map,
 							$author$project$Main$ChordExerciseMsg,
-							$author$project$Games$ChordExercise$view(model.chordExerciseModel));
+							$author$project$Games$ChordGuesserExercise$view(model.chordExerciseModel));
 					case 'fretboard-game':
 						return A2(
 							$elm$html$Html$map,
@@ -15288,4 +14900,4 @@ var $author$project$Main$view = function (model) {
 };
 var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$UrlChanged, onUrlRequest: $author$project$Main$LinkClicked, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
-_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$string)({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Games.TheoryApi.Chord":{"args":[],"type":"{ name : String.String, formula : List.List String.String }"},"Games.TheoryApi.MajorScaleAndKey":{"args":[],"type":"{ key : String.String, notes : List.List ( Basics.Int, Games.TheoryApi.Note ) }"},"Games.TheoryApi.Mode":{"args":[],"type":"{ mode : String.String, formula : List.List String.String }"},"Games.TheoryApi.Note":{"args":[],"type":"String.String"},"Games.TheoryApi.TheoryDb":{"args":[],"type":"{ majorScalesAndKeys : List.List Games.TheoryApi.MajorScaleAndKey, modes : List.List Games.TheoryApi.Mode, allNotes : List.List Games.TheoryApi.Note, chords : List.List Games.TheoryApi.Chord }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UrlChanged":["Url.Url"],"LinkClicked":["Browser.UrlRequest"],"NoteExerciseMsg":["Games.NoteExercise.Msg"],"ModeExerciseMsg":["Games.ModeExercise.Msg"],"ChordExerciseMsg":["Games.ChordExercise.Msg"],"FretboardGameMsg":["Games.FretboardGame.Msg"],"StopwatchMsg":["Games.Stopwatch.Msg"],"GotTheoryDb":["Result.Result Http.Error Games.TheoryApi.TheoryDb"]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Games.ChordExercise.Msg":{"args":[],"tags":{"KeyAndScaleChosen":["Games.TheoryApi.MajorScaleAndKey"],"GotTheoryDb":["Games.TheoryApi.TheoryDb"],"RandomChordPicked":["Basics.Int"],"ChordChosen":["Games.TheoryApi.Chord"],"GameModeChosen":["Games.ChordExercise.GameMode"],"AddToChordBuilderList":["String.String"],"SubmitBuiltChord":[],"ResetChordGuesser":[],"ResetChordBuilder":[],"GoBack":[],"Undo":[]}},"Games.FretboardGame.Msg":{"args":[],"tags":{"KeyDown":["String.String"],"KeyUp":["String.String"],"Tick":["Time.Posix"],"SetIsOnPage":["Basics.Bool"]}},"Games.ModeExercise.Msg":{"args":[],"tags":{"GotTheoryDb":["Games.TheoryApi.TheoryDb"],"ChooseGame":["Games.ModeExercise.GameMode"],"ChooseKey":["Games.TheoryApi.MajorScaleAndKey"],"PickRandomMode":["Basics.Int"],"ModeGuessed":["String.String"],"RandomizeMode":[],"ResetWrong":[],"GoBack":[],"AddToModeBuilderList":["String.String"],"SubmitBuiltMode":[],"Submitted":["Games.ModeExercise.SubmitResult"],"Undo":[],"Reset":[]}},"Games.NoteExercise.Msg":{"args":[],"tags":{"NumberClicked":["Basics.Int"],"GotTheoryDb":["Games.TheoryApi.TheoryDb"],"Shuffle":[],"Shuffled":["List.List ( Basics.Int, Games.TheoryApi.Note )"],"KeyChosen":["Games.TheoryApi.MajorScaleAndKey"],"StopwatchMsg":["Games.Stopwatch.Msg"],"Reset":["Basics.Bool"]}},"Games.Stopwatch.Msg":{"args":[],"tags":{"Tick":["Time.Posix"],"Start":[],"Stop":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Games.ChordExercise.GameMode":{"args":[],"tags":{"ChordGuesserGame":[],"ChordBuilderGame":[]}},"Games.ModeExercise.GameMode":{"args":[],"tags":{"ModeGuesserGame":[],"ModeBuilderGame":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Games.ModeExercise.SubmitResult":{"args":[],"tags":{"Win":[],"Lose":[]}}}}})}});}(this));
+_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$string)({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Games.TheoryApi.Chord2":{"args":[],"type":"{ chord : String.String, root : String.String, formula : List.List Basics.Int, degrees : List.List String.String, notes : List.List String.String }"},"Games.TheoryApi.MajorScaleAndKey":{"args":[],"type":"{ key : String.String, notes : List.List ( Basics.Int, Games.TheoryApi.Note ) }"},"Games.TheoryApi.Mode":{"args":[],"type":"{ mode : String.String, formula : List.List String.String }"},"Games.TheoryApi.Note":{"args":[],"type":"String.String"},"Games.TheoryApi.TheoryDb":{"args":[],"type":"{ majorScalesAndKeys : List.List Games.TheoryApi.MajorScaleAndKey, modes : List.List Games.TheoryApi.Mode, allNotes : List.List Games.TheoryApi.Note, chords : List.List Games.TheoryApi.Chord2 }"},"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UrlChanged":["Url.Url"],"LinkClicked":["Browser.UrlRequest"],"NoteExerciseMsg":["Games.NoteExercise.Msg"],"ModeExerciseMsg":["Games.ModeExercise.Msg"],"ChordExerciseMsg":["Games.ChordGuesserExercise.Msg"],"FretboardGameMsg":["Games.FretboardGame.Msg"],"StopwatchMsg":["Games.Stopwatch.Msg"],"GotTheoryDb":["Result.Result Http.Error Games.TheoryApi.TheoryDb"]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"List.List":{"args":["a"],"tags":{}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Games.ChordGuesserExercise.Msg":{"args":[],"tags":{"GotChordData":["Result.Result Http.Error (List.List Games.TheoryApi.Chord2)"],"RandomChordPicked":["Basics.Int"],"ChordChosen":["Games.TheoryApi.Chord2"],"ResetChordGuesser":[],"GoBack":[]}},"Games.FretboardGame.Msg":{"args":[],"tags":{"KeyDown":["String.String"],"KeyUp":["String.String"],"Tick":["Time.Posix"],"SetIsOnPage":["Basics.Bool"]}},"Games.ModeExercise.Msg":{"args":[],"tags":{"GotTheoryDb":["Games.TheoryApi.TheoryDb"],"ChooseGame":["Games.ModeExercise.GameMode"],"ChooseKey":["Games.TheoryApi.MajorScaleAndKey"],"PickRandomMode":["Basics.Int"],"ModeGuessed":["String.String"],"RandomizeMode":[],"ResetWrong":[],"GoBack":[],"AddToModeBuilderList":["String.String"],"SubmitBuiltMode":[],"Submitted":["Games.ModeExercise.SubmitResult"],"Undo":[],"Reset":[]}},"Games.NoteExercise.Msg":{"args":[],"tags":{"NumberClicked":["Basics.Int"],"GotTheoryDb":["Games.TheoryApi.TheoryDb"],"Shuffle":[],"Shuffled":["List.List ( Basics.Int, Games.TheoryApi.Note )"],"KeyChosen":["Games.TheoryApi.MajorScaleAndKey"],"StopwatchMsg":["Games.Stopwatch.Msg"],"Reset":["Basics.Bool"]}},"Games.Stopwatch.Msg":{"args":[],"tags":{"Tick":["Time.Posix"],"Start":[],"Stop":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Games.ModeExercise.GameMode":{"args":[],"tags":{"ModeGuesserGame":[],"ModeBuilderGame":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Games.ModeExercise.SubmitResult":{"args":[],"tags":{"Win":[],"Lose":[]}}}}})}});}(this));
