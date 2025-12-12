@@ -1,4 +1,4 @@
-module Games.TheoryApi exposing (Chord, MajorScaleAndKey, Mode, Note, TheoryDb, buildErrorMessage, fetchTheoryDb)
+module Games.TheoryApi exposing (Chord, Chord2, MajorScaleAndKey, Mode, Note, TheoryDb, buildErrorMessage, fetchTheoryDb)
 
 import Http
 import Json.Decode as Decode
@@ -12,7 +12,7 @@ type alias TheoryDb =
     { majorScalesAndKeys : List MajorScaleAndKey
     , modes : List Mode
     , allNotes : List Note
-    , chords : List Chord
+    , chords : List Chord2
     }
 
 
@@ -40,7 +40,7 @@ theoryDbDecoder =
         (Decode.field "major-scales" (Decode.list majorScaleAndKeyDecoder))
         (Decode.field "modes" (Decode.list modeDecoder))
         (Decode.field "all-notes" (Decode.list Decode.string))
-        (Decode.field "chords" (Decode.list chordDecoder))
+        (Decode.field "chords" (Decode.list chord2Decoder))
 
 
 majorScaleAndKeyDecoder : Decode.Decoder MajorScaleAndKey

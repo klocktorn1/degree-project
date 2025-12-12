@@ -11,13 +11,13 @@ import Random
 
 
 type alias Model =
-    { maybeChords : Maybe (List TheoryApi.Chord)
+    { maybeChords : Maybe (List TheoryApi.Chord2)
     , maybeMajorScalesAndKeys : Maybe (List TheoryApi.MajorScaleAndKey)
     , gameMode : Maybe GameMode
     , allNotes : Maybe (List String)
     , chosenKeyAndScale : Maybe TheoryApi.MajorScaleAndKey
-    , maybeChosenChord : Maybe TheoryApi.Chord
-    , randomizedChord : Maybe TheoryApi.Chord
+    , maybeChosenChord : Maybe TheoryApi.Chord2
+    , randomizedChord : Maybe TheoryApi.Chord2
     , lastRandomIndex : Maybe Int
     , constructedRandomizedChord : List String
     , constructedChosenChord : List String
@@ -33,7 +33,7 @@ type Msg
     = KeyAndScaleChosen TheoryApi.MajorScaleAndKey
     | GotTheoryDb TheoryApi.TheoryDb
     | RandomChordPicked Int
-    | ChordChosen TheoryApi.Chord
+    | ChordChosen TheoryApi.Chord2
     | GameModeChosen GameMode
     | AddToChordBuilderList String
     | SubmitBuiltChord
@@ -296,10 +296,10 @@ viewChords model chosenKeyAndScale =
             Html.div [] [ Html.text "No chords found" ]
 
 
-viewChord : TheoryApi.MajorScaleAndKey -> TheoryApi.Chord -> Html Msg
+viewChord : TheoryApi.MajorScaleAndKey -> TheoryApi.Chord2 -> Html Msg
 viewChord chosenKeyAndScale chord =
     Html.div [ HA.class "custom-button", HE.onClick (ChordChosen chord) ]
-        [ Html.text (chosenKeyAndScale.key ++ chord.name)
+        [ Html.text (chosenKeyAndScale.key ++ chord.chord)
         ]
 
 
@@ -308,12 +308,12 @@ viewRandomizedChord model showNotes =
     case model.randomizedChord of
         Just randomizedChord ->
             if showNotes then
-                Html.p [] [ Html.text ("Which chord is this? " ++ chordConstructor randomizedChord model.chosenKeyAndScale) ]
+                Html.p [] [ Html.text ("Which chord is this? " ) ]
 
             else
                 case model.chosenKeyAndScale of
                     Just chosenKeyAndScale ->
-                        Html.p [] [ Html.text ("Please build the " ++ chosenKeyAndScale.key ++ randomizedChord.name ++ " chord") ]
+                        Html.p [] [ Html.text ("Please build the " ++ chosenKeyAndScale.key ++ randomizedChord.chord ++ " chord") ]
 
                     Nothing ->
                         Html.p [] []
@@ -343,20 +343,10 @@ listTuplesToListString listOfTuples =
     List.map Tuple.second listOfTuples
 
 
-chordConstructor : TheoryApi.Chord -> Maybe TheoryApi.MajorScaleAndKey -> String
-chordConstructor chord maybeMajorScaleAndKey =
-    case maybeMajorScaleAndKey of
-        Just majorScaleAndKey ->
-            List.map2 (++) (ListExtra.removeIfIndex (\index -> modBy 2 index /= 0) (listTuplesToListString majorScaleAndKey.notes)) chord.formula
-                |> List.map (String.replace "#b" "")
-                |> List.map (String.replace "b#" "")
-                |> String.join " "
-
-        Nothing ->
-            "Please choose a key"
 
 
-pickRandomChord : Maybe (List TheoryApi.Chord) -> Int -> TheoryApi.Chord
+
+pickRandomChord : Maybe (List TheoryApi.Chord2) -> Int -> TheoryApi.Chord2
 pickRandomChord maybeChords randomIndex =
     case maybeChords of
         Just chords ->
@@ -418,7 +408,7 @@ checkIfBuiltCorrectHelper model =
         Just randomizedChord ->
             let
                 constructedRandomizedChordList =
-                    String.split " " (chordConstructor randomizedChord model.chosenKeyAndScale)
+                    []
             in
             constructedRandomizedChordList == List.reverse model.builtChord
 
