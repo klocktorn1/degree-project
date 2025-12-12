@@ -9,7 +9,7 @@ vecka 2
 måndag - Började med API. Bestämt mig för hur det ska struktureras. kommer inte använda DB, utan kör allt med algoritmiska funktioner för att få fram ackord etc. Började göra chordService och definerat notes route och notesController. Färdig med generateChord funktion och första endpointen för att hämta ett ackord.
 tisdag - Nästan färdig med API. gjort scales, chords och intervals endpoints. intervals inte riktigt färdigt än, fastnat lite vid hur jag ska filtrera ut de enharmoniska ekvivalenterna
 onsdag - Färdig med api, bestämmde mig för att inte fokusera så mycket på att få enharmoniskt korrekta kromatiska skalor. Det funkar i "vanliga" tonarter men blir fel enharmoniska toner i t.ex Cbb eller B## (Kanske fixar detta senare om jag har tid men inte super viktigt då detta är bara semantiskt) 
-torsdag - Deployade api på render, började med Figma design för frontend.
+torsdag - Deployade api på render, började med Figma design för frontend. Initierade elm projekt i frontend och kopierade över några filer jag gjort innan
 fredag - 
 
 

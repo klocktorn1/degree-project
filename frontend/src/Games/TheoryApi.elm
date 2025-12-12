@@ -74,7 +74,6 @@ fetchTheoryDb toMsg =
         }
 
 
-
 buildErrorMessage : Http.Error -> String
 buildErrorMessage httpError =
     case httpError of
@@ -94,13 +93,6 @@ buildErrorMessage httpError =
             "BadBody: " ++ message
 
 
-
-
-
-
-
-
-
 type alias Chord2 =
     { chord : String
     , root : String
@@ -108,6 +100,7 @@ type alias Chord2 =
     , degrees : List String
     , notes : List String
     }
+
 
 chord2Decoder : Decode.Decoder Chord2
 chord2Decoder =
@@ -119,33 +112,13 @@ chord2Decoder =
         (Decode.field "notes" (Decode.list Decode.string))
 
 
-fetchChord2 :
-    String -> String -> (Result Http.Error Chord2 -> msg) -> Cmd msg
+fetchChord2 : String -> String -> (Result Http.Error Chord2 -> msg) -> Cmd msg
 fetchChord2 root quality toMsg =
     Http.get
         { url =
             "https://music-theory-api-tuhh.onrender.com/api/v1/chords/"
-                ++ root ++ "/" ++ quality
+                ++ root
+                ++ "/"
+                ++ quality
         , expect = Http.expectJson toMsg chord2Decoder
-        }
-
-
-
-
-type alias Chord2 =
-    { name : String
-    , formula : List String
-    }
-
-chordDecoder2 : Decode.Decoder Chord2
-chordDecoder2 =
-    Decode.map2 Chord2
-        (Decode.field "name" Decode.string)
-        (Decode.field "formula" (Decode.list Decode.string))
-
-fetchChords : (Result Http.Error (List Chord2) -> msg) -> Cmd msg
-fetchChords toMsg =
-    Http.get
-        { url = "https://music-theory-api-tuhh.onrender.com/api/v1/chords"
-        , expect = Http.expectJson toMsg (Decode.list chordDecoder)
         }
