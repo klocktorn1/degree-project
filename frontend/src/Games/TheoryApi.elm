@@ -36,7 +36,7 @@ type alias Mode =
 
 baseUrl : String
 baseUrl =
-    "http://localhost:5000"
+    "https://music-theory-api-tuhh.onrender.com/api/v1"
 
 
 theoryDbDecoder : Decode.Decoder TheoryDb
@@ -127,7 +127,7 @@ fetchChord2 root quality toMsg =
     Http.get
         { url =
             baseUrl
-                ++ "/api/v1/chords/"
+                ++ "/chords/"
                 ++ root
                 ++ "/"
                 ++ quality
@@ -142,13 +142,24 @@ parseChordTypes chordTypes =
         |> (\s -> "?types=" ++ s)
 
 
-fetchChords2 : String -> List String -> (Result Http.Error (List Chord2) -> msg) -> Cmd msg
-fetchChords2 root chordTypes toMsg =
-    Http.get
-        { url =
-            baseUrl
-                ++ "/api/v1/chords/"
-                ++ root
-                ++ parseChordTypes chordTypes
-        , expect = Http.expectJson toMsg chord2ListDecoder
-        }
+fetchChords2 : List String -> List String -> (Result Http.Error (List Chord2) -> msg) -> Cmd msg
+fetchChords2 rootNotes chordTypes toMsg =
+
+    case rootNotes of
+        [] ->
+            Cmd.none
+
+        _ ->
+            rootNotes
+                |> List.map
+                    (\root ->
+                        Http.get
+                            { url =
+                                baseUrl
+                                    ++ "/chords/"
+                                    ++ root
+                                    ++ parseChordTypes chordTypes
+                            , expect = Http.expectJson toMsg chord2ListDecoder
+                            }
+                    )
+                |> Cmd.batch

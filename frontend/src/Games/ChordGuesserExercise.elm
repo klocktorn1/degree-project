@@ -7,6 +7,7 @@ import Html.Events as HE
 import Http
 import List.Extra as ListExtra
 import Random
+import Random.List as RandomList
 import String
 
 
@@ -14,6 +15,7 @@ type alias Model =
     { maybeChords : Maybe (List TheoryApi.Chord2)
     , isGameStarted : Bool
     , chosenDifficulty : Difficulty
+    , pendingFetches : Int
     , rootNotes : List String
     , maybeChosenChord : Maybe TheoryApi.Chord2
     , randomizedChord : Maybe TheoryApi.Chord2
@@ -30,6 +32,7 @@ type Msg
     | DifficultyChosen Difficulty
     | ChordChosen TheoryApi.Chord2
     | ChordGroupChosen (List String)
+
     | ResetChordGuesser
     | GoBack
 
@@ -51,6 +54,7 @@ init _ =
       , maybeChosenChord = Nothing
       , isGameStarted = False
       , chosenDifficulty = Easy
+      , pendingFetches = 0
       , rootNotes = [ "C", "G", "F" ]
       , randomizedChord = Nothing
       , lastRandomIndex = Nothing
@@ -67,10 +71,10 @@ subscriptions _ =
     Sub.none
 
 
-initialFetch : String -> List String -> Cmd Msg
-initialFetch root chordTypes =
+initialFetch : List String -> List String -> Cmd Msg
+initialFetch rootNotes chordTypes =
     -- adjust root and types as desired; Main should call this when route is chord-exercise
-    TheoryApi.fetchChords2 root chordTypes GotChordData
+    TheoryApi.fetchChords2 rootNotes chordTypes GotChordData
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -78,29 +82,59 @@ update msg model =
     case msg of
         GotChordData (Ok chords) ->
             let
-                chordCount =
-                    List.length chords
-            in
-            -- store chords and immediately request a random index if there are any chords
-            if chordCount > 0 then
-                ( { model | maybeChords = Just chords }, randomizeChord chordCount )
+                existingChords =
+                    Maybe.withDefault [] model.maybeChords
 
-            else
-                ( { model | maybeChords = Just [] }, Cmd.none )
+                combined =
+                    existingChords ++ chords
+
+                remaining =
+                    model.pendingFetches - 1
+
+                chordCount =
+                    List.length combined
+
+                cmd =
+                    if remaining <= 0 && chordCount > 0 then
+                        randomizeChord chordCount
+
+                    else
+                        Cmd.none
+            in
+            ( { model | maybeChords = Just combined, pendingFetches = remaining }, cmd )
 
         GotChordData (Err _) ->
-            -- keep things simple: don't change state on error (or log if you want)
-            ( model, Cmd.none )
+            let
+                remaining =
+                    model.pendingFetches - 1
+
+                chordCount =
+                    List.length (Maybe.withDefault [] model.maybeChords)
+
+                cmd =
+                    if remaining <= 0 && chordCount > 0 then
+                        randomizeChord chordCount
+
+                    else
+                        Cmd.none
+            in
+            ( { model | pendingFetches = remaining }, cmd )
 
         DifficultyChosen difficulty ->
             let
                 newDifficulty =
                     difficulty
             in
-            ( { model | chosenDifficulty = newDifficulty, rootNotes = setRootNotes model newDifficulty }, Cmd.none )
+            ( { model | chosenDifficulty = newDifficulty, rootNotes = setRootNotes newDifficulty }, Cmd.none )
 
         ChordGroupChosen chordTypes ->
-            ( { model | isGameStarted = True }, TheoryApi.fetchChords2 model.rootNotes chordTypes GotChordData )
+            let
+                fetchCount =
+                    List.length model.rootNotes
+            in
+            ( { model | isGameStarted = True, maybeChords = Just [], pendingFetches = fetchCount }
+            , TheoryApi.fetchChords2 model.rootNotes chordTypes GotChordData
+            )
 
         RandomChordPicked randomIndex ->
             let
@@ -189,20 +223,20 @@ view model =
             ]
 
 
-setRootNotes : Model -> Difficulty -> Model
-setRootNotes model difficulty =
+setRootNotes : Difficulty -> List String
+setRootNotes difficulty =
     case difficulty of
         Easy ->
-            { model | rootNotes = [ "C", "G", "F" ] }
+            [ "C", "G", "F" ]
 
         Medium ->
-            { model | rootNotes = [ "C", "G", "F", "D", "A", "B♭", "E♭" ] }
+            [ "C", "G", "F", "D", "A", "B♭", "E♭" ]
 
         Hard ->
-            { model | rootNotes = [ "C", "G", "F", "D", "A", "B♭", "E♭", "E", "B", "A♭", "D♭" ] }
+            [ "C", "G", "F", "D", "A", "B♭", "E♭", "E", "B", "A♭", "D♭" ]
 
         Extreme ->
-            { model | rootNotes = [ "C", "G", "F", "D", "A", "B♭", "E♭", "E", "B", "A♭", "D♭", "F#", "C#", "G#", "D#", "A#" ] }
+            [ "C", "G", "F", "D", "A", "B♭", "E♭", "E", "B", "A♭", "D♭", "F#", "C#", "G#", "D#", "A#" ]
 
 
 stringFromDifficulty : Difficulty -> String
@@ -220,6 +254,15 @@ stringFromDifficulty difficulty =
         Extreme ->
             "Extreme"
 
+
+rotateLeft : List a -> List a
+rotateLeft list =
+    case list of
+        x :: xs ->
+            xs ++ [ x ]
+
+        [] ->
+            []
 
 viewChords : Model -> Html Msg
 viewChords model =
@@ -242,7 +285,7 @@ viewRandomizedChord : Model -> Html Msg
 viewRandomizedChord model =
     case model.randomizedChord of
         Just randomizedChord ->
-            Html.p [] [ Html.text ("Which chord is this? " ++ viewRandomizedChordNotes randomizedChord.notes) ]
+            Html.p [] [ Html.text ("Which chord is this? " ++ viewRandomizedChordNotes (rotateLeft randomizedChord.notes)) ]
 
         Nothing ->
             Html.p [] [ Html.text "No chord found" ]

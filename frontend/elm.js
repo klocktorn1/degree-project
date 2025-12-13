@@ -10820,6 +10820,7 @@ var $author$project$Games$ChordGuesserExercise$init = function (_v0) {
 			maybeChords: $elm$core$Maybe$Nothing,
 			maybeChosenChord: $elm$core$Maybe$Nothing,
 			mistakes: 0,
+			pendingFetches: 0,
 			randomizedChord: $elm$core$Maybe$Nothing,
 			rootNotes: _List_fromArray(
 				['C', 'G', 'F']),
@@ -11503,7 +11504,7 @@ var $author$project$Games$ChordGuesserExercise$checkIfChordIsCorrect = function 
 		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 	}
 };
-var $author$project$Games$TheoryApi$baseUrl = 'http://localhost:5000';
+var $author$project$Games$TheoryApi$baseUrl = 'https://music-theory-api-tuhh.onrender.com/api/v1';
 var $author$project$Games$TheoryApi$Chord2 = F5(
 	function (chord, root, formula, degrees, notes) {
 		return {chord: chord, degrees: degrees, formula: formula, notes: notes, root: root};
@@ -11778,12 +11779,22 @@ var $author$project$Games$TheoryApi$parseChordTypes = function (chordTypes) {
 		A2($elm$core$String$join, '&types=', chordTypes));
 };
 var $author$project$Games$TheoryApi$fetchChords2 = F3(
-	function (root, chordTypes, toMsg) {
-		return $elm$http$Http$get(
-			{
-				expect: A2($elm$http$Http$expectJson, toMsg, $author$project$Games$TheoryApi$chord2ListDecoder),
-				url: $author$project$Games$TheoryApi$baseUrl + ('/api/v1/chords/' + (root + $author$project$Games$TheoryApi$parseChordTypes(chordTypes)))
-			});
+	function (rootNotes, chordTypes, toMsg) {
+		if (!rootNotes.b) {
+			return $elm$core$Platform$Cmd$none;
+		} else {
+			return $elm$core$Platform$Cmd$batch(
+				A2(
+					$elm$core$List$map,
+					function (root) {
+						return $elm$http$Http$get(
+							{
+								expect: A2($elm$http$Http$expectJson, toMsg, $author$project$Games$TheoryApi$chord2ListDecoder),
+								url: $author$project$Games$TheoryApi$baseUrl + ('/chords/' + (root + $author$project$Games$TheoryApi$parseChordTypes(chordTypes)))
+							});
+					},
+					rootNotes));
+		}
 	});
 var $author$project$Games$ChordGuesserExercise$defaultChord = {chord: 'No chord found', degrees: _List_Nil, formula: _List_Nil, notes: _List_Nil, root: ''};
 var $elm$core$List$head = function (list) {
@@ -11815,43 +11826,75 @@ var $author$project$Games$ChordGuesserExercise$pickRandomChord = F2(
 			return $author$project$Games$ChordGuesserExercise$defaultChord;
 		}
 	});
+var $author$project$Games$ChordGuesserExercise$setRootNotes = function (difficulty) {
+	switch (difficulty.$) {
+		case 'Easy':
+			return _List_fromArray(
+				['C', 'G', 'F']);
+		case 'Medium':
+			return _List_fromArray(
+				['C', 'G', 'F', 'D', 'A', 'B♭', 'E♭']);
+		case 'Hard':
+			return _List_fromArray(
+				['C', 'G', 'F', 'D', 'A', 'B♭', 'E♭', 'E', 'B', 'A♭', 'D♭']);
+		default:
+			return _List_fromArray(
+				['C', 'G', 'F', 'D', 'A', 'B♭', 'E♭', 'E', 'B', 'A♭', 'D♭', 'F#', 'C#', 'G#', 'D#', 'A#']);
+	}
+};
 var $author$project$Games$ChordGuesserExercise$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
 			case 'GotChordData':
 				if (msg.a.$ === 'Ok') {
 					var chords = msg.a.a;
-					var chordCount = $elm$core$List$length(chords);
-					return (chordCount > 0) ? _Utils_Tuple2(
+					var remaining = model.pendingFetches - 1;
+					var existingChords = A2($elm$core$Maybe$withDefault, _List_Nil, model.maybeChords);
+					var combined = _Utils_ap(existingChords, chords);
+					var chordCount = $elm$core$List$length(combined);
+					var cmd = ((remaining <= 0) && (chordCount > 0)) ? $author$project$Games$ChordGuesserExercise$randomizeChord(chordCount) : $elm$core$Platform$Cmd$none;
+					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
-								maybeChords: $elm$core$Maybe$Just(chords)
+								maybeChords: $elm$core$Maybe$Just(combined),
+								pendingFetches: remaining
 							}),
-						$author$project$Games$ChordGuesserExercise$randomizeChord(chordCount)) : _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								maybeChords: $elm$core$Maybe$Just(_List_Nil)
-							}),
-						$elm$core$Platform$Cmd$none);
+						cmd);
 				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					var remaining = model.pendingFetches - 1;
+					var chordCount = $elm$core$List$length(
+						A2($elm$core$Maybe$withDefault, _List_Nil, model.maybeChords));
+					var cmd = ((remaining <= 0) && (chordCount > 0)) ? $author$project$Games$ChordGuesserExercise$randomizeChord(chordCount) : $elm$core$Platform$Cmd$none;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{pendingFetches: remaining}),
+						cmd);
 				}
 			case 'DifficultyChosen':
 				var difficulty = msg.a;
+				var newDifficulty = difficulty;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{chosenDifficulty: difficulty}),
+						{
+							chosenDifficulty: newDifficulty,
+							rootNotes: $author$project$Games$ChordGuesserExercise$setRootNotes(newDifficulty)
+						}),
 					$elm$core$Platform$Cmd$none);
 			case 'ChordGroupChosen':
 				var chordTypes = msg.a;
+				var fetchCount = $elm$core$List$length(model.rootNotes);
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{isGameStarted: true}),
-					A3($author$project$Games$TheoryApi$fetchChords2, 'C', chordTypes, $author$project$Games$ChordGuesserExercise$GotChordData));
+						{
+							isGameStarted: true,
+							maybeChords: $elm$core$Maybe$Just(_List_Nil),
+							pendingFetches: fetchCount
+						}),
+					A3($author$project$Games$TheoryApi$fetchChords2, model.rootNotes, chordTypes, $author$project$Games$ChordGuesserExercise$GotChordData));
 			case 'RandomChordPicked':
 				var randomIndex = msg.a;
 				var newRandomChord = A2($author$project$Games$ChordGuesserExercise$pickRandomChord, model.maybeChords, randomIndex);
@@ -12191,6 +12234,18 @@ var $author$project$Games$ChordGuesserExercise$viewChords = function (model) {
 				]));
 	}
 };
+var $author$project$Games$ChordGuesserExercise$rotateLeft = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return _Utils_ap(
+			xs,
+			_List_fromArray(
+				[x]));
+	} else {
+		return _List_Nil;
+	}
+};
 var $author$project$Games$ChordGuesserExercise$viewRandomizedChordNotes = function (notes) {
 	return A2($elm$core$String$join, ', ', notes);
 };
@@ -12204,7 +12259,8 @@ var $author$project$Games$ChordGuesserExercise$viewRandomizedChord = function (m
 			_List_fromArray(
 				[
 					$elm$html$Html$text(
-					'Which chord is this? ' + $author$project$Games$ChordGuesserExercise$viewRandomizedChordNotes(randomizedChord.notes))
+					'Which chord is this? ' + $author$project$Games$ChordGuesserExercise$viewRandomizedChordNotes(
+						$author$project$Games$ChordGuesserExercise$rotateLeft(randomizedChord.notes)))
 				]));
 	} else {
 		return A2(
