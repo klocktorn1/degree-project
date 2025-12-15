@@ -1,4 +1,4 @@
-module Games.TheoryApi exposing (Chord, Chord2, MajorScaleAndKey, Mode, Note, TheoryDb, buildErrorMessage, fetchChords2, fetchTheoryDb)
+module Exercises.TheoryApicopy exposing (Chord, Chord2, MajorScaleAndKey, Mode, Note, TheoryDb, buildErrorMessage, fetchChords2, fetchTheoryDb)
 
 import Http
 import Json.Decode as Decode

@@ -1,4 +1,4 @@
-module Games.NoteBuilder exposing (viewNotes)
+module Exercises.NoteBuilder exposing (viewNotes)
 
 import Html exposing (Html)
 import Html.Attributes as HA

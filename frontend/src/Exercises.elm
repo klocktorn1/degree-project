@@ -1,6 +1,6 @@
 module Exercises exposing (Model, Msg, init, subscriptions, update, view)
 
-import Games.ChordGuesserExercise as ChordGuesserExercise
+import Exercises.ChordGuesserExercise as ChordGuesserExercise
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE

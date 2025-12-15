@@ -1,7 +1,7 @@
-port module Games.NoteExercise exposing (..)
+port module Exercises.NoteExercise exposing (..)
 
-import Games.Stopwatch as Stopwatch
-import Games.TheoryApi as TheoryApi
+import Exercises.Stopwatch as Stopwatch
+import Exercises.TheoryApicopy as TheoryApi
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE

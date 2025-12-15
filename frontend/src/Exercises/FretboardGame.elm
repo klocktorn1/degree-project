@@ -1,4 +1,4 @@
-module Games.FretboardGame exposing (..)
+module Exercises.FretboardGame exposing (..)
 
 import Browser
 import Browser.Events exposing (onAnimationFrame, onKeyDown, onKeyUp)

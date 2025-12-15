@@ -10,7 +10,7 @@ måndag - Började med API. Bestämt mig för hur det ska struktureras. kommer i
 tisdag - Nästan färdig med API. gjort scales, chords och intervals endpoints. intervals inte riktigt färdigt än, fastnat lite vid hur jag ska filtrera ut de enharmoniska ekvivalenterna
 onsdag - Färdig med api, bestämmde mig för att inte fokusera så mycket på att få enharmoniskt korrekta kromatiska skalor. Det funkar i "vanliga" tonarter men blir fel enharmoniska toner i t.ex Cbb eller B## (Kanske fixar detta senare om jag har tid men inte super viktigt då detta är bara semantiskt) 
 torsdag - Deployade api på render, började med Figma design för frontend. Initierade elm projekt i frontend och kopierade över några filer jag gjort innan
-fredag - 
+fredag - Hade en gammal övning jag gjort i elm (chordguesser) som jag ändrade väldigt mycket i för att kodstrukturen skulle fungera med mitt nya API. Tog lång tid att få till det då strukturen för musikteori datan i APIet ser helt annorlunda ut från det jag använde mig av innan.
 
 
 

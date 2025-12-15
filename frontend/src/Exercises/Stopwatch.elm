@@ -1,4 +1,4 @@
-module Games.Stopwatch exposing (..)
+module Exercises.Stopwatch exposing (..)
 
 import Html exposing (Html)
 import Html.Attributes as HA

@@ -1,6 +1,6 @@
-module Games.ChordGuesserExercise exposing (..)
+module Exercises.ChordGuesserExercise exposing (..)
 
-import Games.TheoryApi as TheoryApi
+import TheoryApi as TheoryApi
 import Html exposing (Html, s)
 import Html.Attributes as HA
 import Html.Events as HE
@@ -12,14 +12,16 @@ import String
 
 
 type alias Model =
-    { maybeChords : Maybe (List TheoryApi.Chord2)
+    { maybeChords : Maybe (List TheoryApi.Chord)
     , isGameStarted : Bool
     , chosenDifficulty : Difficulty
     , pendingFetches : Int
     , rootNotes : List String
-    , maybeChosenChord : Maybe TheoryApi.Chord2
-    , randomizedChord : Maybe TheoryApi.Chord2
+    , maybeChosenChord : Maybe TheoryApi.Chord
+    , randomizedChord : Maybe TheoryApi.Chord
+    , randomizedChordNotes : Maybe (List String)
     , lastRandomIndex : Maybe Int
+    , areNotesShuffled : Bool
     , score : Int
     , mistakes : Int
     , gameOver : Bool
@@ -27,12 +29,13 @@ type alias Model =
 
 
 type Msg
-    = GotChordData (Result Http.Error (List TheoryApi.Chord2))
+    = GotChordData (Result Http.Error (List TheoryApi.Chord))
     | RandomChordPicked Int
     | DifficultyChosen Difficulty
-    | ChordChosen TheoryApi.Chord2
+    | ChordChosen TheoryApi.Chord
     | ChordGroupChosen (List String)
-
+    | Shuffled (List String)
+    | ToggleNotesShuffle
     | ResetChordGuesser
     | GoBack
 
@@ -41,6 +44,7 @@ type Difficulty
     = Easy
     | Medium
     | Hard
+    | Advanced
     | Extreme
 
 
@@ -57,7 +61,9 @@ init _ =
       , pendingFetches = 0
       , rootNotes = [ "C", "G", "F" ]
       , randomizedChord = Nothing
+      , randomizedChordNotes = Nothing
       , lastRandomIndex = Nothing
+      , areNotesShuffled = False
       , score = 0
       , mistakes = 0
       , gameOver = False
@@ -69,12 +75,6 @@ init _ =
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.none
-
-
-initialFetch : List String -> List String -> Cmd Msg
-initialFetch rootNotes chordTypes =
-    -- adjust root and types as desired; Main should call this when route is chord-exercise
-    TheoryApi.fetchChords2 rootNotes chordTypes GotChordData
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -124,8 +124,25 @@ update msg model =
             let
                 newDifficulty =
                     difficulty
+
+                areNotesShuffled =
+                    case newDifficulty of
+                        Easy ->
+                            False
+
+                        Medium ->
+                            False
+
+                        Hard ->
+                            True
+
+                        Advanced ->
+                            True
+
+                        Extreme ->
+                            True
             in
-            ( { model | chosenDifficulty = newDifficulty, rootNotes = setRootNotes newDifficulty }, Cmd.none )
+            ( { model | chosenDifficulty = newDifficulty, rootNotes = setRootNotes newDifficulty, areNotesShuffled = areNotesShuffled }, Cmd.none )
 
         ChordGroupChosen chordTypes ->
             let
@@ -133,8 +150,13 @@ update msg model =
                     List.length model.rootNotes
             in
             ( { model | isGameStarted = True, maybeChords = Just [], pendingFetches = fetchCount }
-            , TheoryApi.fetchChords2 model.rootNotes chordTypes GotChordData
+            , TheoryApi.fetchChords model.rootNotes chordTypes GotChordData
             )
+
+        Shuffled chordNotes ->
+            -- Don't mutate the canonical `randomizedChord` used for equality checks.
+            -- Store the shuffled/ display-only notes in `randomizedChordNotes`.
+            ( { model | randomizedChordNotes = Just chordNotes }, Cmd.none )
 
         RandomChordPicked randomIndex ->
             let
@@ -144,6 +166,9 @@ update msg model =
                 -- helper to pick the chord at index or default
                 newRandomChord =
                     pickRandomChord model.maybeChords randomIndex
+
+                notes =
+                    newRandomChord.notes
             in
             case model.lastRandomIndex of
                 Just lastIndex ->
@@ -152,10 +177,25 @@ update msg model =
                         ( model, randomizeChord chordCount )
 
                     else
-                        ( { model | randomizedChord = Just newRandomChord, lastRandomIndex = Just randomIndex }, Cmd.none )
+                        ( { model
+                            | randomizedChord = Just newRandomChord
+                            , lastRandomIndex = Just randomIndex
+                            , randomizedChordNotes = Just notes
+                          }
+                        , shuffleNotesInChord model notes
+                        )
 
                 Nothing ->
-                    ( { model | randomizedChord = Just newRandomChord, lastRandomIndex = Just randomIndex }, Cmd.none )
+                    ( { model
+                        | randomizedChord = Just newRandomChord
+                        , lastRandomIndex = Just randomIndex
+                        , randomizedChordNotes = Just notes
+                      }
+                    , shuffleNotesInChord model notes
+                    )
+
+        ToggleNotesShuffle ->
+            ( { model | areNotesShuffled = not model.areNotesShuffled }, Cmd.none )
 
         ChordChosen chord ->
             let
@@ -178,7 +218,30 @@ update msg model =
             )
 
         GoBack ->
-            ( model, Cmd.none )
+            ( { model | isGameStarted = False }, Cmd.none )
+
+
+listOfDifficulities : List Difficulty
+listOfDifficulities =
+    [ Easy, Medium, Hard, Advanced, Extreme ]
+
+isToggleShuffleDisabled : Difficulty -> Bool
+isToggleShuffleDisabled difficulty =
+    case difficulty of
+        Easy ->
+            False
+
+        Medium ->
+            False
+
+        Hard ->
+            True
+
+        Advanced ->
+            True
+
+        Extreme ->
+            False
 
 
 view : Model -> Html Msg
@@ -186,7 +249,7 @@ view model =
     if model.isGameStarted then
         Html.div []
             [ Html.text "Chord guesser"
-            , viewRandomizedChord model
+            , viewRandomizedChordNotes model
             , viewChords model
             , Html.p [] [ Html.text <| "Score:  " ++ String.fromInt model.score ]
             , Html.p [] [ Html.text <| "Mistakes:  " ++ String.fromInt model.mistakes ]
@@ -196,13 +259,19 @@ view model =
     else
         Html.section []
             [ Html.h2 [] [ Html.text "Chord Guesser Exercise" ]
-            , Html.button [ HA.class "custom-button", HE.onClick (DifficultyChosen Easy) ] [ Html.text "Easy" ]
-            , Html.button [ HA.class "custom-button", HE.onClick (DifficultyChosen Medium) ] [ Html.text "Medium" ]
-            , Html.button [ HA.class "custom-button", HE.onClick (DifficultyChosen Hard) ] [ Html.text "Hard" ]
-            , Html.button [ HA.class "custom-button", HE.onClick (DifficultyChosen Extreme) ] [ Html.text "Extreme" ]
+            , viewDifficultyButtons listOfDifficulities
             , Html.div []
                 [ Html.text ("Chosen difficulty: " ++ stringFromDifficulty model.chosenDifficulty)
                 ]
+            , Html.label [ HA.for "shuffle-notes-checkbox" ] [ Html.text "Shuffle Notes" ]
+            , Html.input
+                [ HA.type_ "checkbox"
+                , HA.checked model.areNotesShuffled
+                , HA.id "shuffle-notes-checkbox"
+                , HE.onClick ToggleNotesShuffle
+                , HA.disabled (isToggleShuffleDisabled model.chosenDifficulty)
+                ]
+                [ Html.text "Toggle Shuffle Notes" ]
             , Html.div []
                 [ Html.ul []
                     [ Html.li [ HE.onClick (ChordGroupChosen [ "major", "minor" ]) ] [ Html.text "Major and minor" ]
@@ -223,20 +292,40 @@ view model =
             ]
 
 
+viewDifficultyButtons : List Difficulty -> Html Msg
+viewDifficultyButtons difficulties =
+    Html.div []
+        (List.map
+            (\difficulty ->
+                Html.button
+                    [ HA.class "custom-button"
+                    , HE.onClick (DifficultyChosen difficulty)
+                    ]
+                    [ Html.text (stringFromDifficulty difficulty) ]
+            )
+            difficulties
+        )
+
+
 setRootNotes : Difficulty -> List String
 setRootNotes difficulty =
     case difficulty of
         Easy ->
             [ "C", "G", "F" ]
 
+        -- Only C, G, F, notes are not shuffled, user can choose to shuffle notes maybe?
         Medium ->
-            [ "C", "G", "F", "D", "A", "B♭", "E♭" ]
+            [ "C", "G", "F", "D", "A" ]
 
         Hard ->
-            [ "C", "G", "F", "D", "A", "B♭", "E♭", "E", "B", "A♭", "D♭" ]
+            [ "C", "G", "F", "D", "A", "Bb", "Eb" ]
+
+        -- Notes are always shuffled
+        Advanced ->
+            [ "C", "G", "F", "D", "A", "Bb", "Eb", "E", "B", "Ab", "Db" ]
 
         Extreme ->
-            [ "C", "G", "F", "D", "A", "B♭", "E♭", "E", "B", "A♭", "D♭", "F#", "C#", "G#", "D#", "A#" ]
+            [ "C", "G", "F", "D", "A", "Bb", "Eb", "E", "B", "Ab", "Db", "Fsharp", "Csharp", "Gsharp", "Dsharp", "Asharp" ]
 
 
 stringFromDifficulty : Difficulty -> String
@@ -251,18 +340,22 @@ stringFromDifficulty difficulty =
         Hard ->
             "Hard"
 
+        Advanced ->
+            "Advanced"
+
         Extreme ->
             "Extreme"
 
 
-rotateLeft : List a -> List a
-rotateLeft list =
-    case list of
-        x :: xs ->
-            xs ++ [ x ]
 
-        [] ->
-            []
+-- rotateLeft : List a -> List a
+-- rotateLeft list =
+--     case list of
+--         x :: xs ->
+--             xs ++ [ x ]
+--         [] ->
+--             []
+
 
 viewChords : Model -> Html Msg
 viewChords model =
@@ -275,28 +368,36 @@ viewChords model =
             Html.div [] [ Html.text "No chords found" ]
 
 
-viewChord : TheoryApi.Chord2 -> Html Msg
+viewChord : TheoryApi.Chord -> Html Msg
 viewChord chord =
     Html.div [ HA.class "custom-button", HE.onClick (ChordChosen chord) ]
         [ Html.text chord.chord ]
 
 
-viewRandomizedChord : Model -> Html Msg
-viewRandomizedChord model =
-    case model.randomizedChord of
-        Just randomizedChord ->
-            Html.p [] [ Html.text ("Which chord is this? " ++ viewRandomizedChordNotes (rotateLeft randomizedChord.notes)) ]
+viewRandomizedChordNotes : Model -> Html Msg
+viewRandomizedChordNotes model =
+    case model.randomizedChordNotes of
+        Just randomizedChordNotes ->
+            Html.p [] [ Html.text ("Which chord is this? " ++ String.join ", " randomizedChordNotes) ]
 
         Nothing ->
             Html.p [] [ Html.text "No chord found" ]
 
 
-viewRandomizedChordNotes : List String -> String
-viewRandomizedChordNotes notes =
-    String.join ", " notes
+
+-- Random.generate Shuffled (RandomList.shuffle notes)
 
 
-defaultChord : TheoryApi.Chord2
+shuffleNotesInChord : Model -> List String -> Cmd Msg
+shuffleNotesInChord model notes =
+    if model.areNotesShuffled then
+        Random.generate Shuffled (RandomList.shuffle notes)
+
+    else
+        Cmd.none
+
+
+defaultChord : TheoryApi.Chord
 defaultChord =
     { chord = "No chord found"
     , root = ""
@@ -306,7 +407,7 @@ defaultChord =
     }
 
 
-pickRandomChord : Maybe (List TheoryApi.Chord2) -> Int -> TheoryApi.Chord2
+pickRandomChord : Maybe (List TheoryApi.Chord) -> Int -> TheoryApi.Chord
 pickRandomChord maybeChords randomIndex =
     case maybeChords of
         Just chords ->
@@ -334,7 +435,9 @@ checkIfChordIsCorrect : Model -> ( Model, Cmd Msg )
 checkIfChordIsCorrect model =
     case ( model.maybeChosenChord, model.randomizedChord ) of
         ( Just chosenChord, Just randomizedChord ) ->
-            if chosenChord == randomizedChord then
+            -- Compare by the chord identifier (the `chord` string) so presentation-only
+            -- reordering of `notes` doesn't affect correctness.
+            if chosenChord.chord == randomizedChord.chord then
                 let
                     newScore =
                         model.score + 1

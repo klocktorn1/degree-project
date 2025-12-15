@@ -1,15 +1,15 @@
-module Games.ModeExercise exposing (..)
+module Exercises.ModeExercise exposing (..)
 
 import Array
-import Games.NoteExercise exposing (Msg(..))
-import Games.TheoryApi as TheoryApi
+import Exercises.NoteExercise exposing (Msg(..))
+import Exercises.TheoryApicopy as TheoryApi
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
 import Process
 import Random
 import Task
-import Games.NoteBuilder as NoteBuilder
+import Exercises.NoteBuilder as NoteBuilder
 
 
 
