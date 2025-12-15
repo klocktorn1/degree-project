@@ -1,3 +1,65 @@
+:root {
+
+
+  /* Colors */
+  --bg-primary: radial-gradient(73.72% 50% at 50% 50%, #868686 35.1%, #6D6D6D 100%);
+
+  --bg-secondary: linear-gradient(270deg, #E0E0E0 0%, #C2C2C2 100%);
+
+  --button-bg: #4848F0;
+
+
+  --text-primary: #d9d9d9;
+  --text-secondary: #0b0e15;
+
+
+
+  /* Spacings */
+  --space-xs: 0.25rem;
+  --space-s: 0.5rem;
+  --space-m: 1rem;
+  --space-l: 2rem;
+  --space-xl: 4rem;
+
+
+  --max-width: 93.75rem;
+  --site-gutter: max(clamp(var(--space-l), 1dvw, var(--space-xl)), calc((100vw - var(--max-width)) / 2));
+  --header-height: 4rem;
+
+  /* Font configs */
+  --fs-100: 0.75rem;
+  --fs-200: 0.875rem;
+  --fs-300: 1rem;
+  --fs-400: 1.125rem;
+  --fs-500: 1.325rem;
+  --fs-600: 1.625rem;
+  --fs-700: 2rem;
+  --fs-800: 2.325rem;
+  --fs-900: 3rem;
+  --fs-1000: 4rem;
+
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-medium-bold: 600;
+  --font-weight-bold: 700;
+
+  --font-heading: "Montserrat", sans-serif;
+  --font-body: "Open Sans", sans-serif;
+
+  /* Heights */
+  --hero-bottom-height: clamp(130px, 10dvh, 180px);
+  --hero-section-height: calc(100dvh - var(--hero-bottom-height));
+  /* Other reusable variables */
+  --radius-xs: 8px;
+  --radius-s: 16px;
+  --radius-l: 65px;
+  --scale: scale(1.02);
+  --transition: 0.2s ease-in-out;
+
+}
+
+
 /* ========== Global & Reset ========== */
 * {
   margin: 0;
@@ -5,59 +67,106 @@
 }
 
 body {
-  height: 100%;
-  background-color: gray;
+  font-family: 'Press Start 2P', cursive;
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding-inline: var(--site-gutter);
+
 }
 
 a {
-  text-decoration: none;
-  color: white;
-}
-
-/* ========== Layout Containers ========== */
-.wrapper {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-.content-container {
-  flex: 1;
-  padding: 20px;
-}
-
-.footer-container {
-  width: 100%;
-  height: 18dvh;
-  background-color: blue;
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  cursor: pointer;
+  /* because all: unset removes it */
 }
 
 /* ========== Header & Navigation ========== */
-.header {
-  width: 100%;
-  height: 15dvh;
-  background-color: blue;
-  display: flex;
-  justify-content: flex-end;
+header {
+  height: 10dvh;
+  background: var(--bg-secondary);
+  margin-top: 20px;
+  border-radius: var(--radius-s);
+  align-content: center;
+  color: var(--text-secondary);
+  padding-inline: var(--space-m);
 
-  ul {
+
+
+  nav {
     display: flex;
+    font-size: var(--fs-200);
     justify-content: space-between;
-    align-items: center;
-    height: 100%;
-    width: 30%;
-    margin-right: 10px;
 
-    li {
-      list-style: none;
-      transition: 0.4s;
 
-      &:hover {
-        cursor: pointer;
-        scale: 1.2;
+    ul {
+      display: flex;
+      justify-self: center;
+      gap: var(--space-m);
+      height: 100%;
+
+      li {
+        list-style: none;
+        transition: 0.4s;
+
+        &:hover {
+          cursor: pointer;
+          scale: 1.05;
+        }
+      }
+    }
+
+  }
+}
+
+
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  section {
+    color: var(--text-primary);
+    display: grid;
+    gap: var(--space-m);
+
+    h1 {
+      font-size: var(--fs-900);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    div {
+      display: flex;
+      justify-content: space-around;
+
+      a {
+        all: unset;
+        padding: 10px 20px;
+        background: var(--button-bg);
+        transition: 0.1s;
+        border-radius: var(--radius-xs);
+
+        &:hover {
+          cursor: pointer;
+          scale: 1.2;
+        }
       }
     }
   }
+}
+
+
+footer {
+  width: 100%;
+  height: 18dvh;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
 }
 
 /* ========== Mode Selection ========== */
@@ -137,6 +246,15 @@ a {
 /* ========== Buttons ========== */
 button {
   all: unset;
+  padding: 10px 20px;
+  background: var(--button-bg);
+  transition: 0.1s;
+  border-radius: var(--radius-xs);
+
+  &:hover {
+    cursor: pointer;
+    scale: 1.2;
+  }
 }
 
 .custom-button {

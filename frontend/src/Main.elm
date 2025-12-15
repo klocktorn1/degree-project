@@ -2,11 +2,12 @@ module Main exposing (..)
 
 import Browser exposing (UrlRequest(..))
 import Browser.Navigation as Nav
-import Exercises
-import Games.Stopwatch as Stopwatch
+import Exercises.Stopwatch as Stopwatch
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
+import Pages.Exercises as Exercises
+import Pages.Login as Login
 import Time exposing (Posix)
 import Url
 import Url.Parser as UP exposing ((</>), (<?>))
@@ -17,6 +18,7 @@ type alias Model =
     , key : Nav.Key
     , route : Route
     , exercisesModel : Exercises.Model
+    , loginModel : Login.Model
     , stopwatchModel : Stopwatch.Model
     }
 
@@ -25,12 +27,14 @@ type Msg
     = UrlChanged Url.Url
     | LinkClicked Browser.UrlRequest
     | ExercisesMsg Exercises.Msg
+    | LoginMsg Login.Msg
     | StopwatchMsg Stopwatch.Msg
 
 
 type Route
     = Home
-    | ExercisesRoute
+    | Exercises
+    | Login
     | NotFound
 
 
@@ -68,12 +72,15 @@ init flags url key =
         ( exercisesModel, exercisesCmd ) =
             Exercises.init flags
 
+        ( loginModel, loginCmd ) =
+            Login.init
+
         stopwatchModel =
             Stopwatch.init
 
         exercisesFetchOnStart =
             case route of
-                ExercisesRoute ->
+                Exercises ->
                     Cmd.none
 
                 _ ->
@@ -83,11 +90,13 @@ init flags url key =
       , key = key
       , route = route
       , exercisesModel = exercisesModel
+      , loginModel = loginModel
       , stopwatchModel = stopwatchModel
       }
     , Cmd.batch
         [ Cmd.map ExercisesMsg exercisesCmd
         , exercisesFetchOnStart
+        , Cmd.map LoginMsg loginCmd
         ]
     )
 
@@ -96,7 +105,8 @@ routeParser : UP.Parser (Route -> a) a
 routeParser =
     UP.oneOf
         [ UP.map Home (UP.s "home")
-        , UP.map ExercisesRoute (UP.s "exercises")
+        , UP.map Exercises (UP.s "exercises")
+        , UP.map Login (UP.s "login")
         , UP.map Home UP.top
 
         -- removed Game route from top-level routing; exercises and their games are handled in Exercises.elm
@@ -120,7 +130,7 @@ update msg model =
 
                 exercisesFetchCmd =
                     case newRoute of
-                        ExercisesRoute ->
+                        Exercises ->
                             Cmd.none
 
                         _ ->
@@ -150,6 +160,15 @@ update msg model =
             , Cmd.map ExercisesMsg cmd
             )
 
+        LoginMsg subMsg ->
+            let
+                ( updatedLoginModel, cmd ) =
+                    Login.update subMsg model.loginModel
+            in
+            ( { model | loginModel = updatedLoginModel }
+            , Cmd.map LoginMsg cmd
+            )
+
         StopwatchMsg subMsg ->
             let
                 ( updatedStopwatch, cmd ) =
@@ -164,13 +183,11 @@ view : Model -> Browser.Document Msg
 view model =
     { title = viewTitle model.route
     , body =
-        [ Html.div [ HA.class "wrapper" ]
-            [ viewHeader model.url.path
-            , Html.main_ [ HA.class "content-container" ]
-                [ viewRoute model
-                ]
-            , viewFooter
+        [ viewHeader model.url.path
+        , Html.main_ []
+            [ viewRoute model
             ]
+        , viewFooter
         ]
     }
 
@@ -181,8 +198,11 @@ viewTitle route =
         Home ->
             "Home"
 
-        ExercisesRoute ->
+        Exercises ->
             "Exercises"
+
+        Login ->
+            "Login"
 
         NotFound ->
             "Page not found"
@@ -190,14 +210,19 @@ viewTitle route =
 
 viewHeader : String -> Html Msg
 viewHeader currentPath =
-    Html.div [ HA.class "header-container" ]
-        [ Html.header [ HA.class "header" ]
-            [ Html.ul []
-                [ Html.li [] [ viewLink "Home" "/home" currentPath ]
-                , Html.li [] [ viewLink "Exercises" "/exercises" currentPath ]
-
-                -- removed direct game link from top-level header; exercises page lists games
+    Html.header []
+        [ Html.nav []
+            [ Html.a [ HA.class "logo", HA.href "/" ]
+                [ Html.img [ HA.src "/assets/logo.png", HA.alt "TQ" ] []
                 ]
+            , Html.ul []
+                [ Html.li [] [ viewLink "HOME" "/home" currentPath ]
+                , Html.li [] [ viewLink "EXERCISES" "/exercises" currentPath ]
+                , Html.li [] [ viewLink "THEORY" "/theory" currentPath ]
+                , Html.li [] [ viewLink "ABOUT" "/about" currentPath ]
+                ]
+            , Html.div []
+                [ viewLink "LOGIN" "/login" currentPath ]
             ]
         ]
 
@@ -206,10 +231,28 @@ viewRoute : Model -> Html Msg
 viewRoute model =
     case model.route of
         Home ->
-            Html.div [] [ Html.text "You are at the home page" ]
+            Html.section []
+                [ Html.h1 []
+                    [ Html.text "MUSIC THEORY"
+                    , Html.br [] []
+                    , Html.text "MADE EASY"
+                    ]
+                , Html.div
+                    []
+                    [ Html.a
+                        [ HA.href "/exercises" ]
+                        [ Html.text "Exercises" ]
+                    , Html.a
+                        [ HA.href "/theory" ]
+                        [ Html.text "Theory" ]
+                    ]
+                ]
 
-        ExercisesRoute ->
+        Exercises ->
             Html.map ExercisesMsg (Exercises.view model.exercisesModel)
+
+        Login ->
+            Html.map LoginMsg (Login.view model.loginModel)
 
         NotFound ->
             Html.div []
@@ -240,6 +283,4 @@ viewLink label path currentPath =
 
 viewFooter : Html Msg
 viewFooter =
-    Html.div [ HA.class "footer-container" ]
-        [ Html.footer [ HA.class "footer" ] []
-        ]
+    Html.footer [] [ Html.text "© 2024 My Elm App" ]

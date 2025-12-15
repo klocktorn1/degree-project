@@ -21,17 +21,33 @@ const createRefreshToken = (user) => {
 
 
 const loginUser = async (req, res) => {
+
+    console.log("Headers:", req.headers);
+    console.log("Body:", req.body);
     const { email, password } = req.body;
+    if (!email || !password) {
+        return res.json({
+            ok: false,
+            message: "Email and password required"
+        });
+
+    }
     try {
         const [row] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
         const user = row[0]
-
         if (!user) {
-            return res.status(401).json({ message: "Invalid email or password" })
-        } else {            
+            return res.json({
+                ok: false,
+                message: "Invalid email or password"
+            });
+
+        } else {
             const match = await bcrypt.compare(password, row[0].password_hash)
             if (!match) {
-                return res.status(401).json({ message: "Invalid email or password" });
+                return res.json({
+                    ok: false,
+                    message: "Invalid email or password"
+                });
             } else {
                 const accessToken = createAccessToken(user);
                 const refreshToken = createRefreshToken(user);
@@ -42,6 +58,7 @@ const loginUser = async (req, res) => {
                     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 d
                 })
                 await db.query('UPDATE users SET refresh_token = ? WHERE id = ?', [refreshToken, user.id]);
+                console.log("asdasdasdasd");
 
                 return res.json({
                     message: `Successful login`,

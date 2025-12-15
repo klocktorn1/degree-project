@@ -1,6 +1,15 @@
 const express = require('express');
 const app = express();
 const cookieParser = require('cookie-parser')
+const cors = require('cors');
+
+
+app.use(cookieParser())
+app.use(express.json());
+app.use(cors({
+    origin: 'http://localhost:8000',
+    credentials: true,
+}));
 
 
 
@@ -12,8 +21,7 @@ const requireAuth = require('./middleware/requireAuth')
 
 
 
-app.use(cookieParser())
-app.use(express.json());
+
 
 app.use('/users', requireAuth, usersRouter);
 app.use('/exercises', exerciseRouter);

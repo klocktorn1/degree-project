@@ -1,4 +1,4 @@
-module Exercises exposing (Model, Msg, init, subscriptions, update, view)
+module Pages.Exercises exposing (Model, Msg, init, subscriptions, update, view)
 
 import Exercises.ChordGuesserExercise as ChordGuesserExercise
 import Html exposing (Html)

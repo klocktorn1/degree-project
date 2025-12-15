@@ -1,2 +1,7 @@
 run:
-	elm-live src/Main.elm --open --pushstate -- --output=elm.js --debug
+	elm-live src/Main.elm \
+	--open \
+	--pushstate \
+	--watch=src \
+	--watch=. \
+	-- --output=elm.js --debug

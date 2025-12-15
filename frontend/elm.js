@@ -10805,16 +10805,20 @@ var $elm$browser$Browser$application = _Browser_application;
 var $author$project$Main$ExercisesMsg = function (a) {
 	return {$: 'ExercisesMsg', a: a};
 };
+var $author$project$Main$LoginMsg = function (a) {
+	return {$: 'LoginMsg', a: a};
+};
 var $author$project$Main$NotFound = {$: 'NotFound'};
-var $author$project$Exercises$ChordGuesserMsg = function (a) {
+var $author$project$Exercises$Stopwatch$init = {running: false, stopwatchInMs: 0};
+var $author$project$Pages$Exercises$ChordGuesserMsg = function (a) {
 	return {$: 'ChordGuesserMsg', a: a};
 };
-var $author$project$Games$ChordGuesserExercise$Easy = {$: 'Easy'};
-var $author$project$Games$ChordGuesserExercise$init = function (_v0) {
+var $author$project$Exercises$ChordGuesserExercise$Easy = {$: 'Easy'};
+var $author$project$Exercises$ChordGuesserExercise$init = function (_v0) {
 	return _Utils_Tuple2(
 		{
 			areNotesShuffled: false,
-			chosenDifficulty: $author$project$Games$ChordGuesserExercise$Easy,
+			chosenDifficulty: $author$project$Exercises$ChordGuesserExercise$Easy,
 			gameOver: false,
 			isGameStarted: false,
 			lastRandomIndex: $elm$core$Maybe$Nothing,
@@ -10830,15 +10834,17 @@ var $author$project$Games$ChordGuesserExercise$init = function (_v0) {
 		},
 		$elm$core$Platform$Cmd$none);
 };
-var $author$project$Exercises$init = function (flags) {
-	var _v0 = $author$project$Games$ChordGuesserExercise$init(flags);
+var $author$project$Pages$Exercises$init = function (flags) {
+	var _v0 = $author$project$Exercises$ChordGuesserExercise$init(flags);
 	var chordModel = _v0.a;
 	var chordCmd = _v0.b;
 	return _Utils_Tuple2(
 		{chordGuesserModel: chordModel, currentGame: $elm$core$Maybe$Nothing},
-		A2($elm$core$Platform$Cmd$map, $author$project$Exercises$ChordGuesserMsg, chordCmd));
+		A2($elm$core$Platform$Cmd$map, $author$project$Pages$Exercises$ChordGuesserMsg, chordCmd));
 };
-var $author$project$Games$Stopwatch$init = {running: false, stopwatchInMs: 0};
+var $author$project$Pages$Login$init = _Utils_Tuple2(
+	{email: '', error: $elm$core$Maybe$Nothing, isSubmitting: false, password: ''},
+	$elm$core$Platform$Cmd$none);
 var $elm$url$Url$Parser$State = F5(
 	function (visited, unvisited, params, frag, value) {
 		return {frag: frag, params: params, unvisited: unvisited, value: value, visited: visited};
@@ -10958,8 +10964,9 @@ var $elm$url$Url$Parser$parse = F2(
 					url.fragment,
 					$elm$core$Basics$identity)));
 	});
-var $author$project$Main$ExercisesRoute = {$: 'ExercisesRoute'};
+var $author$project$Main$Exercises = {$: 'Exercises'};
 var $author$project$Main$Home = {$: 'Home'};
+var $author$project$Main$Login = {$: 'Login'};
 var $elm$url$Url$Parser$Parser = function (a) {
 	return {$: 'Parser', a: a};
 };
@@ -11047,51 +11054,49 @@ var $author$project$Main$routeParser = $elm$url$Url$Parser$oneOf(
 			$elm$url$Url$Parser$s('home')),
 			A2(
 			$elm$url$Url$Parser$map,
-			$author$project$Main$ExercisesRoute,
+			$author$project$Main$Exercises,
 			$elm$url$Url$Parser$s('exercises')),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Main$Login,
+			$elm$url$Url$Parser$s('login')),
 			A2($elm$url$Url$Parser$map, $author$project$Main$Home, $elm$url$Url$Parser$top)
 		]));
 var $author$project$Main$init = F3(
 	function (flags, url, key) {
-		var stopwatchModel = $author$project$Games$Stopwatch$init;
+		var stopwatchModel = $author$project$Exercises$Stopwatch$init;
 		var route = A2(
 			$elm$core$Maybe$withDefault,
 			$author$project$Main$NotFound,
 			A2($elm$url$Url$Parser$parse, $author$project$Main$routeParser, url));
 		var exercisesFetchOnStart = function () {
-			if (route.$ === 'ExercisesRoute') {
+			if (route.$ === 'Exercises') {
 				return $elm$core$Platform$Cmd$none;
 			} else {
 				return $elm$core$Platform$Cmd$none;
 			}
 		}();
-		var _v0 = $author$project$Exercises$init(flags);
-		var exercisesModel = _v0.a;
-		var exercisesCmd = _v0.b;
+		var _v0 = $author$project$Pages$Login$init;
+		var loginModel = _v0.a;
+		var loginCmd = _v0.b;
+		var _v1 = $author$project$Pages$Exercises$init(flags);
+		var exercisesModel = _v1.a;
+		var exercisesCmd = _v1.b;
 		return _Utils_Tuple2(
-			{exercisesModel: exercisesModel, key: key, route: route, stopwatchModel: stopwatchModel, url: url},
+			{exercisesModel: exercisesModel, key: key, loginModel: loginModel, route: route, stopwatchModel: stopwatchModel, url: url},
 			$elm$core$Platform$Cmd$batch(
 				_List_fromArray(
 					[
 						A2($elm$core$Platform$Cmd$map, $author$project$Main$ExercisesMsg, exercisesCmd),
-						exercisesFetchOnStart
+						exercisesFetchOnStart,
+						A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, loginCmd)
 					])));
 	});
 var $author$project$Main$StopwatchMsg = function (a) {
 	return {$: 'StopwatchMsg', a: a};
 };
 var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $author$project$Games$ChordGuesserExercise$subscriptions = function (_v0) {
-	return $elm$core$Platform$Sub$none;
-};
-var $author$project$Exercises$subscriptions = function (model) {
-	return A2(
-		$elm$core$Platform$Sub$map,
-		$author$project$Exercises$ChordGuesserMsg,
-		$author$project$Games$ChordGuesserExercise$subscriptions(model.chordGuesserModel));
-};
-var $author$project$Games$Stopwatch$Tick = function (a) {
+var $author$project$Exercises$Stopwatch$Tick = function (a) {
 	return {$: 'Tick', a: a};
 };
 var $elm$time$Time$Every = F2(
@@ -11276,8 +11281,18 @@ var $elm$time$Time$every = F2(
 		return $elm$time$Time$subscription(
 			A2($elm$time$Time$Every, interval, tagger));
 	});
-var $author$project$Games$Stopwatch$subscriptions = function (model) {
-	return model.running ? A2($elm$time$Time$every, 10, $author$project$Games$Stopwatch$Tick) : $elm$core$Platform$Sub$none;
+var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $author$project$Exercises$Stopwatch$subscriptions = function (model) {
+	return model.running ? A2($elm$time$Time$every, 10, $author$project$Exercises$Stopwatch$Tick) : $elm$core$Platform$Sub$none;
+};
+var $author$project$Exercises$ChordGuesserExercise$subscriptions = function (_v0) {
+	return $elm$core$Platform$Sub$none;
+};
+var $author$project$Pages$Exercises$subscriptions = function (model) {
+	return A2(
+		$elm$core$Platform$Sub$map,
+		$author$project$Pages$Exercises$ChordGuesserMsg,
+		$author$project$Exercises$ChordGuesserExercise$subscriptions(model.chordGuesserModel));
 };
 var $author$project$Main$subscriptions = function (model) {
 	return $elm$core$Platform$Sub$batch(
@@ -11286,11 +11301,11 @@ var $author$project$Main$subscriptions = function (model) {
 				A2(
 				$elm$core$Platform$Sub$map,
 				$author$project$Main$StopwatchMsg,
-				$author$project$Games$Stopwatch$subscriptions(model.stopwatchModel)),
+				$author$project$Exercises$Stopwatch$subscriptions(model.stopwatchModel)),
 				A2(
 				$elm$core$Platform$Sub$map,
 				$author$project$Main$ExercisesMsg,
-				$author$project$Exercises$subscriptions(model.exercisesModel))
+				$author$project$Pages$Exercises$subscriptions(model.exercisesModel))
 			]));
 };
 var $elm$browser$Browser$Navigation$load = _Browser_load;
@@ -11339,10 +11354,33 @@ var $elm$url$Url$toString = function (url) {
 					_Utils_ap(http, url.host)),
 				url.path)));
 };
-var $author$project$Games$ChordGuesserExercise$GotChordData = function (a) {
+var $author$project$Exercises$Stopwatch$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'Tick':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{stopwatchInMs: model.stopwatchInMs + 100}),
+					$elm$core$Platform$Cmd$none);
+			case 'Start':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{running: true, stopwatchInMs: model.stopwatchInMs + 10000}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{running: false}),
+					$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Exercises$ChordGuesserExercise$GotChordData = function (a) {
 	return {$: 'GotChordData', a: a};
 };
-var $author$project$Games$ChordGuesserExercise$RandomChordPicked = function (a) {
+var $author$project$Exercises$ChordGuesserExercise$RandomChordPicked = function (a) {
 	return {$: 'RandomChordPicked', a: a};
 };
 var $elm$random$Random$Generate = function (a) {
@@ -11473,13 +11511,13 @@ var $elm$random$Random$int = F2(
 				}
 			});
 	});
-var $author$project$Games$ChordGuesserExercise$randomizeChord = function (maxIndex) {
+var $author$project$Exercises$ChordGuesserExercise$randomizeChord = function (maxIndex) {
 	return (maxIndex <= 0) ? $elm$core$Platform$Cmd$none : A2(
 		$elm$random$Random$generate,
-		$author$project$Games$ChordGuesserExercise$RandomChordPicked,
+		$author$project$Exercises$ChordGuesserExercise$RandomChordPicked,
 		A2($elm$random$Random$int, 0, maxIndex - 1));
 };
-var $author$project$Games$ChordGuesserExercise$checkIfChordIsCorrect = function (model) {
+var $author$project$Exercises$ChordGuesserExercise$checkIfChordIsCorrect = function (model) {
 	var _v0 = _Utils_Tuple2(model.maybeChosenChord, model.randomizedChord);
 	if ((_v0.a.$ === 'Just') && (_v0.b.$ === 'Just')) {
 		var chosenChord = _v0.a.a;
@@ -11492,7 +11530,7 @@ var $author$project$Games$ChordGuesserExercise$checkIfChordIsCorrect = function 
 				_Utils_update(
 					model,
 					{score: newScore}),
-				$author$project$Games$ChordGuesserExercise$randomizeChord(chordCount));
+				$author$project$Exercises$ChordGuesserExercise$randomizeChord(chordCount));
 		} else {
 			var newMistakes = model.mistakes + 1;
 			var setGameOver = (newMistakes >= 3) ? true : false;
@@ -11798,7 +11836,7 @@ var $author$project$TheoryApi$fetchChords = F3(
 					rootNotes));
 		}
 	});
-var $author$project$Games$ChordGuesserExercise$defaultChord = {chord: 'No chord found', degrees: _List_Nil, formula: _List_Nil, notes: _List_Nil, root: ''};
+var $author$project$Exercises$ChordGuesserExercise$defaultChord = {chord: 'No chord found', degrees: _List_Nil, formula: _List_Nil, notes: _List_Nil, root: ''};
 var $elm$core$List$head = function (list) {
 	if (list.b) {
 		var x = list.a;
@@ -11813,7 +11851,7 @@ var $elm_community$list_extra$List$Extra$getAt = F2(
 		return (idx < 0) ? $elm$core$Maybe$Nothing : $elm$core$List$head(
 			A2($elm$core$List$drop, idx, xs));
 	});
-var $author$project$Games$ChordGuesserExercise$pickRandomChord = F2(
+var $author$project$Exercises$ChordGuesserExercise$pickRandomChord = F2(
 	function (maybeChords, randomIndex) {
 		if (maybeChords.$ === 'Just') {
 			var chords = maybeChords.a;
@@ -11822,13 +11860,13 @@ var $author$project$Games$ChordGuesserExercise$pickRandomChord = F2(
 				var randomChordObject = _v1.a;
 				return randomChordObject;
 			} else {
-				return $author$project$Games$ChordGuesserExercise$defaultChord;
+				return $author$project$Exercises$ChordGuesserExercise$defaultChord;
 			}
 		} else {
-			return $author$project$Games$ChordGuesserExercise$defaultChord;
+			return $author$project$Exercises$ChordGuesserExercise$defaultChord;
 		}
 	});
-var $author$project$Games$ChordGuesserExercise$setRootNotes = function (difficulty) {
+var $author$project$Exercises$ChordGuesserExercise$setRootNotes = function (difficulty) {
 	switch (difficulty.$) {
 		case 'Easy':
 			return _List_fromArray(
@@ -11847,7 +11885,7 @@ var $author$project$Games$ChordGuesserExercise$setRootNotes = function (difficul
 				['C', 'G', 'F', 'D', 'A', 'Bb', 'Eb', 'E', 'B', 'Ab', 'Db', 'Fsharp', 'Csharp', 'Gsharp', 'Dsharp', 'Asharp']);
 	}
 };
-var $author$project$Games$ChordGuesserExercise$Shuffled = function (a) {
+var $author$project$Exercises$ChordGuesserExercise$Shuffled = function (a) {
 	return {$: 'Shuffled', a: a};
 };
 var $elm$random$Random$maxInt = 2147483647;
@@ -11920,14 +11958,14 @@ var $elm_community$random_extra$Random$List$shuffle = function (list) {
 		},
 		$elm$random$Random$independentSeed);
 };
-var $author$project$Games$ChordGuesserExercise$shuffleNotesInChord = F2(
+var $author$project$Exercises$ChordGuesserExercise$shuffleNotesInChord = F2(
 	function (model, notes) {
 		return model.areNotesShuffled ? A2(
 			$elm$random$Random$generate,
-			$author$project$Games$ChordGuesserExercise$Shuffled,
+			$author$project$Exercises$ChordGuesserExercise$Shuffled,
 			$elm_community$random_extra$Random$List$shuffle(notes)) : $elm$core$Platform$Cmd$none;
 	});
-var $author$project$Games$ChordGuesserExercise$update = F2(
+var $author$project$Exercises$ChordGuesserExercise$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
 			case 'GotChordData':
@@ -11937,7 +11975,7 @@ var $author$project$Games$ChordGuesserExercise$update = F2(
 					var existingChords = A2($elm$core$Maybe$withDefault, _List_Nil, model.maybeChords);
 					var combined = _Utils_ap(existingChords, chords);
 					var chordCount = $elm$core$List$length(combined);
-					var cmd = ((remaining <= 0) && (chordCount > 0)) ? $author$project$Games$ChordGuesserExercise$randomizeChord(chordCount) : $elm$core$Platform$Cmd$none;
+					var cmd = ((remaining <= 0) && (chordCount > 0)) ? $author$project$Exercises$ChordGuesserExercise$randomizeChord(chordCount) : $elm$core$Platform$Cmd$none;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
@@ -11950,7 +11988,7 @@ var $author$project$Games$ChordGuesserExercise$update = F2(
 					var remaining = model.pendingFetches - 1;
 					var chordCount = $elm$core$List$length(
 						A2($elm$core$Maybe$withDefault, _List_Nil, model.maybeChords));
-					var cmd = ((remaining <= 0) && (chordCount > 0)) ? $author$project$Games$ChordGuesserExercise$randomizeChord(chordCount) : $elm$core$Platform$Cmd$none;
+					var cmd = ((remaining <= 0) && (chordCount > 0)) ? $author$project$Exercises$ChordGuesserExercise$randomizeChord(chordCount) : $elm$core$Platform$Cmd$none;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
@@ -11980,7 +12018,7 @@ var $author$project$Games$ChordGuesserExercise$update = F2(
 						{
 							areNotesShuffled: areNotesShuffled,
 							chosenDifficulty: newDifficulty,
-							rootNotes: $author$project$Games$ChordGuesserExercise$setRootNotes(newDifficulty)
+							rootNotes: $author$project$Exercises$ChordGuesserExercise$setRootNotes(newDifficulty)
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'ChordGroupChosen':
@@ -11994,7 +12032,7 @@ var $author$project$Games$ChordGuesserExercise$update = F2(
 							maybeChords: $elm$core$Maybe$Just(_List_Nil),
 							pendingFetches: fetchCount
 						}),
-					A3($author$project$TheoryApi$fetchChords, model.rootNotes, chordTypes, $author$project$Games$ChordGuesserExercise$GotChordData));
+					A3($author$project$TheoryApi$fetchChords, model.rootNotes, chordTypes, $author$project$Exercises$ChordGuesserExercise$GotChordData));
 			case 'Shuffled':
 				var chordNotes = msg.a;
 				return _Utils_Tuple2(
@@ -12006,7 +12044,7 @@ var $author$project$Games$ChordGuesserExercise$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'RandomChordPicked':
 				var randomIndex = msg.a;
-				var newRandomChord = A2($author$project$Games$ChordGuesserExercise$pickRandomChord, model.maybeChords, randomIndex);
+				var newRandomChord = A2($author$project$Exercises$ChordGuesserExercise$pickRandomChord, model.maybeChords, randomIndex);
 				var notes = newRandomChord.notes;
 				var chordCount = $elm$core$List$length(
 					A2($elm$core$Maybe$withDefault, _List_Nil, model.maybeChords));
@@ -12015,7 +12053,7 @@ var $author$project$Games$ChordGuesserExercise$update = F2(
 					var lastIndex = _v2.a;
 					return (_Utils_eq(lastIndex, randomIndex) && (chordCount > 1)) ? _Utils_Tuple2(
 						model,
-						$author$project$Games$ChordGuesserExercise$randomizeChord(chordCount)) : _Utils_Tuple2(
+						$author$project$Exercises$ChordGuesserExercise$randomizeChord(chordCount)) : _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
@@ -12023,7 +12061,7 @@ var $author$project$Games$ChordGuesserExercise$update = F2(
 								randomizedChord: $elm$core$Maybe$Just(newRandomChord),
 								randomizedChordNotes: $elm$core$Maybe$Just(notes)
 							}),
-						A2($author$project$Games$ChordGuesserExercise$shuffleNotesInChord, model, notes));
+						A2($author$project$Exercises$ChordGuesserExercise$shuffleNotesInChord, model, notes));
 				} else {
 					return _Utils_Tuple2(
 						_Utils_update(
@@ -12033,7 +12071,7 @@ var $author$project$Games$ChordGuesserExercise$update = F2(
 								randomizedChord: $elm$core$Maybe$Just(newRandomChord),
 								randomizedChordNotes: $elm$core$Maybe$Just(notes)
 							}),
-						A2($author$project$Games$ChordGuesserExercise$shuffleNotesInChord, model, notes));
+						A2($author$project$Exercises$ChordGuesserExercise$shuffleNotesInChord, model, notes));
 				}
 			case 'ToggleNotesShuffle':
 				return _Utils_Tuple2(
@@ -12048,7 +12086,7 @@ var $author$project$Games$ChordGuesserExercise$update = F2(
 					{
 						maybeChosenChord: $elm$core$Maybe$Just(chord)
 					});
-				var _v3 = $author$project$Games$ChordGuesserExercise$checkIfChordIsCorrect(modelWithChordChosen);
+				var _v3 = $author$project$Exercises$ChordGuesserExercise$checkIfChordIsCorrect(modelWithChordChosen);
 				var updatedModel = _v3.a;
 				var cmd = _v3.b;
 				return _Utils_Tuple2(updatedModel, cmd);
@@ -12066,19 +12104,19 @@ var $author$project$Games$ChordGuesserExercise$update = F2(
 					$elm$core$Platform$Cmd$none);
 		}
 	});
-var $author$project$Exercises$update = F2(
+var $author$project$Pages$Exercises$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
 			case 'ChordGuesserMsg':
 				var sub = msg.a;
-				var _v1 = A2($author$project$Games$ChordGuesserExercise$update, sub, model.chordGuesserModel);
+				var _v1 = A2($author$project$Exercises$ChordGuesserExercise$update, sub, model.chordGuesserModel);
 				var updated = _v1.a;
 				var cmd = _v1.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{chordGuesserModel: updated}),
-					A2($elm$core$Platform$Cmd$map, $author$project$Exercises$ChordGuesserMsg, cmd));
+					A2($elm$core$Platform$Cmd$map, $author$project$Pages$Exercises$ChordGuesserMsg, cmd));
 			case 'SelectGame':
 				var game = msg.a;
 				return _Utils_Tuple2(
@@ -12096,27 +12134,131 @@ var $author$project$Exercises$update = F2(
 					$elm$core$Platform$Cmd$none);
 		}
 	});
-var $author$project$Games$Stopwatch$update = F2(
+var $author$project$Pages$Login$LoginResult = function (a) {
+	return {$: 'LoginResult', a: a};
+};
+var $author$project$Pages$Login$httpErrorToString = function (httpError) {
+	switch (httpError.$) {
+		case 'BadUrl':
+			var msg = httpError.a;
+			return 'Bad url: ' + msg;
+		case 'Timeout':
+			return 'Request timed out';
+		case 'NetworkError':
+			return 'Network error';
+		case 'BadStatus':
+			var code = httpError.a;
+			return 'Bad status: ' + $elm$core$String$fromInt(code);
+		default:
+			var msg = httpError.a;
+			return 'Bad body: ' + msg;
+	}
+};
+var $author$project$Api$Auth$baseUrl = 'http://localhost:3000';
+var $elm$http$Http$jsonBody = function (value) {
+	return A2(
+		_Http_pair,
+		'application/json',
+		A2($elm$json$Json$Encode$encode, 0, value));
+};
+var $author$project$Api$Auth$LoginResponse = F3(
+	function (ok, message, accessToken) {
+		return {accessToken: accessToken, message: message, ok: ok};
+	});
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $elm$json$Json$Decode$oneOf = _Json_oneOf;
+var $elm$json$Json$Decode$maybe = function (decoder) {
+	return $elm$json$Json$Decode$oneOf(
+		_List_fromArray(
+			[
+				A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, decoder),
+				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
+			]));
+};
+var $author$project$Api$Auth$loginDecoder = A4(
+	$elm$json$Json$Decode$map3,
+	$author$project$Api$Auth$LoginResponse,
+	A2($elm$json$Json$Decode$field, 'ok', $elm$json$Json$Decode$bool),
+	A2($elm$json$Json$Decode$field, 'message', $elm$json$Json$Decode$string),
+	$elm$json$Json$Decode$maybe(
+		A2($elm$json$Json$Decode$field, 'accessToken', $elm$json$Json$Decode$string)));
+var $author$project$Api$Auth$login = F2(
+	function (body, toMsg) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(body),
+				expect: A2($elm$http$Http$expectJson, toMsg, $author$project$Api$Auth$loginDecoder),
+				headers: _List_Nil,
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: $author$project$Api$Auth$baseUrl + '/auth/login'
+			});
+	});
+var $author$project$Pages$Login$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
-			case 'Tick':
+			case 'SetUsername':
+				var u = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{stopwatchInMs: model.stopwatchInMs + 100}),
+						{email: u}),
 					$elm$core$Platform$Cmd$none);
-			case 'Start':
+			case 'SetPassword':
+				var p = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{running: true, stopwatchInMs: model.stopwatchInMs + 10000}),
+						{password: p}),
 					$elm$core$Platform$Cmd$none);
+			case 'Submit':
+				if (model.isSubmitting) {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				} else {
+					var body = $elm$json$Json$Encode$object(
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								'email',
+								$elm$json$Json$Encode$string(model.email)),
+								_Utils_Tuple2(
+								'password',
+								$elm$json$Json$Encode$string(model.password))
+							]));
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{error: $elm$core$Maybe$Nothing, isSubmitting: true}),
+						A2($author$project$Api$Auth$login, body, $author$project$Pages$Login$LoginResult));
+				}
 			default:
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{running: false}),
-					$elm$core$Platform$Cmd$none);
+				if (msg.a.$ === 'Ok') {
+					var response = msg.a.a;
+					return response.ok ? _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{error: $elm$core$Maybe$Nothing, isSubmitting: false}),
+						$elm$core$Platform$Cmd$none) : _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								error: $elm$core$Maybe$Just(response.message),
+								isSubmitting: false
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					var httpError = msg.a.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								error: $elm$core$Maybe$Just(
+									$author$project$Pages$Login$httpErrorToString(httpError)),
+								isSubmitting: false
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
 		}
 	});
 var $author$project$Main$update = F2(
@@ -12129,7 +12271,7 @@ var $author$project$Main$update = F2(
 					$author$project$Main$NotFound,
 					A2($elm$url$Url$Parser$parse, $author$project$Main$routeParser, newUrl));
 				var exercisesFetchCmd = function () {
-					if (newRoute.$ === 'ExercisesRoute') {
+					if (newRoute.$ === 'Exercises') {
 						return $elm$core$Platform$Cmd$none;
 					} else {
 						return $elm$core$Platform$Cmd$none;
@@ -12160,7 +12302,7 @@ var $author$project$Main$update = F2(
 				}
 			case 'ExercisesMsg':
 				var subMsg = msg.a;
-				var _v3 = A2($author$project$Exercises$update, subMsg, model.exercisesModel);
+				var _v3 = A2($author$project$Pages$Exercises$update, subMsg, model.exercisesModel);
 				var updatedExercisesModel = _v3.a;
 				var cmd = _v3.b;
 				return _Utils_Tuple2(
@@ -12168,11 +12310,21 @@ var $author$project$Main$update = F2(
 						model,
 						{exercisesModel: updatedExercisesModel}),
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$ExercisesMsg, cmd));
+			case 'LoginMsg':
+				var subMsg = msg.a;
+				var _v4 = A2($author$project$Pages$Login$update, subMsg, model.loginModel);
+				var updatedLoginModel = _v4.a;
+				var cmd = _v4.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{loginModel: updatedLoginModel}),
+					A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd));
 			default:
 				var subMsg = msg.a;
-				var _v4 = A2($author$project$Games$Stopwatch$update, subMsg, model.stopwatchModel);
-				var updatedStopwatch = _v4.a;
-				var cmd = _v4.b;
+				var _v5 = A2($author$project$Exercises$Stopwatch$update, subMsg, model.stopwatchModel);
+				var updatedStopwatch = _v5.a;
+				var cmd = _v5.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -12183,22 +12335,22 @@ var $author$project$Main$update = F2(
 var $elm$html$Html$main_ = _VirtualDom_node('main');
 var $elm$html$Html$footer = _VirtualDom_node('footer');
 var $author$project$Main$viewFooter = A2(
-	$elm$html$Html$div,
+	$elm$html$Html$footer,
+	_List_Nil,
 	_List_fromArray(
 		[
-			$elm$html$Html$Attributes$class('footer-container')
-		]),
-	_List_fromArray(
-		[
-			A2(
-			$elm$html$Html$footer,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('footer')
-				]),
-			_List_Nil)
+			$elm$html$Html$text('© 2024 My Elm App')
 		]));
+var $elm$html$Html$Attributes$alt = $elm$html$Html$Attributes$stringProperty('alt');
 var $elm$html$Html$header = _VirtualDom_node('header');
+var $elm$html$Html$img = _VirtualDom_node('img');
+var $elm$html$Html$nav = _VirtualDom_node('nav');
+var $elm$html$Html$Attributes$src = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'src',
+		_VirtualDom_noJavaScriptOrHtmlUri(url));
+};
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
 		return A3(
@@ -12250,21 +12402,33 @@ var $author$project$Main$viewLink = F3(
 	});
 var $author$project$Main$viewHeader = function (currentPath) {
 	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('header-container')
-			]),
+		$elm$html$Html$header,
+		_List_Nil,
 		_List_fromArray(
 			[
 				A2(
-				$elm$html$Html$header,
+				$elm$html$Html$nav,
+				_List_Nil,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('header')
-					]),
-				_List_fromArray(
-					[
+						A2(
+						$elm$html$Html$a,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('logo'),
+								$elm$html$Html$Attributes$href('/')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$img,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$src('/assets/logo.png'),
+										$elm$html$Html$Attributes$alt('TQ')
+									]),
+								_List_Nil)
+							])),
 						A2(
 						$elm$html$Html$ul,
 						_List_Nil,
@@ -12275,31 +12439,55 @@ var $author$project$Main$viewHeader = function (currentPath) {
 								_List_Nil,
 								_List_fromArray(
 									[
-										A3($author$project$Main$viewLink, 'Home', '/home', currentPath)
+										A3($author$project$Main$viewLink, 'HOME', '/home', currentPath)
 									])),
 								A2(
 								$elm$html$Html$li,
 								_List_Nil,
 								_List_fromArray(
 									[
-										A3($author$project$Main$viewLink, 'Exercises', '/exercises', currentPath)
+										A3($author$project$Main$viewLink, 'EXERCISES', '/exercises', currentPath)
+									])),
+								A2(
+								$elm$html$Html$li,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A3($author$project$Main$viewLink, 'THEORY', '/theory', currentPath)
+									])),
+								A2(
+								$elm$html$Html$li,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A3($author$project$Main$viewLink, 'ABOUT', '/about', currentPath)
 									]))
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A3($author$project$Main$viewLink, 'LOGIN', '/login', currentPath)
 							]))
 					]))
 			]));
 };
-var $author$project$Exercises$BackToList = {$: 'BackToList'};
-var $author$project$Exercises$ChordGuesser = {$: 'ChordGuesser'};
-var $author$project$Exercises$SelectGame = function (a) {
+var $elm$html$Html$br = _VirtualDom_node('br');
+var $elm$html$Html$h1 = _VirtualDom_node('h1');
+var $elm$html$Html$section = _VirtualDom_node('section');
+var $author$project$Pages$Exercises$BackToList = {$: 'BackToList'};
+var $author$project$Pages$Exercises$ChordGuesser = {$: 'ChordGuesser'};
+var $author$project$Pages$Exercises$SelectGame = function (a) {
 	return {$: 'SelectGame', a: a};
 };
 var $elm$html$Html$h2 = _VirtualDom_node('h2');
-var $author$project$Games$ChordGuesserExercise$ChordGroupChosen = function (a) {
+var $author$project$Exercises$ChordGuesserExercise$ChordGroupChosen = function (a) {
 	return {$: 'ChordGroupChosen', a: a};
 };
-var $author$project$Games$ChordGuesserExercise$GoBack = {$: 'GoBack'};
-var $author$project$Games$ChordGuesserExercise$ResetChordGuesser = {$: 'ResetChordGuesser'};
-var $author$project$Games$ChordGuesserExercise$ToggleNotesShuffle = {$: 'ToggleNotesShuffle'};
+var $author$project$Exercises$ChordGuesserExercise$GoBack = {$: 'GoBack'};
+var $author$project$Exercises$ChordGuesserExercise$ResetChordGuesser = {$: 'ResetChordGuesser'};
+var $author$project$Exercises$ChordGuesserExercise$ToggleNotesShuffle = {$: 'ToggleNotesShuffle'};
 var $elm$json$Json$Encode$bool = _Json_wrap;
 var $elm$html$Html$Attributes$boolProperty = F2(
 	function (key, bool) {
@@ -12311,7 +12499,7 @@ var $elm$html$Html$Attributes$boolProperty = F2(
 var $elm$html$Html$Attributes$checked = $elm$html$Html$Attributes$boolProperty('checked');
 var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
 var $elm$html$Html$Attributes$for = $elm$html$Html$Attributes$stringProperty('htmlFor');
-var $author$project$Games$ChordGuesserExercise$isToggleShuffleDisabled = function (difficulty) {
+var $author$project$Exercises$ChordGuesserExercise$isToggleShuffleDisabled = function (difficulty) {
 	switch (difficulty.$) {
 		case 'Easy':
 			return false;
@@ -12326,14 +12514,13 @@ var $author$project$Games$ChordGuesserExercise$isToggleShuffleDisabled = functio
 	}
 };
 var $elm$html$Html$label = _VirtualDom_node('label');
-var $author$project$Games$ChordGuesserExercise$Advanced = {$: 'Advanced'};
-var $author$project$Games$ChordGuesserExercise$Extreme = {$: 'Extreme'};
-var $author$project$Games$ChordGuesserExercise$Hard = {$: 'Hard'};
-var $author$project$Games$ChordGuesserExercise$Medium = {$: 'Medium'};
-var $author$project$Games$ChordGuesserExercise$listOfDifficulities = _List_fromArray(
-	[$author$project$Games$ChordGuesserExercise$Easy, $author$project$Games$ChordGuesserExercise$Medium, $author$project$Games$ChordGuesserExercise$Hard, $author$project$Games$ChordGuesserExercise$Advanced, $author$project$Games$ChordGuesserExercise$Extreme]);
-var $elm$html$Html$section = _VirtualDom_node('section');
-var $author$project$Games$ChordGuesserExercise$stringFromDifficulty = function (difficulty) {
+var $author$project$Exercises$ChordGuesserExercise$Advanced = {$: 'Advanced'};
+var $author$project$Exercises$ChordGuesserExercise$Extreme = {$: 'Extreme'};
+var $author$project$Exercises$ChordGuesserExercise$Hard = {$: 'Hard'};
+var $author$project$Exercises$ChordGuesserExercise$Medium = {$: 'Medium'};
+var $author$project$Exercises$ChordGuesserExercise$listOfDifficulities = _List_fromArray(
+	[$author$project$Exercises$ChordGuesserExercise$Easy, $author$project$Exercises$ChordGuesserExercise$Medium, $author$project$Exercises$ChordGuesserExercise$Hard, $author$project$Exercises$ChordGuesserExercise$Advanced, $author$project$Exercises$ChordGuesserExercise$Extreme]);
+var $author$project$Exercises$ChordGuesserExercise$stringFromDifficulty = function (difficulty) {
 	switch (difficulty.$) {
 		case 'Easy':
 			return 'Easy';
@@ -12347,24 +12534,24 @@ var $author$project$Games$ChordGuesserExercise$stringFromDifficulty = function (
 			return 'Extreme';
 	}
 };
-var $author$project$Games$ChordGuesserExercise$ChordChosen = function (a) {
+var $author$project$Exercises$ChordGuesserExercise$ChordChosen = function (a) {
 	return {$: 'ChordChosen', a: a};
 };
-var $author$project$Games$ChordGuesserExercise$viewChord = function (chord) {
+var $author$project$Exercises$ChordGuesserExercise$viewChord = function (chord) {
 	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
 			[
 				$elm$html$Html$Attributes$class('custom-button'),
 				$elm$html$Html$Events$onClick(
-				$author$project$Games$ChordGuesserExercise$ChordChosen(chord))
+				$author$project$Exercises$ChordGuesserExercise$ChordChosen(chord))
 			]),
 		_List_fromArray(
 			[
 				$elm$html$Html$text(chord.chord)
 			]));
 };
-var $author$project$Games$ChordGuesserExercise$viewChords = function (model) {
+var $author$project$Exercises$ChordGuesserExercise$viewChords = function (model) {
 	var _v0 = model.maybeChords;
 	if (_v0.$ === 'Just') {
 		var chords = _v0.a;
@@ -12374,7 +12561,7 @@ var $author$project$Games$ChordGuesserExercise$viewChords = function (model) {
 				[
 					$elm$html$Html$Attributes$class('chords-container')
 				]),
-			A2($elm$core$List$map, $author$project$Games$ChordGuesserExercise$viewChord, chords));
+			A2($elm$core$List$map, $author$project$Exercises$ChordGuesserExercise$viewChord, chords));
 	} else {
 		return A2(
 			$elm$html$Html$div,
@@ -12385,10 +12572,10 @@ var $author$project$Games$ChordGuesserExercise$viewChords = function (model) {
 				]));
 	}
 };
-var $author$project$Games$ChordGuesserExercise$DifficultyChosen = function (a) {
+var $author$project$Exercises$ChordGuesserExercise$DifficultyChosen = function (a) {
 	return {$: 'DifficultyChosen', a: a};
 };
-var $author$project$Games$ChordGuesserExercise$viewDifficultyButtons = function (difficulties) {
+var $author$project$Exercises$ChordGuesserExercise$viewDifficultyButtons = function (difficulties) {
 	return A2(
 		$elm$html$Html$div,
 		_List_Nil,
@@ -12401,17 +12588,17 @@ var $author$project$Games$ChordGuesserExercise$viewDifficultyButtons = function 
 						[
 							$elm$html$Html$Attributes$class('custom-button'),
 							$elm$html$Html$Events$onClick(
-							$author$project$Games$ChordGuesserExercise$DifficultyChosen(difficulty))
+							$author$project$Exercises$ChordGuesserExercise$DifficultyChosen(difficulty))
 						]),
 					_List_fromArray(
 						[
 							$elm$html$Html$text(
-							$author$project$Games$ChordGuesserExercise$stringFromDifficulty(difficulty))
+							$author$project$Exercises$ChordGuesserExercise$stringFromDifficulty(difficulty))
 						]));
 			},
 			difficulties));
 };
-var $author$project$Games$ChordGuesserExercise$viewRandomizedChordNotes = function (model) {
+var $author$project$Exercises$ChordGuesserExercise$viewRandomizedChordNotes = function (model) {
 	var _v0 = model.randomizedChordNotes;
 	if (_v0.$ === 'Just') {
 		var randomizedChordNotes = _v0.a;
@@ -12433,15 +12620,15 @@ var $author$project$Games$ChordGuesserExercise$viewRandomizedChordNotes = functi
 				]));
 	}
 };
-var $author$project$Games$ChordGuesserExercise$view = function (model) {
+var $author$project$Exercises$ChordGuesserExercise$view = function (model) {
 	return model.isGameStarted ? A2(
 		$elm$html$Html$div,
 		_List_Nil,
 		_List_fromArray(
 			[
 				$elm$html$Html$text('Chord guesser'),
-				$author$project$Games$ChordGuesserExercise$viewRandomizedChordNotes(model),
-				$author$project$Games$ChordGuesserExercise$viewChords(model),
+				$author$project$Exercises$ChordGuesserExercise$viewRandomizedChordNotes(model),
+				$author$project$Exercises$ChordGuesserExercise$viewChords(model),
 				A2(
 				$elm$html$Html$p,
 				_List_Nil,
@@ -12463,7 +12650,7 @@ var $author$project$Games$ChordGuesserExercise$view = function (model) {
 				_List_fromArray(
 					[
 						$elm$html$Html$Attributes$class('custom-button'),
-						$elm$html$Html$Events$onClick($author$project$Games$ChordGuesserExercise$ResetChordGuesser)
+						$elm$html$Html$Events$onClick($author$project$Exercises$ChordGuesserExercise$ResetChordGuesser)
 					]),
 				_List_fromArray(
 					[
@@ -12481,14 +12668,14 @@ var $author$project$Games$ChordGuesserExercise$view = function (model) {
 					[
 						$elm$html$Html$text('Chord Guesser Exercise')
 					])),
-				$author$project$Games$ChordGuesserExercise$viewDifficultyButtons($author$project$Games$ChordGuesserExercise$listOfDifficulities),
+				$author$project$Exercises$ChordGuesserExercise$viewDifficultyButtons($author$project$Exercises$ChordGuesserExercise$listOfDifficulities),
 				A2(
 				$elm$html$Html$div,
 				_List_Nil,
 				_List_fromArray(
 					[
 						$elm$html$Html$text(
-						'Chosen difficulty: ' + $author$project$Games$ChordGuesserExercise$stringFromDifficulty(model.chosenDifficulty))
+						'Chosen difficulty: ' + $author$project$Exercises$ChordGuesserExercise$stringFromDifficulty(model.chosenDifficulty))
 					])),
 				A2(
 				$elm$html$Html$label,
@@ -12507,9 +12694,9 @@ var $author$project$Games$ChordGuesserExercise$view = function (model) {
 						$elm$html$Html$Attributes$type_('checkbox'),
 						$elm$html$Html$Attributes$checked(model.areNotesShuffled),
 						$elm$html$Html$Attributes$id('shuffle-notes-checkbox'),
-						$elm$html$Html$Events$onClick($author$project$Games$ChordGuesserExercise$ToggleNotesShuffle),
+						$elm$html$Html$Events$onClick($author$project$Exercises$ChordGuesserExercise$ToggleNotesShuffle),
 						$elm$html$Html$Attributes$disabled(
-						$author$project$Games$ChordGuesserExercise$isToggleShuffleDisabled(model.chosenDifficulty))
+						$author$project$Exercises$ChordGuesserExercise$isToggleShuffleDisabled(model.chosenDifficulty))
 					]),
 				_List_fromArray(
 					[
@@ -12530,7 +12717,7 @@ var $author$project$Games$ChordGuesserExercise$view = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Events$onClick(
-										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
 											_List_fromArray(
 												['major', 'minor'])))
 									]),
@@ -12543,7 +12730,7 @@ var $author$project$Games$ChordGuesserExercise$view = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Events$onClick(
-										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
 											_List_fromArray(
 												['dom7', 'maj7', 'minor7'])))
 									]),
@@ -12556,7 +12743,7 @@ var $author$project$Games$ChordGuesserExercise$view = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Events$onClick(
-										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
 											_List_fromArray(
 												['diminished', 'dim7', 'minor7flat5'])))
 									]),
@@ -12569,7 +12756,7 @@ var $author$project$Games$ChordGuesserExercise$view = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Events$onClick(
-										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
 											_List_fromArray(
 												['augmented', 'aug7', 'maj7sharp5'])))
 									]),
@@ -12582,7 +12769,7 @@ var $author$project$Games$ChordGuesserExercise$view = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Events$onClick(
-										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
 											_List_fromArray(
 												['sus2', 'sus4'])))
 									]),
@@ -12595,7 +12782,7 @@ var $author$project$Games$ChordGuesserExercise$view = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Events$onClick(
-										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
 											_List_fromArray(
 												['major6', 'minor6'])))
 									]),
@@ -12608,7 +12795,7 @@ var $author$project$Games$ChordGuesserExercise$view = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Events$onClick(
-										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
 											_List_fromArray(
 												['dom9', 'maj9', 'minor9'])))
 									]),
@@ -12621,7 +12808,7 @@ var $author$project$Games$ChordGuesserExercise$view = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Events$onClick(
-										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
 											_List_fromArray(
 												['dom11', 'maj11', 'minor11'])))
 									]),
@@ -12634,7 +12821,7 @@ var $author$project$Games$ChordGuesserExercise$view = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Events$onClick(
-										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
 											_List_fromArray(
 												['dom13', 'maj13', 'minor13'])))
 									]),
@@ -12647,7 +12834,7 @@ var $author$project$Games$ChordGuesserExercise$view = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Events$onClick(
-										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
 											_List_fromArray(
 												['dom7flat9', 'dom7sharp9', 'dom7sharp11'])))
 									]),
@@ -12660,7 +12847,7 @@ var $author$project$Games$ChordGuesserExercise$view = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Events$onClick(
-										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
 											_List_fromArray(
 												['dom7flat13', 'dom7sharp5', 'dom7flat5'])))
 									]),
@@ -12673,7 +12860,7 @@ var $author$project$Games$ChordGuesserExercise$view = function (model) {
 								_List_fromArray(
 									[
 										$elm$html$Html$Events$onClick(
-										$author$project$Games$ChordGuesserExercise$ChordGroupChosen(
+										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
 											_List_fromArray(
 												['sus13', 'minorMaj7', 'dim9'])))
 									]),
@@ -12688,7 +12875,7 @@ var $author$project$Games$ChordGuesserExercise$view = function (model) {
 				_List_fromArray(
 					[
 						$elm$html$Html$Attributes$class('custom-button'),
-						$elm$html$Html$Events$onClick($author$project$Games$ChordGuesserExercise$GoBack)
+						$elm$html$Html$Events$onClick($author$project$Exercises$ChordGuesserExercise$GoBack)
 					]),
 				_List_fromArray(
 					[
@@ -12696,7 +12883,7 @@ var $author$project$Games$ChordGuesserExercise$view = function (model) {
 					]))
 			]));
 };
-var $author$project$Exercises$view = function (model) {
+var $author$project$Pages$Exercises$view = function (model) {
 	var _v0 = model.currentGame;
 	if (_v0.$ === 'Just') {
 		var _v1 = _v0.a;
@@ -12710,7 +12897,7 @@ var $author$project$Exercises$view = function (model) {
 					_List_fromArray(
 						[
 							$elm$html$Html$Attributes$class('custom-button'),
-							$elm$html$Html$Events$onClick($author$project$Exercises$BackToList)
+							$elm$html$Html$Events$onClick($author$project$Pages$Exercises$BackToList)
 						]),
 					_List_fromArray(
 						[
@@ -12718,8 +12905,8 @@ var $author$project$Exercises$view = function (model) {
 						])),
 					A2(
 					$elm$html$Html$map,
-					$author$project$Exercises$ChordGuesserMsg,
-					$author$project$Games$ChordGuesserExercise$view(model.chordGuesserModel))
+					$author$project$Pages$Exercises$ChordGuesserMsg,
+					$author$project$Exercises$ChordGuesserExercise$view(model.chordGuesserModel))
 				]));
 	} else {
 		return A2(
@@ -12749,7 +12936,7 @@ var $author$project$Exercises$view = function (model) {
 									_List_fromArray(
 										[
 											$elm$html$Html$Events$onClick(
-											$author$project$Exercises$SelectGame($author$project$Exercises$ChordGuesser)),
+											$author$project$Pages$Exercises$SelectGame($author$project$Pages$Exercises$ChordGuesser)),
 											$elm$html$Html$Attributes$class('custom-button')
 										]),
 									_List_fromArray(
@@ -12761,22 +12948,153 @@ var $author$project$Exercises$view = function (model) {
 				]));
 	}
 };
+var $author$project$Pages$Login$SetPassword = function (a) {
+	return {$: 'SetPassword', a: a};
+};
+var $author$project$Pages$Login$SetUsername = function (a) {
+	return {$: 'SetUsername', a: a};
+};
+var $author$project$Pages$Login$Submit = {$: 'Submit'};
+var $author$project$Pages$Login$view = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('login-form')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$label,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Email')
+							])),
+						A2(
+						$elm$html$Html$input,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$type_('text'),
+								$elm$html$Html$Attributes$value(model.email),
+								$elm$html$Html$Events$onInput($author$project$Pages$Login$SetUsername)
+							]),
+						_List_Nil)
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$label,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Password')
+							])),
+						A2(
+						$elm$html$Html$input,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$type_('password'),
+								$elm$html$Html$Attributes$value(model.password),
+								$elm$html$Html$Events$onInput($author$project$Pages$Login$SetPassword)
+							]),
+						_List_Nil)
+					])),
+				function () {
+				var _v0 = model.error;
+				if (_v0.$ === 'Just') {
+					var e = _v0.a;
+					return A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('error')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(e)
+							]));
+				} else {
+					return A2($elm$html$Html$div, _List_Nil, _List_Nil);
+				}
+			}(),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$disabled(model.isSubmitting),
+						$elm$html$Html$Events$onClick($author$project$Pages$Login$Submit)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						model.isSubmitting ? 'Signing in...' : 'Sign in')
+					]))
+			]));
+};
 var $author$project$Main$viewRoute = function (model) {
 	var _v0 = model.route;
 	switch (_v0.$) {
 		case 'Home':
 			return A2(
-				$elm$html$Html$div,
+				$elm$html$Html$section,
 				_List_Nil,
 				_List_fromArray(
 					[
-						$elm$html$Html$text('You are at the home page')
+						A2(
+						$elm$html$Html$h1,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('MUSIC THEORY'),
+								A2($elm$html$Html$br, _List_Nil, _List_Nil),
+								$elm$html$Html$text('MADE EASY')
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$a,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$href('/exercises')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Exercises')
+									])),
+								A2(
+								$elm$html$Html$a,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$href('/theory')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Theory')
+									]))
+							]))
 					]));
-		case 'ExercisesRoute':
+		case 'Exercises':
 			return A2(
 				$elm$html$Html$map,
 				$author$project$Main$ExercisesMsg,
-				$author$project$Exercises$view(model.exercisesModel));
+				$author$project$Pages$Exercises$view(model.exercisesModel));
+		case 'Login':
+			return A2(
+				$elm$html$Html$map,
+				$author$project$Main$LoginMsg,
+				$author$project$Pages$Login$view(model.loginModel));
 		default:
 			return A2(
 				$elm$html$Html$div,
@@ -12791,8 +13109,10 @@ var $author$project$Main$viewTitle = function (route) {
 	switch (route.$) {
 		case 'Home':
 			return 'Home';
-		case 'ExercisesRoute':
+		case 'Exercises':
 			return 'Exercises';
+		case 'Login':
+			return 'Login';
 		default:
 			return 'Page not found';
 	}
@@ -12801,31 +13121,19 @@ var $author$project$Main$view = function (model) {
 	return {
 		body: _List_fromArray(
 			[
+				$author$project$Main$viewHeader(model.url.path),
 				A2(
-				$elm$html$Html$div,
+				$elm$html$Html$main_,
+				_List_Nil,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('wrapper')
-					]),
-				_List_fromArray(
-					[
-						$author$project$Main$viewHeader(model.url.path),
-						A2(
-						$elm$html$Html$main_,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('content-container')
-							]),
-						_List_fromArray(
-							[
-								$author$project$Main$viewRoute(model)
-							])),
-						$author$project$Main$viewFooter
-					]))
+						$author$project$Main$viewRoute(model)
+					])),
+				$author$project$Main$viewFooter
 			]),
 		title: $author$project$Main$viewTitle(model.route)
 	};
 };
 var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$UrlChanged, onUrlRequest: $author$project$Main$LinkClicked, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
-_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$string)({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"TheoryApi.Chord":{"args":[],"type":"{ chord : String.String, root : String.String, formula : List.List Basics.Int, degrees : List.List String.String, notes : List.List String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UrlChanged":["Url.Url"],"LinkClicked":["Browser.UrlRequest"],"ExercisesMsg":["Exercises.Msg"],"StopwatchMsg":["Games.Stopwatch.Msg"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Exercises.Msg":{"args":[],"tags":{"ChordGuesserMsg":["Games.ChordGuesserExercise.Msg"],"SelectGame":["Exercises.Game"],"BackToList":[]}},"Games.Stopwatch.Msg":{"args":[],"tags":{"Tick":["Time.Posix"],"Start":[],"Stop":[]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Exercises.Game":{"args":[],"tags":{"ChordGuesser":[]}},"Games.ChordGuesserExercise.Msg":{"args":[],"tags":{"GotChordData":["Result.Result Http.Error (List.List TheoryApi.Chord)"],"RandomChordPicked":["Basics.Int"],"DifficultyChosen":["Games.ChordGuesserExercise.Difficulty"],"ChordChosen":["TheoryApi.Chord"],"ChordGroupChosen":["List.List String.String"],"Shuffled":["List.List String.String"],"ToggleNotesShuffle":[],"ResetChordGuesser":[],"GoBack":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Games.ChordGuesserExercise.Difficulty":{"args":[],"tags":{"Easy":[],"Medium":[],"Hard":[],"Advanced":[],"Extreme":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"List.List":{"args":["a"],"tags":{}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}}}}})}});}(this));
+_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$string)({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Api.Auth.LoginResponse":{"args":[],"type":"{ ok : Basics.Bool, message : String.String, accessToken : Maybe.Maybe String.String }"},"TheoryApi.Chord":{"args":[],"type":"{ chord : String.String, root : String.String, formula : List.List Basics.Int, degrees : List.List String.String, notes : List.List String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UrlChanged":["Url.Url"],"LinkClicked":["Browser.UrlRequest"],"ExercisesMsg":["Pages.Exercises.Msg"],"LoginMsg":["Pages.Login.Msg"],"StopwatchMsg":["Exercises.Stopwatch.Msg"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Exercises.Stopwatch.Msg":{"args":[],"tags":{"Tick":["Time.Posix"],"Start":[],"Stop":[]}},"Pages.Exercises.Msg":{"args":[],"tags":{"ChordGuesserMsg":["Exercises.ChordGuesserExercise.Msg"],"SelectGame":["Pages.Exercises.Game"],"BackToList":[]}},"Pages.Login.Msg":{"args":[],"tags":{"SetUsername":["String.String"],"SetPassword":["String.String"],"Submit":[],"LoginResult":["Result.Result Http.Error Api.Auth.LoginResponse"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Pages.Exercises.Game":{"args":[],"tags":{"ChordGuesser":[]}},"Exercises.ChordGuesserExercise.Msg":{"args":[],"tags":{"GotChordData":["Result.Result Http.Error (List.List TheoryApi.Chord)"],"RandomChordPicked":["Basics.Int"],"DifficultyChosen":["Exercises.ChordGuesserExercise.Difficulty"],"ChordChosen":["TheoryApi.Chord"],"ChordGroupChosen":["List.List String.String"],"Shuffled":["List.List String.String"],"ToggleNotesShuffle":[],"ResetChordGuesser":[],"GoBack":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"Exercises.ChordGuesserExercise.Difficulty":{"args":[],"tags":{"Easy":[],"Medium":[],"Hard":[],"Advanced":[],"Extreme":[]}},"List.List":{"args":["a"],"tags":{}}}}})}});}(this));
