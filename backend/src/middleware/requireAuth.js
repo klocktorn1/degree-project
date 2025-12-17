@@ -20,7 +20,7 @@ function requireAuth(req, res, next) {
 
     } catch (err) {
         if (err.name === 'TokenExpiredError') {
-            return res.status(401).json({ message: "Access token expired" })
+            return res.status(401).json({ tokenOk: false, message: "Access token expired" })
         }
         return res.status(401).json({ message: 'Invalid token' })
 

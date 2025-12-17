@@ -18,12 +18,13 @@ const createRefreshToken = (user) => {
         expiresIn: "7d"
     })
 }
+const debug = ((req, res) => {
 
+    console.log("Cookies:", req.cookies);
+    res.json(req.cookies);
+})
 
 const loginUser = async (req, res) => {
-
-    console.log("Headers:", req.headers);
-    console.log("Body:", req.body);
     const { email, password } = req.body;
     if (!email || !password) {
         return res.json({
@@ -35,6 +36,7 @@ const loginUser = async (req, res) => {
     try {
         const [row] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
         const user = row[0]
+        const userId = row[0].id
         if (!user) {
             return res.json({
                 ok: false,
@@ -51,17 +53,25 @@ const loginUser = async (req, res) => {
             } else {
                 const accessToken = createAccessToken(user);
                 const refreshToken = createRefreshToken(user);
+
+                res.cookie('accessToken', accessToken, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: 'Strict',
+                    maxAge: 15 * 60 * 1000 // 15 minutes
+                });
                 res.cookie("refreshToken", refreshToken, {
                     httpOnly: true,
                     secure: false,
-                    sameSite: "strict",
+                    sameSite: "lax",
                     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 d
                 })
                 await db.query('UPDATE users SET refresh_token = ? WHERE id = ?', [refreshToken, user.id]);
-                console.log("asdasdasdasd");
 
                 return res.json({
+                    ok: true,
                     message: `Successful login`,
+                    id: userId.toString(),
                     accessToken,
                     refreshToken
                 });
@@ -73,6 +83,8 @@ const loginUser = async (req, res) => {
         return res.status(500).json({ error: `loginUser in authController: ${err.message}` });
     }
 };
+
+
 
 // if jwt.verify throws error TokenExpiredError i get 	"message": "Access token expired"
 // from server. frontend needs a way to handle this, if TokenExpiredError then point to
@@ -90,6 +102,12 @@ const refreshToken = async (req, res) => {
         if (!user) return res.status(403).json({ message: "Invalid refresh token" })
 
         const newAccessToken = createAccessToken(user);
+
+        res.cookie('accessToken', newAccessToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'Strict'
+        });
         res.json({ accessToken: newAccessToken })
     } catch (err) {
         res.status(403).json({ message: "Invalid or expired refresh token" });
@@ -200,5 +218,6 @@ module.exports = {
     registerUser,
     refreshToken,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    debug
 }

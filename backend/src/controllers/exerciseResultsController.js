@@ -10,11 +10,11 @@ const getAllExerciseResults = async (req, res) => {
   }
 };
 
-// Get exercise result by id
+// Get exercise result by user id
 const getExerciseResultsById = async (req, res) => {
   try {
     const [rows] = await db.query(
-      'SELECT * FROM exercise_results WHERE id = ?',
+      'SELECT * FROM exercise_results WHERE user_id = ?',
       [req.params.id]
     );
 
@@ -22,7 +22,7 @@ const getExerciseResultsById = async (req, res) => {
       return res.status(404).json({ error: 'Exercise result not found' });
     }
 
-    res.json({ exercise_results: rows[0] });
+    res.json({ exercise_results: rows });
   } catch (err) {
     res.status(500).json({ error: `getExerciseResultsById inside exerciseResultsContainer: ${err.message}` })
   }

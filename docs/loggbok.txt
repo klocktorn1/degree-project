@@ -16,8 +16,8 @@ fredag - Hade en gammal övning jag gjort i elm (chordguesser) som jag ändrade 
 
 
 vecka 3
-måndag - 
-tisdag -
+måndag - Började med lite styling, skapade dashboard page och började smått försöka få till inlogg för användare. 
+tisdag - Fick till inlogg för användare som redirectar till dashboard page och visar lite info om användaren.
 onsdag - 
 torsdag -
 fredag - 

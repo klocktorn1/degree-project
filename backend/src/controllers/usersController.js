@@ -13,13 +13,14 @@ const getAllUsers = async (req, res) => {
 
 
 
-const getUserById = async (req, res) => {
+const getUser = async (req, res) => {
+
 
   const requestedId = parseInt(req.params.id); // id in the URL
   const authenticatedId = req.user.id; // id from JWT payload
 
   if (requestedId !== authenticatedId) {
-    res.status(403).json({ message: "Forbidden: Access denied" })
+    return res.status(403).json({ message: "Forbidden: Access denied" })
   }
 
   try {
@@ -29,7 +30,7 @@ const getUserById = async (req, res) => {
     }
 
     const { username, email, firstname, lastname, created_at } = row[0]
-    res.json({ user: { username, email, firstname, lastname, created_at } });
+    res.json({ username, email, firstname, lastname, createdAt: created_at });
   } catch (err) {
     res.status(500).json({ error: `getUserById in usersController: ${err.message}` });
   }
@@ -81,7 +82,7 @@ const deleteUser = async (req, res) => {
 
     return res.status(404).json({ message: "Forbidden: No Access" })
   } else {
-    
+
     try {
       const result = db.query('DELETE FROM users WHERE id = ?', [id])
       if (result.affectedRows === 0) {
@@ -99,7 +100,7 @@ const deleteUser = async (req, res) => {
 
 module.exports = {
   getAllUsers,
-  getUserById,
+  getUser,
   updateUser,
   deleteUser
 };

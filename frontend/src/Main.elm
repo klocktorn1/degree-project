@@ -1,11 +1,13 @@
 module Main exposing (..)
 
+import Api.Auth as Auth
 import Browser exposing (UrlRequest(..))
 import Browser.Navigation as Nav
 import Exercises.Stopwatch as Stopwatch
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
+import Pages.Dashboard as Dashboard
 import Pages.Exercises as Exercises
 import Pages.Login as Login
 import Time exposing (Posix)
@@ -19,7 +21,10 @@ type alias Model =
     , route : Route
     , exercisesModel : Exercises.Model
     , loginModel : Login.Model
+    , dashboardModel : Dashboard.Model
     , stopwatchModel : Stopwatch.Model
+    , accessToken : Maybe String
+    , userId : Maybe String
     }
 
 
@@ -28,6 +33,7 @@ type Msg
     | LinkClicked Browser.UrlRequest
     | ExercisesMsg Exercises.Msg
     | LoginMsg Login.Msg
+    | DashboardMsg Dashboard.Msg
     | StopwatchMsg Stopwatch.Msg
 
 
@@ -35,6 +41,7 @@ type Route
     = Home
     | Exercises
     | Login
+    | Dashboard
     | NotFound
 
 
@@ -59,6 +66,7 @@ subscriptions model =
     Sub.batch
         [ Sub.map StopwatchMsg (Stopwatch.subscriptions model.stopwatchModel)
         , Sub.map ExercisesMsg (Exercises.subscriptions model.exercisesModel)
+        , Sub.map DashboardMsg (Dashboard.subscriptions model.dashboardModel)
         ]
 
 
@@ -74,6 +82,9 @@ init flags url key =
 
         ( loginModel, loginCmd ) =
             Login.init
+
+        ( dashboardModel, dashboardCmd ) =
+            Dashboard.init
 
         stopwatchModel =
             Stopwatch.init
@@ -91,12 +102,16 @@ init flags url key =
       , route = route
       , exercisesModel = exercisesModel
       , loginModel = loginModel
+      , dashboardModel = dashboardModel
       , stopwatchModel = stopwatchModel
+      , accessToken = Nothing
+      , userId = Nothing
       }
     , Cmd.batch
         [ Cmd.map ExercisesMsg exercisesCmd
         , exercisesFetchOnStart
         , Cmd.map LoginMsg loginCmd
+        , Cmd.map DashboardMsg dashboardCmd
         ]
     )
 
@@ -107,6 +122,7 @@ routeParser =
         [ UP.map Home (UP.s "home")
         , UP.map Exercises (UP.s "exercises")
         , UP.map Login (UP.s "login")
+        , UP.map Dashboard (UP.s "dashboard")
         , UP.map Home UP.top
 
         -- removed Game route from top-level routing; exercises and their games are handled in Exercises.elm
@@ -161,12 +177,57 @@ update msg model =
             )
 
         LoginMsg subMsg ->
+            case subMsg of
+                Login.LoginResult result ->
+                    let
+                        ( updatedLoginModel, cmd ) =
+                            Login.update subMsg model.loginModel
+
+                        ( accessToken, userId, sideEffects ) =
+                            case result of
+                                Ok response ->
+                                    if response.ok then
+                                        ( response.accessToken
+                                        , response.id
+                                        , Cmd.batch
+                                            [ Auth.getUser
+                                                response.accessToken
+                                                response.id
+                                                (Dashboard.GotUser >> DashboardMsg)
+                                            , Nav.pushUrl model.key "/dashboard"
+                                            ]
+                                        )
+
+                                    else
+                                        ( Nothing, Nothing, Cmd.none )
+
+                                Err _ ->
+                                    ( Nothing, Nothing, Cmd.none )
+                    in
+                    ( { model
+                        | loginModel = updatedLoginModel
+                        , accessToken = accessToken
+                        , userId = userId
+                      }
+                    , Cmd.batch [ Cmd.map LoginMsg cmd, sideEffects ]
+                    )
+
+                _ ->
+                    let
+                        ( updatedLoginModel, cmd ) =
+                            Login.update subMsg model.loginModel
+                    in
+                    ( { model | loginModel = updatedLoginModel }
+                    , Cmd.map LoginMsg cmd
+                    )
+
+        DashboardMsg subMsg ->
             let
-                ( updatedLoginModel, cmd ) =
-                    Login.update subMsg model.loginModel
+                ( updatedDashboardModel, cmd ) =
+                    Dashboard.update subMsg model.dashboardModel
             in
-            ( { model | loginModel = updatedLoginModel }
-            , Cmd.map LoginMsg cmd
+            ( { model | dashboardModel = updatedDashboardModel }
+            , Cmd.batch [ Cmd.map DashboardMsg cmd ]
             )
 
         StopwatchMsg subMsg ->
@@ -203,6 +264,9 @@ viewTitle route =
 
         Login ->
             "Login"
+
+        Dashboard ->
+            "Dashboard"
 
         NotFound ->
             "Page not found"
@@ -254,6 +318,9 @@ viewRoute model =
         Login ->
             Html.map LoginMsg (Login.view model.loginModel)
 
+        Dashboard ->
+            Html.map DashboardMsg (Dashboard.view model.dashboardModel)
+
         NotFound ->
             Html.div []
                 [ Html.text "Page not found" ]
@@ -263,7 +330,7 @@ viewLink : String -> String -> String -> Html Msg
 viewLink label path currentPath =
     let
         maybeUrl =
-            Url.fromString ("http://localhost:8000" ++ path)
+            Url.fromString ("http://localhost:3000" ++ path)
 
         isActive =
             path == currentPath

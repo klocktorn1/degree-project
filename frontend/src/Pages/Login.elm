@@ -1,12 +1,12 @@
-module Pages.Login exposing (Model, Msg, init, update, view)
+module Pages.Login exposing (Model, Msg(..), init, update, view)
 
-import Api.Auth exposing (..)
+import Api.Auth as Auth
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
 import Http
-import Json.Decode as Decode
 import Json.Encode as Encode
+import Json.Decode as Decode
 import Platform.Cmd exposing (Cmd)
 import String
 
@@ -20,15 +20,19 @@ type alias Model =
 
 
 type Msg
-    = SetUsername String
+    = SetEmail String
     | SetPassword String
     | Submit
-    | LoginResult (Result Http.Error LoginResponse)
+    | LoginResult (Result Http.Error Auth.LoginResponse)
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { email = "", password = "", error = Nothing, isSubmitting = False }
+    ( { email = ""
+      , password = ""
+      , error = Nothing
+      , isSubmitting = False
+      }
     , Cmd.none
     )
 
@@ -36,8 +40,8 @@ init =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        SetUsername u ->
-            ( { model | email = u }, Cmd.none )
+        SetEmail e ->
+            ( { model | email = e }, Cmd.none )
 
         SetPassword p ->
             ( { model | password = p }, Cmd.none )
@@ -55,17 +59,25 @@ update msg model =
                             ]
                 in
                 ( { model | isSubmitting = True, error = Nothing }
-                , Api.Auth.login body LoginResult
+                , Auth.login body LoginResult
                 )
 
         LoginResult (Ok response) ->
             if response.ok then
-                ( { model | isSubmitting = False, error = Nothing }
+                ( { model
+                    | isSubmitting = False
+                    , error = Nothing
+                  }
                 , Cmd.none
                 )
 
-                else
-                    ( { model | isSubmitting = False, error = Just response.message }, Cmd.none )
+            else
+                ( { model
+                    | isSubmitting = False
+                    , error = Just response.message
+                  }
+                , Cmd.none
+                )
 
         LoginResult (Err httpError) ->
             ( { model | isSubmitting = False, error = Just (httpErrorToString httpError) }, Cmd.none )
@@ -92,11 +104,13 @@ httpErrorToString httpError =
 
 view : Model -> Html Msg
 view model =
-    Html.div [ HA.class "login-form" ]
-        --should be form here
+    Html.form
+        [ HA.class "login-form"
+        , HE.preventDefaultOn "submit" (Decode.succeed ( Submit, True ))
+        ]
         [ Html.div []
             [ Html.label [] [ Html.text "Email" ]
-            , Html.input [ HA.type_ "text", HA.value model.email, HE.onInput SetUsername ] []
+            , Html.input [ HA.type_ "text", HA.value model.email, HE.onInput SetEmail ] []
             ]
         , Html.div []
             [ Html.label [] [ Html.text "Password" ]

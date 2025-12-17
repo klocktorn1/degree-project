@@ -10802,6 +10802,9 @@ var $elm$core$Basics$never = function (_v0) {
 	}
 };
 var $elm$browser$Browser$application = _Browser_application;
+var $author$project$Main$DashboardMsg = function (a) {
+	return {$: 'DashboardMsg', a: a};
+};
 var $author$project$Main$ExercisesMsg = function (a) {
 	return {$: 'ExercisesMsg', a: a};
 };
@@ -10810,6 +10813,9 @@ var $author$project$Main$LoginMsg = function (a) {
 };
 var $author$project$Main$NotFound = {$: 'NotFound'};
 var $author$project$Exercises$Stopwatch$init = {running: false, stopwatchInMs: 0};
+var $author$project$Pages$Dashboard$init = _Utils_Tuple2(
+	{user: $elm$core$Maybe$Nothing},
+	$elm$core$Platform$Cmd$none);
 var $author$project$Pages$Exercises$ChordGuesserMsg = function (a) {
 	return {$: 'ChordGuesserMsg', a: a};
 };
@@ -10964,6 +10970,7 @@ var $elm$url$Url$Parser$parse = F2(
 					url.fragment,
 					$elm$core$Basics$identity)));
 	});
+var $author$project$Main$Dashboard = {$: 'Dashboard'};
 var $author$project$Main$Exercises = {$: 'Exercises'};
 var $author$project$Main$Home = {$: 'Home'};
 var $author$project$Main$Login = {$: 'Login'};
@@ -11060,6 +11067,10 @@ var $author$project$Main$routeParser = $elm$url$Url$Parser$oneOf(
 			$elm$url$Url$Parser$map,
 			$author$project$Main$Login,
 			$elm$url$Url$Parser$s('login')),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Main$Dashboard,
+			$elm$url$Url$Parser$s('dashboard')),
 			A2($elm$url$Url$Parser$map, $author$project$Main$Home, $elm$url$Url$Parser$top)
 		]));
 var $author$project$Main$init = F3(
@@ -11082,14 +11093,18 @@ var $author$project$Main$init = F3(
 		var _v1 = $author$project$Pages$Exercises$init(flags);
 		var exercisesModel = _v1.a;
 		var exercisesCmd = _v1.b;
+		var _v2 = $author$project$Pages$Dashboard$init;
+		var dashboardModel = _v2.a;
+		var dashboardCmd = _v2.b;
 		return _Utils_Tuple2(
-			{exercisesModel: exercisesModel, key: key, loginModel: loginModel, route: route, stopwatchModel: stopwatchModel, url: url},
+			{accessToken: $elm$core$Maybe$Nothing, dashboardModel: dashboardModel, exercisesModel: exercisesModel, key: key, loginModel: loginModel, route: route, stopwatchModel: stopwatchModel, url: url, userId: $elm$core$Maybe$Nothing},
 			$elm$core$Platform$Cmd$batch(
 				_List_fromArray(
 					[
 						A2($elm$core$Platform$Cmd$map, $author$project$Main$ExercisesMsg, exercisesCmd),
 						exercisesFetchOnStart,
-						A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, loginCmd)
+						A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, loginCmd),
+						A2($elm$core$Platform$Cmd$map, $author$project$Main$DashboardMsg, dashboardCmd)
 					])));
 	});
 var $author$project$Main$StopwatchMsg = function (a) {
@@ -11285,6 +11300,9 @@ var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Exercises$Stopwatch$subscriptions = function (model) {
 	return model.running ? A2($elm$time$Time$every, 10, $author$project$Exercises$Stopwatch$Tick) : $elm$core$Platform$Sub$none;
 };
+var $author$project$Pages$Dashboard$subscriptions = function (_v0) {
+	return $elm$core$Platform$Sub$none;
+};
 var $author$project$Exercises$ChordGuesserExercise$subscriptions = function (_v0) {
 	return $elm$core$Platform$Sub$none;
 };
@@ -11305,9 +11323,298 @@ var $author$project$Main$subscriptions = function (model) {
 				A2(
 				$elm$core$Platform$Sub$map,
 				$author$project$Main$ExercisesMsg,
-				$author$project$Pages$Exercises$subscriptions(model.exercisesModel))
+				$author$project$Pages$Exercises$subscriptions(model.exercisesModel)),
+				A2(
+				$elm$core$Platform$Sub$map,
+				$author$project$Main$DashboardMsg,
+				$author$project$Pages$Dashboard$subscriptions(model.dashboardModel))
 			]));
 };
+var $author$project$Pages$Dashboard$GotUser = function (a) {
+	return {$: 'GotUser', a: a};
+};
+var $author$project$Api$Auth$baseUrl = 'http://localhost:3000';
+var $elm$http$Http$BadStatus_ = F2(
+	function (a, b) {
+		return {$: 'BadStatus_', a: a, b: b};
+	});
+var $elm$http$Http$BadUrl_ = function (a) {
+	return {$: 'BadUrl_', a: a};
+};
+var $elm$http$Http$GoodStatus_ = F2(
+	function (a, b) {
+		return {$: 'GoodStatus_', a: a, b: b};
+	});
+var $elm$http$Http$NetworkError_ = {$: 'NetworkError_'};
+var $elm$http$Http$Receiving = function (a) {
+	return {$: 'Receiving', a: a};
+};
+var $elm$http$Http$Sending = function (a) {
+	return {$: 'Sending', a: a};
+};
+var $elm$http$Http$Timeout_ = {$: 'Timeout_'};
+var $elm$core$Maybe$isJust = function (maybe) {
+	if (maybe.$ === 'Just') {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm$http$Http$emptyBody = _Http_emptyBody;
+var $elm$http$Http$expectStringResponse = F2(
+	function (toMsg, toResult) {
+		return A3(
+			_Http_expect,
+			'',
+			$elm$core$Basics$identity,
+			A2($elm$core$Basics$composeR, toResult, toMsg));
+	});
+var $elm$core$Result$mapError = F2(
+	function (f, result) {
+		if (result.$ === 'Ok') {
+			var v = result.a;
+			return $elm$core$Result$Ok(v);
+		} else {
+			var e = result.a;
+			return $elm$core$Result$Err(
+				f(e));
+		}
+	});
+var $elm$http$Http$BadBody = function (a) {
+	return {$: 'BadBody', a: a};
+};
+var $elm$http$Http$BadStatus = function (a) {
+	return {$: 'BadStatus', a: a};
+};
+var $elm$http$Http$BadUrl = function (a) {
+	return {$: 'BadUrl', a: a};
+};
+var $elm$http$Http$NetworkError = {$: 'NetworkError'};
+var $elm$http$Http$Timeout = {$: 'Timeout'};
+var $elm$http$Http$resolve = F2(
+	function (toResult, response) {
+		switch (response.$) {
+			case 'BadUrl_':
+				var url = response.a;
+				return $elm$core$Result$Err(
+					$elm$http$Http$BadUrl(url));
+			case 'Timeout_':
+				return $elm$core$Result$Err($elm$http$Http$Timeout);
+			case 'NetworkError_':
+				return $elm$core$Result$Err($elm$http$Http$NetworkError);
+			case 'BadStatus_':
+				var metadata = response.a;
+				return $elm$core$Result$Err(
+					$elm$http$Http$BadStatus(metadata.statusCode));
+			default:
+				var body = response.b;
+				return A2(
+					$elm$core$Result$mapError,
+					$elm$http$Http$BadBody,
+					toResult(body));
+		}
+	});
+var $elm$http$Http$expectJson = F2(
+	function (toMsg, decoder) {
+		return A2(
+			$elm$http$Http$expectStringResponse,
+			toMsg,
+			$elm$http$Http$resolve(
+				function (string) {
+					return A2(
+						$elm$core$Result$mapError,
+						$elm$json$Json$Decode$errorToString,
+						A2($elm$json$Json$Decode$decodeString, decoder, string));
+				}));
+	});
+var $elm$http$Http$Header = F2(
+	function (a, b) {
+		return {$: 'Header', a: a, b: b};
+	});
+var $elm$http$Http$header = $elm$http$Http$Header;
+var $elm$http$Http$Request = function (a) {
+	return {$: 'Request', a: a};
+};
+var $elm$http$Http$State = F2(
+	function (reqs, subs) {
+		return {reqs: reqs, subs: subs};
+	});
+var $elm$http$Http$init = $elm$core$Task$succeed(
+	A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
+var $elm$http$Http$updateReqs = F3(
+	function (router, cmds, reqs) {
+		updateReqs:
+		while (true) {
+			if (!cmds.b) {
+				return $elm$core$Task$succeed(reqs);
+			} else {
+				var cmd = cmds.a;
+				var otherCmds = cmds.b;
+				if (cmd.$ === 'Cancel') {
+					var tracker = cmd.a;
+					var _v2 = A2($elm$core$Dict$get, tracker, reqs);
+					if (_v2.$ === 'Nothing') {
+						var $temp$router = router,
+							$temp$cmds = otherCmds,
+							$temp$reqs = reqs;
+						router = $temp$router;
+						cmds = $temp$cmds;
+						reqs = $temp$reqs;
+						continue updateReqs;
+					} else {
+						var pid = _v2.a;
+						return A2(
+							$elm$core$Task$andThen,
+							function (_v3) {
+								return A3(
+									$elm$http$Http$updateReqs,
+									router,
+									otherCmds,
+									A2($elm$core$Dict$remove, tracker, reqs));
+							},
+							$elm$core$Process$kill(pid));
+					}
+				} else {
+					var req = cmd.a;
+					return A2(
+						$elm$core$Task$andThen,
+						function (pid) {
+							var _v4 = req.tracker;
+							if (_v4.$ === 'Nothing') {
+								return A3($elm$http$Http$updateReqs, router, otherCmds, reqs);
+							} else {
+								var tracker = _v4.a;
+								return A3(
+									$elm$http$Http$updateReqs,
+									router,
+									otherCmds,
+									A3($elm$core$Dict$insert, tracker, pid, reqs));
+							}
+						},
+						$elm$core$Process$spawn(
+							A3(
+								_Http_toTask,
+								router,
+								$elm$core$Platform$sendToApp(router),
+								req)));
+				}
+			}
+		}
+	});
+var $elm$http$Http$onEffects = F4(
+	function (router, cmds, subs, state) {
+		return A2(
+			$elm$core$Task$andThen,
+			function (reqs) {
+				return $elm$core$Task$succeed(
+					A2($elm$http$Http$State, reqs, subs));
+			},
+			A3($elm$http$Http$updateReqs, router, cmds, state.reqs));
+	});
+var $elm$http$Http$maybeSend = F4(
+	function (router, desiredTracker, progress, _v0) {
+		var actualTracker = _v0.a;
+		var toMsg = _v0.b;
+		return _Utils_eq(desiredTracker, actualTracker) ? $elm$core$Maybe$Just(
+			A2(
+				$elm$core$Platform$sendToApp,
+				router,
+				toMsg(progress))) : $elm$core$Maybe$Nothing;
+	});
+var $elm$http$Http$onSelfMsg = F3(
+	function (router, _v0, state) {
+		var tracker = _v0.a;
+		var progress = _v0.b;
+		return A2(
+			$elm$core$Task$andThen,
+			function (_v1) {
+				return $elm$core$Task$succeed(state);
+			},
+			$elm$core$Task$sequence(
+				A2(
+					$elm$core$List$filterMap,
+					A3($elm$http$Http$maybeSend, router, tracker, progress),
+					state.subs)));
+	});
+var $elm$http$Http$Cancel = function (a) {
+	return {$: 'Cancel', a: a};
+};
+var $elm$http$Http$cmdMap = F2(
+	function (func, cmd) {
+		if (cmd.$ === 'Cancel') {
+			var tracker = cmd.a;
+			return $elm$http$Http$Cancel(tracker);
+		} else {
+			var r = cmd.a;
+			return $elm$http$Http$Request(
+				{
+					allowCookiesFromOtherDomains: r.allowCookiesFromOtherDomains,
+					body: r.body,
+					expect: A2(_Http_mapExpect, func, r.expect),
+					headers: r.headers,
+					method: r.method,
+					timeout: r.timeout,
+					tracker: r.tracker,
+					url: r.url
+				});
+		}
+	});
+var $elm$http$Http$MySub = F2(
+	function (a, b) {
+		return {$: 'MySub', a: a, b: b};
+	});
+var $elm$http$Http$subMap = F2(
+	function (func, _v0) {
+		var tracker = _v0.a;
+		var toMsg = _v0.b;
+		return A2(
+			$elm$http$Http$MySub,
+			tracker,
+			A2($elm$core$Basics$composeR, toMsg, func));
+	});
+_Platform_effectManagers['Http'] = _Platform_createManager($elm$http$Http$init, $elm$http$Http$onEffects, $elm$http$Http$onSelfMsg, $elm$http$Http$cmdMap, $elm$http$Http$subMap);
+var $elm$http$Http$command = _Platform_leaf('Http');
+var $elm$http$Http$subscription = _Platform_leaf('Http');
+var $elm$http$Http$request = function (r) {
+	return $elm$http$Http$command(
+		$elm$http$Http$Request(
+			{allowCookiesFromOtherDomains: false, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
+};
+var $author$project$Api$Auth$UserResponse = F5(
+	function (username, email, firstname, lastname, createdAt) {
+		return {createdAt: createdAt, email: email, firstname: firstname, lastname: lastname, username: username};
+	});
+var $author$project$Api$Auth$userDecoder = A6(
+	$elm$json$Json$Decode$map5,
+	$author$project$Api$Auth$UserResponse,
+	A2($elm$json$Json$Decode$field, 'username', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'email', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'firstname', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'lastname', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'createdAt', $elm$json$Json$Decode$string));
+var $author$project$Api$Auth$getUser = F3(
+	function (maybeAccessToken, maybeId, toMsg) {
+		var _v0 = _Utils_Tuple2(maybeAccessToken, maybeId);
+		if ((_v0.a.$ === 'Just') && (_v0.b.$ === 'Just')) {
+			var token = _v0.a.a;
+			var id = _v0.b.a;
+			return $elm$http$Http$request(
+				{
+					body: $elm$http$Http$emptyBody,
+					expect: A2($elm$http$Http$expectJson, toMsg, $author$project$Api$Auth$userDecoder),
+					headers: _List_fromArray(
+						[
+							A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+						]),
+					method: 'GET',
+					timeout: $elm$core$Maybe$Nothing,
+					tracker: $elm$core$Maybe$Nothing,
+					url: $author$project$Api$Auth$baseUrl + ('/users/' + id)
+				});
+		} else {
+			return $elm$core$Platform$Cmd$none;
+		}
+	});
 var $elm$browser$Browser$Navigation$load = _Browser_load;
 var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
 var $elm$url$Url$addPort = F2(
@@ -11375,6 +11682,23 @@ var $author$project$Exercises$Stopwatch$update = F2(
 						model,
 						{running: false}),
 					$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Pages$Dashboard$update = F2(
+	function (msg, model) {
+		if (msg.a.$ === 'Ok') {
+			var userResponse = msg.a.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						user: $elm$core$Maybe$Just(
+							{createdAt: userResponse.createdAt, email: userResponse.email, firstname: userResponse.firstname, lastname: userResponse.lastname, username: userResponse.username})
+					}),
+				$elm$core$Platform$Cmd$none);
+		} else {
+			var httpError = msg.a.a;
+			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Exercises$ChordGuesserExercise$GotChordData = function (a) {
@@ -11567,247 +11891,6 @@ var $author$project$TheoryApi$chordDecoder = A6(
 		'notes',
 		$elm$json$Json$Decode$list($elm$json$Json$Decode$string)));
 var $author$project$TheoryApi$chordListDecoder = $elm$json$Json$Decode$list($author$project$TheoryApi$chordDecoder);
-var $elm$http$Http$BadStatus_ = F2(
-	function (a, b) {
-		return {$: 'BadStatus_', a: a, b: b};
-	});
-var $elm$http$Http$BadUrl_ = function (a) {
-	return {$: 'BadUrl_', a: a};
-};
-var $elm$http$Http$GoodStatus_ = F2(
-	function (a, b) {
-		return {$: 'GoodStatus_', a: a, b: b};
-	});
-var $elm$http$Http$NetworkError_ = {$: 'NetworkError_'};
-var $elm$http$Http$Receiving = function (a) {
-	return {$: 'Receiving', a: a};
-};
-var $elm$http$Http$Sending = function (a) {
-	return {$: 'Sending', a: a};
-};
-var $elm$http$Http$Timeout_ = {$: 'Timeout_'};
-var $elm$core$Maybe$isJust = function (maybe) {
-	if (maybe.$ === 'Just') {
-		return true;
-	} else {
-		return false;
-	}
-};
-var $elm$http$Http$expectStringResponse = F2(
-	function (toMsg, toResult) {
-		return A3(
-			_Http_expect,
-			'',
-			$elm$core$Basics$identity,
-			A2($elm$core$Basics$composeR, toResult, toMsg));
-	});
-var $elm$core$Result$mapError = F2(
-	function (f, result) {
-		if (result.$ === 'Ok') {
-			var v = result.a;
-			return $elm$core$Result$Ok(v);
-		} else {
-			var e = result.a;
-			return $elm$core$Result$Err(
-				f(e));
-		}
-	});
-var $elm$http$Http$BadBody = function (a) {
-	return {$: 'BadBody', a: a};
-};
-var $elm$http$Http$BadStatus = function (a) {
-	return {$: 'BadStatus', a: a};
-};
-var $elm$http$Http$BadUrl = function (a) {
-	return {$: 'BadUrl', a: a};
-};
-var $elm$http$Http$NetworkError = {$: 'NetworkError'};
-var $elm$http$Http$Timeout = {$: 'Timeout'};
-var $elm$http$Http$resolve = F2(
-	function (toResult, response) {
-		switch (response.$) {
-			case 'BadUrl_':
-				var url = response.a;
-				return $elm$core$Result$Err(
-					$elm$http$Http$BadUrl(url));
-			case 'Timeout_':
-				return $elm$core$Result$Err($elm$http$Http$Timeout);
-			case 'NetworkError_':
-				return $elm$core$Result$Err($elm$http$Http$NetworkError);
-			case 'BadStatus_':
-				var metadata = response.a;
-				return $elm$core$Result$Err(
-					$elm$http$Http$BadStatus(metadata.statusCode));
-			default:
-				var body = response.b;
-				return A2(
-					$elm$core$Result$mapError,
-					$elm$http$Http$BadBody,
-					toResult(body));
-		}
-	});
-var $elm$http$Http$expectJson = F2(
-	function (toMsg, decoder) {
-		return A2(
-			$elm$http$Http$expectStringResponse,
-			toMsg,
-			$elm$http$Http$resolve(
-				function (string) {
-					return A2(
-						$elm$core$Result$mapError,
-						$elm$json$Json$Decode$errorToString,
-						A2($elm$json$Json$Decode$decodeString, decoder, string));
-				}));
-	});
-var $elm$http$Http$emptyBody = _Http_emptyBody;
-var $elm$http$Http$Request = function (a) {
-	return {$: 'Request', a: a};
-};
-var $elm$http$Http$State = F2(
-	function (reqs, subs) {
-		return {reqs: reqs, subs: subs};
-	});
-var $elm$http$Http$init = $elm$core$Task$succeed(
-	A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
-var $elm$http$Http$updateReqs = F3(
-	function (router, cmds, reqs) {
-		updateReqs:
-		while (true) {
-			if (!cmds.b) {
-				return $elm$core$Task$succeed(reqs);
-			} else {
-				var cmd = cmds.a;
-				var otherCmds = cmds.b;
-				if (cmd.$ === 'Cancel') {
-					var tracker = cmd.a;
-					var _v2 = A2($elm$core$Dict$get, tracker, reqs);
-					if (_v2.$ === 'Nothing') {
-						var $temp$router = router,
-							$temp$cmds = otherCmds,
-							$temp$reqs = reqs;
-						router = $temp$router;
-						cmds = $temp$cmds;
-						reqs = $temp$reqs;
-						continue updateReqs;
-					} else {
-						var pid = _v2.a;
-						return A2(
-							$elm$core$Task$andThen,
-							function (_v3) {
-								return A3(
-									$elm$http$Http$updateReqs,
-									router,
-									otherCmds,
-									A2($elm$core$Dict$remove, tracker, reqs));
-							},
-							$elm$core$Process$kill(pid));
-					}
-				} else {
-					var req = cmd.a;
-					return A2(
-						$elm$core$Task$andThen,
-						function (pid) {
-							var _v4 = req.tracker;
-							if (_v4.$ === 'Nothing') {
-								return A3($elm$http$Http$updateReqs, router, otherCmds, reqs);
-							} else {
-								var tracker = _v4.a;
-								return A3(
-									$elm$http$Http$updateReqs,
-									router,
-									otherCmds,
-									A3($elm$core$Dict$insert, tracker, pid, reqs));
-							}
-						},
-						$elm$core$Process$spawn(
-							A3(
-								_Http_toTask,
-								router,
-								$elm$core$Platform$sendToApp(router),
-								req)));
-				}
-			}
-		}
-	});
-var $elm$http$Http$onEffects = F4(
-	function (router, cmds, subs, state) {
-		return A2(
-			$elm$core$Task$andThen,
-			function (reqs) {
-				return $elm$core$Task$succeed(
-					A2($elm$http$Http$State, reqs, subs));
-			},
-			A3($elm$http$Http$updateReqs, router, cmds, state.reqs));
-	});
-var $elm$http$Http$maybeSend = F4(
-	function (router, desiredTracker, progress, _v0) {
-		var actualTracker = _v0.a;
-		var toMsg = _v0.b;
-		return _Utils_eq(desiredTracker, actualTracker) ? $elm$core$Maybe$Just(
-			A2(
-				$elm$core$Platform$sendToApp,
-				router,
-				toMsg(progress))) : $elm$core$Maybe$Nothing;
-	});
-var $elm$http$Http$onSelfMsg = F3(
-	function (router, _v0, state) {
-		var tracker = _v0.a;
-		var progress = _v0.b;
-		return A2(
-			$elm$core$Task$andThen,
-			function (_v1) {
-				return $elm$core$Task$succeed(state);
-			},
-			$elm$core$Task$sequence(
-				A2(
-					$elm$core$List$filterMap,
-					A3($elm$http$Http$maybeSend, router, tracker, progress),
-					state.subs)));
-	});
-var $elm$http$Http$Cancel = function (a) {
-	return {$: 'Cancel', a: a};
-};
-var $elm$http$Http$cmdMap = F2(
-	function (func, cmd) {
-		if (cmd.$ === 'Cancel') {
-			var tracker = cmd.a;
-			return $elm$http$Http$Cancel(tracker);
-		} else {
-			var r = cmd.a;
-			return $elm$http$Http$Request(
-				{
-					allowCookiesFromOtherDomains: r.allowCookiesFromOtherDomains,
-					body: r.body,
-					expect: A2(_Http_mapExpect, func, r.expect),
-					headers: r.headers,
-					method: r.method,
-					timeout: r.timeout,
-					tracker: r.tracker,
-					url: r.url
-				});
-		}
-	});
-var $elm$http$Http$MySub = F2(
-	function (a, b) {
-		return {$: 'MySub', a: a, b: b};
-	});
-var $elm$http$Http$subMap = F2(
-	function (func, _v0) {
-		var tracker = _v0.a;
-		var toMsg = _v0.b;
-		return A2(
-			$elm$http$Http$MySub,
-			tracker,
-			A2($elm$core$Basics$composeR, toMsg, func));
-	});
-_Platform_effectManagers['Http'] = _Platform_createManager($elm$http$Http$init, $elm$http$Http$onEffects, $elm$http$Http$onSelfMsg, $elm$http$Http$cmdMap, $elm$http$Http$subMap);
-var $elm$http$Http$command = _Platform_leaf('Http');
-var $elm$http$Http$subscription = _Platform_leaf('Http');
-var $elm$http$Http$request = function (r) {
-	return $elm$http$Http$command(
-		$elm$http$Http$Request(
-			{allowCookiesFromOtherDomains: false, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
-};
 var $elm$http$Http$get = function (r) {
 	return $elm$http$Http$request(
 		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
@@ -12154,18 +12237,18 @@ var $author$project$Pages$Login$httpErrorToString = function (httpError) {
 			return 'Bad body: ' + msg;
 	}
 };
-var $author$project$Api$Auth$baseUrl = 'http://localhost:3000';
 var $elm$http$Http$jsonBody = function (value) {
 	return A2(
 		_Http_pair,
 		'application/json',
 		A2($elm$json$Json$Encode$encode, 0, value));
 };
-var $author$project$Api$Auth$LoginResponse = F3(
-	function (ok, message, accessToken) {
-		return {accessToken: accessToken, message: message, ok: ok};
+var $author$project$Api$Auth$LoginResponse = F4(
+	function (ok, message, id, accessToken) {
+		return {accessToken: accessToken, id: id, message: message, ok: ok};
 	});
 var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $elm$json$Json$Decode$map4 = _Json_map4;
 var $elm$json$Json$Decode$oneOf = _Json_oneOf;
 var $elm$json$Json$Decode$maybe = function (decoder) {
 	return $elm$json$Json$Decode$oneOf(
@@ -12175,11 +12258,13 @@ var $elm$json$Json$Decode$maybe = function (decoder) {
 				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
 			]));
 };
-var $author$project$Api$Auth$loginDecoder = A4(
-	$elm$json$Json$Decode$map3,
+var $author$project$Api$Auth$loginDecoder = A5(
+	$elm$json$Json$Decode$map4,
 	$author$project$Api$Auth$LoginResponse,
 	A2($elm$json$Json$Decode$field, 'ok', $elm$json$Json$Decode$bool),
 	A2($elm$json$Json$Decode$field, 'message', $elm$json$Json$Decode$string),
+	$elm$json$Json$Decode$maybe(
+		A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$string)),
 	$elm$json$Json$Decode$maybe(
 		A2($elm$json$Json$Decode$field, 'accessToken', $elm$json$Json$Decode$string)));
 var $author$project$Api$Auth$login = F2(
@@ -12198,12 +12283,12 @@ var $author$project$Api$Auth$login = F2(
 var $author$project$Pages$Login$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
-			case 'SetUsername':
-				var u = msg.a;
+			case 'SetEmail':
+				var e = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{email: u}),
+						{email: e}),
 					$elm$core$Platform$Cmd$none);
 			case 'SetPassword':
 				var p = msg.a;
@@ -12312,19 +12397,73 @@ var $author$project$Main$update = F2(
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$ExercisesMsg, cmd));
 			case 'LoginMsg':
 				var subMsg = msg.a;
-				var _v4 = A2($author$project$Pages$Login$update, subMsg, model.loginModel);
-				var updatedLoginModel = _v4.a;
-				var cmd = _v4.b;
+				if (subMsg.$ === 'LoginResult') {
+					var result = subMsg.a;
+					var _v5 = function () {
+						if (result.$ === 'Ok') {
+							var response = result.a;
+							return response.ok ? _Utils_Tuple3(
+								response.accessToken,
+								response.id,
+								$elm$core$Platform$Cmd$batch(
+									_List_fromArray(
+										[
+											A3(
+											$author$project$Api$Auth$getUser,
+											response.accessToken,
+											response.id,
+											A2($elm$core$Basics$composeR, $author$project$Pages$Dashboard$GotUser, $author$project$Main$DashboardMsg)),
+											A2($elm$browser$Browser$Navigation$pushUrl, model.key, '/dashboard')
+										]))) : _Utils_Tuple3($elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Platform$Cmd$none);
+						} else {
+							return _Utils_Tuple3($elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, $elm$core$Platform$Cmd$none);
+						}
+					}();
+					var accessToken = _v5.a;
+					var userId = _v5.b;
+					var sideEffects = _v5.c;
+					var _v7 = A2($author$project$Pages$Login$update, subMsg, model.loginModel);
+					var updatedLoginModel = _v7.a;
+					var cmd = _v7.b;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{accessToken: accessToken, loginModel: updatedLoginModel, userId: userId}),
+						$elm$core$Platform$Cmd$batch(
+							_List_fromArray(
+								[
+									A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd),
+									sideEffects
+								])));
+				} else {
+					var _v8 = A2($author$project$Pages$Login$update, subMsg, model.loginModel);
+					var updatedLoginModel = _v8.a;
+					var cmd = _v8.b;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{loginModel: updatedLoginModel}),
+						A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd));
+				}
+			case 'DashboardMsg':
+				var subMsg = msg.a;
+				var _v9 = A2($author$project$Pages$Dashboard$update, subMsg, model.dashboardModel);
+				var updatedDashboardModel = _v9.a;
+				var cmd = _v9.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{loginModel: updatedLoginModel}),
-					A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd));
+						{dashboardModel: updatedDashboardModel}),
+					$elm$core$Platform$Cmd$batch(
+						_List_fromArray(
+							[
+								A2($elm$core$Platform$Cmd$map, $author$project$Main$DashboardMsg, cmd)
+							])));
 			default:
 				var subMsg = msg.a;
-				var _v5 = A2($author$project$Exercises$Stopwatch$update, subMsg, model.stopwatchModel);
-				var updatedStopwatch = _v5.a;
-				var cmd = _v5.b;
+				var _v10 = A2($author$project$Exercises$Stopwatch$update, subMsg, model.stopwatchModel);
+				var updatedStopwatch = _v10.a;
+				var cmd = _v10.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -12374,7 +12513,7 @@ var $elm$html$Html$Attributes$classList = function (classes) {
 };
 var $author$project$Main$viewLink = F3(
 	function (label, path, currentPath) {
-		var maybeUrl = $elm$url$Url$fromString('http://localhost:8000' + path);
+		var maybeUrl = $elm$url$Url$fromString('http://localhost:3000' + path);
 		var isActive = _Utils_eq(path, currentPath);
 		if (maybeUrl.$ === 'Just') {
 			var url = maybeUrl.a;
@@ -12476,6 +12615,70 @@ var $author$project$Main$viewHeader = function (currentPath) {
 var $elm$html$Html$br = _VirtualDom_node('br');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$section = _VirtualDom_node('section');
+var $author$project$Pages$Dashboard$view = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$text('This is the dashboard page.'),
+				function () {
+				var _v0 = model.user;
+				if (_v0.$ === 'Just') {
+					var user = _v0.a;
+					return A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$p,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Username: ' + user.username)
+									])),
+								A2(
+								$elm$html$Html$p,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Email: ' + user.email)
+									])),
+								A2(
+								$elm$html$Html$p,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('First Name: ' + user.firstname)
+									])),
+								A2(
+								$elm$html$Html$p,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Last Name: ' + user.lastname)
+									])),
+								A2(
+								$elm$html$Html$p,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Created At: ' + user.createdAt)
+									]))
+							]));
+				} else {
+					return A2(
+						$elm$html$Html$p,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('User data not available.')
+							]));
+				}
+			}()
+			]));
+};
 var $author$project$Pages$Exercises$BackToList = {$: 'BackToList'};
 var $author$project$Pages$Exercises$ChordGuesser = {$: 'ChordGuesser'};
 var $author$project$Pages$Exercises$SelectGame = function (a) {
@@ -12948,19 +13151,35 @@ var $author$project$Pages$Exercises$view = function (model) {
 				]));
 	}
 };
+var $author$project$Pages$Login$SetEmail = function (a) {
+	return {$: 'SetEmail', a: a};
+};
 var $author$project$Pages$Login$SetPassword = function (a) {
 	return {$: 'SetPassword', a: a};
 };
-var $author$project$Pages$Login$SetUsername = function (a) {
-	return {$: 'SetUsername', a: a};
-};
 var $author$project$Pages$Login$Submit = {$: 'Submit'};
+var $elm$html$Html$form = _VirtualDom_node('form');
+var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
+	return {$: 'MayPreventDefault', a: a};
+};
+var $elm$html$Html$Events$preventDefaultOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
+	});
 var $author$project$Pages$Login$view = function (model) {
 	return A2(
-		$elm$html$Html$div,
+		$elm$html$Html$form,
 		_List_fromArray(
 			[
-				$elm$html$Html$Attributes$class('login-form')
+				$elm$html$Html$Attributes$class('login-form'),
+				A2(
+				$elm$html$Html$Events$preventDefaultOn,
+				'submit',
+				$elm$json$Json$Decode$succeed(
+					_Utils_Tuple2($author$project$Pages$Login$Submit, true)))
 			]),
 		_List_fromArray(
 			[
@@ -12982,7 +13201,7 @@ var $author$project$Pages$Login$view = function (model) {
 							[
 								$elm$html$Html$Attributes$type_('text'),
 								$elm$html$Html$Attributes$value(model.email),
-								$elm$html$Html$Events$onInput($author$project$Pages$Login$SetUsername)
+								$elm$html$Html$Events$onInput($author$project$Pages$Login$SetEmail)
 							]),
 						_List_Nil)
 					])),
@@ -13095,6 +13314,11 @@ var $author$project$Main$viewRoute = function (model) {
 				$elm$html$Html$map,
 				$author$project$Main$LoginMsg,
 				$author$project$Pages$Login$view(model.loginModel));
+		case 'Dashboard':
+			return A2(
+				$elm$html$Html$map,
+				$author$project$Main$DashboardMsg,
+				$author$project$Pages$Dashboard$view(model.dashboardModel));
 		default:
 			return A2(
 				$elm$html$Html$div,
@@ -13113,6 +13337,8 @@ var $author$project$Main$viewTitle = function (route) {
 			return 'Exercises';
 		case 'Login':
 			return 'Login';
+		case 'Dashboard':
+			return 'Dashboard';
 		default:
 			return 'Page not found';
 	}
@@ -13136,4 +13362,4 @@ var $author$project$Main$view = function (model) {
 };
 var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$UrlChanged, onUrlRequest: $author$project$Main$LinkClicked, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
-_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$string)({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Api.Auth.LoginResponse":{"args":[],"type":"{ ok : Basics.Bool, message : String.String, accessToken : Maybe.Maybe String.String }"},"TheoryApi.Chord":{"args":[],"type":"{ chord : String.String, root : String.String, formula : List.List Basics.Int, degrees : List.List String.String, notes : List.List String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UrlChanged":["Url.Url"],"LinkClicked":["Browser.UrlRequest"],"ExercisesMsg":["Pages.Exercises.Msg"],"LoginMsg":["Pages.Login.Msg"],"StopwatchMsg":["Exercises.Stopwatch.Msg"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Exercises.Stopwatch.Msg":{"args":[],"tags":{"Tick":["Time.Posix"],"Start":[],"Stop":[]}},"Pages.Exercises.Msg":{"args":[],"tags":{"ChordGuesserMsg":["Exercises.ChordGuesserExercise.Msg"],"SelectGame":["Pages.Exercises.Game"],"BackToList":[]}},"Pages.Login.Msg":{"args":[],"tags":{"SetUsername":["String.String"],"SetPassword":["String.String"],"Submit":[],"LoginResult":["Result.Result Http.Error Api.Auth.LoginResponse"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Pages.Exercises.Game":{"args":[],"tags":{"ChordGuesser":[]}},"Exercises.ChordGuesserExercise.Msg":{"args":[],"tags":{"GotChordData":["Result.Result Http.Error (List.List TheoryApi.Chord)"],"RandomChordPicked":["Basics.Int"],"DifficultyChosen":["Exercises.ChordGuesserExercise.Difficulty"],"ChordChosen":["TheoryApi.Chord"],"ChordGroupChosen":["List.List String.String"],"Shuffled":["List.List String.String"],"ToggleNotesShuffle":[],"ResetChordGuesser":[],"GoBack":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"Exercises.ChordGuesserExercise.Difficulty":{"args":[],"tags":{"Easy":[],"Medium":[],"Hard":[],"Advanced":[],"Extreme":[]}},"List.List":{"args":["a"],"tags":{}}}}})}});}(this));
+_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$string)({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Api.Auth.LoginResponse":{"args":[],"type":"{ ok : Basics.Bool, message : String.String, id : Maybe.Maybe String.String, accessToken : Maybe.Maybe String.String }"},"Api.Auth.UserResponse":{"args":[],"type":"{ username : String.String, email : String.String, firstname : String.String, lastname : String.String, createdAt : String.String }"},"TheoryApi.Chord":{"args":[],"type":"{ chord : String.String, root : String.String, formula : List.List Basics.Int, degrees : List.List String.String, notes : List.List String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UrlChanged":["Url.Url"],"LinkClicked":["Browser.UrlRequest"],"ExercisesMsg":["Pages.Exercises.Msg"],"LoginMsg":["Pages.Login.Msg"],"DashboardMsg":["Pages.Dashboard.Msg"],"StopwatchMsg":["Exercises.Stopwatch.Msg"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Exercises.Stopwatch.Msg":{"args":[],"tags":{"Tick":["Time.Posix"],"Start":[],"Stop":[]}},"Pages.Dashboard.Msg":{"args":[],"tags":{"GotUser":["Result.Result Http.Error Api.Auth.UserResponse"]}},"Pages.Exercises.Msg":{"args":[],"tags":{"ChordGuesserMsg":["Exercises.ChordGuesserExercise.Msg"],"SelectGame":["Pages.Exercises.Game"],"BackToList":[]}},"Pages.Login.Msg":{"args":[],"tags":{"SetEmail":["String.String"],"SetPassword":["String.String"],"Submit":[],"LoginResult":["Result.Result Http.Error Api.Auth.LoginResponse"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Pages.Exercises.Game":{"args":[],"tags":{"ChordGuesser":[]}},"Exercises.ChordGuesserExercise.Msg":{"args":[],"tags":{"GotChordData":["Result.Result Http.Error (List.List TheoryApi.Chord)"],"RandomChordPicked":["Basics.Int"],"DifficultyChosen":["Exercises.ChordGuesserExercise.Difficulty"],"ChordChosen":["TheoryApi.Chord"],"ChordGroupChosen":["List.List String.String"],"Shuffled":["List.List String.String"],"ToggleNotesShuffle":[],"ResetChordGuesser":[],"GoBack":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"Exercises.ChordGuesserExercise.Difficulty":{"args":[],"tags":{"Easy":[],"Medium":[],"Hard":[],"Advanced":[],"Extreme":[]}},"List.List":{"args":["a"],"tags":{}}}}})}});}(this));

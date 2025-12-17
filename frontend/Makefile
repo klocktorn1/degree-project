@@ -2,6 +2,6 @@ run:
 	elm-live src/Main.elm \
 	--open \
 	--pushstate \
+	--dir=public \
 	--watch=src \
-	--watch=. \
-	-- --output=elm.js --debug
+	-- --output=public/elm.js --debug
