@@ -1,6 +1,6 @@
 module Pages.Dashboard exposing (..)
 
-import Api.Auth exposing (UserResponse)
+import Api.Auth as Auth
 import Html exposing (Html)
 import Http
 
@@ -20,42 +20,39 @@ type alias User =
 
 
 type Msg
-    = GotUser (Result Http.Error UserResponse)
+    = GotUser (Result Http.Error Auth.UserResponse)
 
 
 init : ( Model, Cmd Msg )
 init =
     ( { user = Nothing }
-    , Cmd.none
+    , Auth.getMe GotUser
     )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        GotUser (Ok userResponse) ->
-            ( { model
-                | user =
-                    Just
-                        { username = userResponse.username
-                        , email = userResponse.email
-                        , firstname = userResponse.firstname
-                        , lastname = userResponse.lastname
-                        , createdAt = userResponse.createdAt
-                        }
-              }
-            , Cmd.none
-            )
+        GotUser (Ok response) ->
+            case response.user of
+                Just user ->
+                    ( { model | user = Just user }
+                    , Cmd.none
+                    )
+
+                Nothing ->
+                    -- user missing → likely not authenticated
+                    ( model, Cmd.none )
 
         GotUser (Err httpError) ->
             ( model, Cmd.none )
 
 
-view : Model -> Html Msg
-view model =
-    Html.div []
-        [ Html.text "This is the dashboard page."
-        , case model.user of
+view : Model -> Bool -> Html Msg
+view model isLoggedIn =
+     if isLoggedIn then
+         Html.div []
+        [ case model.user of
             Just user ->
                 Html.div []
                     [ Html.p [] [ Html.text ("Username: " ++ user.username) ]
@@ -68,6 +65,10 @@ view model =
             Nothing ->
                 Html.p [] [ Html.text "User data not available." ]
         ]
+     else
+     Html.div [] [Html.text "Please log in"]
+        
+   
 
 
 subscriptions : Model -> Sub Msg

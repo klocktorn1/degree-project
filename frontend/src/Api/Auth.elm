@@ -8,12 +8,21 @@ import Json.Encode as Encode
 type alias LoginResponse =
     { ok : Bool
     , message : String
-    , id : Maybe String
-    , accessToken : Maybe String
+    }
+
+
+type alias RegisterResponse =
+    { ok : Bool
+    , message : String
     }
 
 
 type alias UserResponse =
+    { user : Maybe User
+    }
+
+
+type alias User =
     { username : String
     , email : String
     , firstname : String
@@ -29,16 +38,27 @@ baseUrl =
 
 loginDecoder : Decode.Decoder LoginResponse
 loginDecoder =
-    Decode.map4 LoginResponse
+    Decode.map2 LoginResponse
         (Decode.field "ok" Decode.bool)
         (Decode.field "message" Decode.string)
-        (Decode.maybe (Decode.field "id" Decode.string))
-        (Decode.maybe (Decode.field "accessToken" Decode.string))
 
 
-userDecoder : Decode.Decoder UserResponse
+registerDecoder : Decode.Decoder RegisterResponse
+registerDecoder =
+    Decode.map2 RegisterResponse
+        (Decode.field "ok" Decode.bool)
+        (Decode.field "message" Decode.string)
+
+
+userResponseDecoder : Decode.Decoder UserResponse
+userResponseDecoder =
+    Decode.map UserResponse
+        (Decode.field "user" (Decode.maybe userDecoder))
+
+
+userDecoder : Decode.Decoder User
 userDecoder =
-    Decode.map5 UserResponse
+    Decode.map5 User
         (Decode.field "username" Decode.string)
         (Decode.field "email" Decode.string)
         (Decode.field "firstname" Decode.string)
@@ -59,33 +79,32 @@ login body toMsg =
         }
 
 
-signup : Encode.Value -> Cmd (Result Http.Error String)
-signup body =
-    Http.post
-        { url = baseUrl ++ "/auth/signup"
+register : Encode.Value -> (Result Http.Error RegisterResponse -> msg) -> Cmd msg
+register body toMsg =
+    Http.request
+        { method = "POST"
+        , headers = []
+        , url = baseUrl ++ "/auth/register"
         , body = Http.jsonBody body
-        , expect = Http.expectString identity
+        , expect = Http.expectJson toMsg registerDecoder
+        , timeout = Nothing
+        , tracker = Nothing
         }
 
 
+getMe : (Result Http.Error UserResponse -> msg) -> Cmd msg
+getMe toMsg =
+    Http.request
+        { method = "GET"
+        , headers = []
+        , url = baseUrl ++ "/users/me"
+        , body = Http.emptyBody
+        , expect = Http.expectJson toMsg userResponseDecoder
+        , timeout = Nothing
+        , tracker = Nothing
+        }
 
 
-
-getUser : Maybe String -> Maybe String -> (Result Http.Error UserResponse -> msg) -> Cmd msg
-getUser maybeAccessToken maybeId toMsg =
-    case ( maybeAccessToken, maybeId ) of
-        ( Just token, Just id ) ->
-            Http.request
-                { method = "GET"
-                , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
-                , url = baseUrl ++ "/users/" ++ id
-                , body = Http.emptyBody
-                , expect = Http.expectJson toMsg userDecoder
-                , timeout = Nothing
-                , tracker = Nothing
-                }
-        _ ->
-            Cmd.none
 getExerciseResults : Maybe String -> Maybe String -> (Result Http.Error UserResponse -> msg) -> Cmd msg
 getExerciseResults maybeAccessToken maybeId toMsg =
     case ( maybeAccessToken, maybeId ) of
@@ -95,27 +114,32 @@ getExerciseResults maybeAccessToken maybeId toMsg =
                 , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
                 , url = baseUrl ++ "/users/" ++ id
                 , body = Http.emptyBody
-                , expect = Http.expectJson toMsg userDecoder
+                , expect = Http.expectJson toMsg userResponseDecoder
                 , timeout = Nothing
                 , tracker = Nothing
                 }
+
         _ ->
             Cmd.none
 
 
+refreshToken : (Result Http.Error () -> msg) -> Cmd msg
+refreshToken toMsg =
+    Http.request
+        { method = "POST"
+        , headers = []
+        , url = baseUrl ++ "/auth/refresh"
+        , body = Http.emptyBody
+        , expect = Http.expectWhatever toMsg
+        , timeout = Nothing
+        , tracker = Nothing
+        }
 
 
-
-
---refresh token, do i even need to return anything in the expectJson? i just need to update the accessToken stored in the cookie maybe
--- refreshToken : (Result Http.Error RefreshResponse -> msg) -> Cmd msg
--- refreshToken toMsg =
---     Http.request
---         { method = "POST"
---         , headers = []
---         , url = baseUrl ++ "/auth/refresh"
---         , body = Http.emptyBody
---         , expect = Http.expectJson toMsg accessTokenDecoder
---         , timeout = Nothing
---         , tracker = Nothing
---         }
+logout : (Result Http.Error () -> msg) -> Cmd msg
+logout toMsg =
+    Http.post
+        { url = baseUrl ++ "/auth/logout"
+        , body = Http.emptyBody
+        , expect = Http.expectWhatever toMsg
+        }

@@ -62,8 +62,8 @@ const loginUser = async (req, res) => {
                 });
                 res.cookie("refreshToken", refreshToken, {
                     httpOnly: true,
-                    secure: false,
-                    sameSite: "lax",
+                    secure: true,
+                    sameSite: "Strict",
                     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 d
                 })
                 await db.query('UPDATE users SET refresh_token = ? WHERE id = ?', [refreshToken, user.id]);
@@ -71,9 +71,6 @@ const loginUser = async (req, res) => {
                 return res.json({
                     ok: true,
                     message: `Successful login`,
-                    id: userId.toString(),
-                    accessToken,
-                    refreshToken
                 });
             }
 
@@ -85,14 +82,33 @@ const loginUser = async (req, res) => {
 };
 
 
+const logoutUser = async (req, res) => {
+
+    res.clearCookie('accessToken', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'Strict'
+    });
+    res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'Strict'
+    });
+
+
+    res.json({ ok: true, message: 'Logged out successfully' });
+};
+
+
+
 
 // if jwt.verify throws error TokenExpiredError i get 	"message": "Access token expired"
 // from server. frontend needs a way to handle this, if TokenExpiredError then point to
 // this endpoint here (refreshToken). The refresh token is saved in db so
 // frontend needs to access this and send it as payload to this endpoint
 const refreshToken = async (req, res) => {
-    const { token } = req.body;
-    if (!token) return res.status(401).json({ message: "No token provided" })
+    const token = req.cookies.refreshToken;
+    if (!token) return res.status(401).json({ message: "Logged out" })
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
@@ -108,7 +124,10 @@ const refreshToken = async (req, res) => {
             secure: true,
             sameSite: 'Strict'
         });
-        res.json({ accessToken: newAccessToken })
+        res.json({
+            ok: true,
+            message: `Successful refresh`,
+        })
     } catch (err) {
         res.status(403).json({ message: "Invalid or expired refresh token" });
     }
@@ -123,9 +142,16 @@ const registerUser = async (req, res) => {
             'INSERT INTO users (username, email, firstname, lastname, password_hash) VALUES (?, ?, ?, ?, ?)',
             [username, email, firstname, lastname, password_hash]
         );
-        res.json({ message: `User created successfully with id: ${result.insertId}` });
+        return res.json({ ok: true, message: `User created successfully`});
     } catch (err) {
-        res.status(500).json({ error: `registerUser in authController: ${err.message}` });
+        if (err.code === 'ER_DUP_ENTRY') {
+            if (err.sqlMessage.includes('username')) {
+                return res.status(400).json({ ok: false, message: 'Username already in use' });
+            } else if (err.sqlMessage.includes('email')) {
+                return res.status(400).json({ ok: false, message: 'Email already in use' });
+            }
+        }
+        res.status(500).json({ ok: false, message: 'Something went wrong during registration' });
     }
 };
 
@@ -219,5 +245,6 @@ module.exports = {
     refreshToken,
     forgotPassword,
     resetPassword,
+    logoutUser,
     debug
 }

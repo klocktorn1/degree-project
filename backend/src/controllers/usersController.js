@@ -16,23 +16,18 @@ const getAllUsers = async (req, res) => {
 const getUser = async (req, res) => {
 
 
-  const requestedId = parseInt(req.params.id); // id in the URL
-  const authenticatedId = req.user.id; // id from JWT payload
-
-  if (requestedId !== authenticatedId) {
-    return res.status(403).json({ message: "Forbidden: Access denied" })
-  }
+  const userId = req.user.id; // id from JWT payload
 
   try {
-    const [row] = await db.query('SELECT * FROM users WHERE id = ?', [requestedId]);
+    const [row] = await db.query('SELECT * FROM users WHERE id = ?', [userId]);
     if (row.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
 
     const { username, email, firstname, lastname, created_at } = row[0]
-    res.json({ username, email, firstname, lastname, createdAt: created_at });
+    res.json({ user: {username, email, firstname, lastname, createdAt: created_at} });
   } catch (err) {
-    res.status(500).json({ error: `getUserById in usersController: ${err.message}` });
+    res.status(500).json({ error: `getUser in usersController: ${err.message}` });
   }
 };
 

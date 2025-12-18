@@ -122,7 +122,7 @@ view model =
 
             Nothing ->
                 Html.div [] []
-        , Html.button [ HA.disabled model.isSubmitting, HE.onClick Submit ]
+        , Html.button [ HA.disabled model.isSubmitting ]
             [ Html.text
                 (if model.isSubmitting then
                     "Signing in..."
