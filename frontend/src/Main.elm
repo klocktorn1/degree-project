@@ -17,19 +17,27 @@ import Url
 import Url.Parser as UP exposing ((</>), (<?>))
 
 
+
+-- MAIN MODEL
+
+
 type alias Model =
     { url : Url.Url
     , key : Nav.Key
-    , route : Route
-    , exercisesModel : Exercises.Model
-    , loginModel : Login.Model
-    , registerModel : Register.Model
-    , dashboardModel : Dashboard.Model
-    , stopwatchModel : Stopwatch.Model
+    , page : Page
     , auth : AuthState
     , isLoggedIn : Bool
     , isLoading : Bool
+    , stopwatchModel : Stopwatch.Model
     }
+
+
+type Page
+    = HomePage
+    | ExercisesPage Exercises.Model
+    | LoginPage Login.Model
+    | RegisterPage Register.Model
+    | DashboardPage Dashboard.Model
 
 
 type alias AuthState =
@@ -40,10 +48,6 @@ type alias AuthState =
 
 type Retry
     = RetryGetMe
-
-
-
--- later: RetryOtherProtectedCall
 
 
 type Msg
@@ -68,11 +72,11 @@ type Route
     | NotFound
 
 
-type alias Flags =
-    String
+
+-- MAIN PROGRAM
 
 
-main : Program Flags Model Msg
+main : Program () Model Msg
 main =
     Browser.application
         { init = init
@@ -84,77 +88,86 @@ main =
         }
 
 
+
+-- SUBSCRIPTIONS
+
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Sub.map StopwatchMsg (Stopwatch.subscriptions model.stopwatchModel)
-        , Sub.map ExercisesMsg (Exercises.subscriptions model.exercisesModel)
-        , Sub.map DashboardMsg (Dashboard.subscriptions model.dashboardModel)
+        , case model.page of
+            ExercisesPage m ->
+                Sub.map ExercisesMsg (Exercises.subscriptions m)
+
+            DashboardPage m ->
+                Sub.map DashboardMsg (Dashboard.subscriptions m)
+
+            _ ->
+                Sub.none
         ]
 
 
-init : Flags -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
-init flags url key =
+
+-- INITIALIZATION
+
+
+init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
+init _ url key =
     let
-
-
         route =
-            UP.parse routeParser url
-                |> Maybe.withDefault NotFound
+            UP.parse routeParser url |> Maybe.withDefault NotFound
 
-        ( exercisesModel, exercisesCmd ) =
-            Exercises.init flags
+        ( page, cmd ) =
+            case route of
+                Exercises ->
+                    let
+                        ( m, c ) =
+                            Exercises.init ()
+                    in
+                    ( ExercisesPage m, Cmd.map ExercisesMsg c )
 
-        ( loginModel, loginCmd ) =
-            Login.init
+                Login ->
+                    let
+                        ( m, c ) =
+                            Login.init
+                    in
+                    ( LoginPage m, Cmd.map LoginMsg c )
 
-        ( registerModel, registerCmd ) =
-            Register.init
+                Register ->
+                    let
+                        ( m, c ) =
+                            Register.init
+                    in
+                    ( RegisterPage m, Cmd.map RegisterMsg c )
 
-        ( dashboardModel, dashboardCmd ) =
-            Dashboard.init
+                Dashboard ->
+                    let
+                        ( m, c ) =
+                            Dashboard.init
+                    in
+                    ( DashboardPage m, Cmd.map DashboardMsg c )
 
-        stopwatchModel =
-            Stopwatch.init
+                _ ->
+                    ( HomePage, Cmd.none )
 
         checkLoginCmd =
             Auth.getMe (Dashboard.GotUser >> DashboardMsg)
     in
     ( { url = url
       , key = key
-      , route = route
-      , exercisesModel = exercisesModel
-      , loginModel = loginModel
-      , registerModel = registerModel
-      , dashboardModel = dashboardModel
-      , stopwatchModel = stopwatchModel
+      , page = page
       , auth = { refreshing = False, retryAfterRefresh = Nothing }
       , isLoggedIn = False
-      , isLoading = True
+      , isLoading = False
+      , stopwatchModel = Stopwatch.init
       }
-    , Cmd.batch
-        [ Cmd.map ExercisesMsg exercisesCmd
-        , Cmd.map LoginMsg loginCmd
-        , Cmd.map RegisterMsg registerCmd
-        , Cmd.map DashboardMsg dashboardCmd
-        , checkLoginCmd
-        ]
+    , Cmd.batch [ cmd, checkLoginCmd ]
     )
 
 
-onProtectedCallFail : Retry -> Model -> ( Model, Cmd Msg )
-onProtectedCallFail retry model =
-    if model.auth.refreshing then
-        -- Already refreshing → just queue the retry
-        ( { model | auth = { refreshing = False, retryAfterRefresh = Just ( retry, model.url ) } }
-        , Cmd.none
-        )
 
-    else
-        -- Start refresh immediately
-        ( { model | auth = { refreshing = True, retryAfterRefresh = Just ( retry, model.url ) } }
-        , Auth.refreshToken AuthRefreshed
-        )
+-- ROUTING
 
 
 routeParser : UP.Parser (Route -> a) a
@@ -169,29 +182,67 @@ routeParser =
         ]
 
 
+
+-- HELPER: PROTECTED CALL FAIL
+
+
+onProtectedCallFail : Retry -> Model -> ( Model, Cmd Msg )
+onProtectedCallFail retry model =
+    if model.auth.refreshing then
+        ( { model | auth = { refreshing = False, retryAfterRefresh = Just ( retry, model.url ) } }, Cmd.none )
+
+    else
+        ( { model | auth = { refreshing = True, retryAfterRefresh = Just ( retry, model.url ) } }
+        , Auth.refreshToken AuthRefreshed
+        )
+
+
+
+-- UPDATE
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         UrlChanged newUrl ->
             let
-                newRoute =
-                    UP.parse routeParser newUrl
-                        |> Maybe.withDefault NotFound
+                route =
+                    UP.parse routeParser newUrl |> Maybe.withDefault NotFound
 
-                exercisesFetchCmd =
-                    case newRoute of
+                ( page, cmd ) =
+                    case route of
                         Exercises ->
-                            Cmd.none
+                            let
+                                ( m, c ) =
+                                    Exercises.init ()
+                            in
+                            ( ExercisesPage m, Cmd.map ExercisesMsg c )
+
+                        Login ->
+                            let
+                                ( m, c ) =
+                                    Login.init
+                            in
+                            ( LoginPage m, Cmd.map LoginMsg c )
+
+                        Register ->
+                            let
+                                ( m, c ) =
+                                    Register.init
+                            in
+                            ( RegisterPage m, Cmd.map RegisterMsg c )
+
+                        Dashboard ->
+                            let
+                                ( m, c ) =
+                                    Dashboard.init
+                            in
+                            ( DashboardPage m, Cmd.map DashboardMsg c )
 
                         _ ->
-                            Cmd.none
+                            ( HomePage, Cmd.none )
             in
-            ( { model
-                | url = newUrl
-                , route = newRoute
-              }
-            , Cmd.batch [ exercisesFetchCmd ]
-            )
+            ( { model | url = newUrl, page = page }, cmd )
 
         LinkClicked urlRequest ->
             case urlRequest of
@@ -202,115 +253,112 @@ update msg model =
                     ( model, Nav.load href )
 
         ExercisesMsg subMsg ->
-            let
-                ( updatedExercisesModel, cmd ) =
-                    Exercises.update subMsg model.exercisesModel
-            in
-            ( { model | exercisesModel = updatedExercisesModel }
-            , Cmd.map ExercisesMsg cmd
-            )
-
-        RegisterMsg subMsg ->
-            case subMsg of
-                Register.RegisterResult (Ok _) ->
-                    ( model, Nav.pushUrl model.key "/login" )
+            case model.page of
+                ExercisesPage m ->
+                    let
+                        ( updated, cmd ) =
+                            Exercises.update subMsg m
+                    in
+                    ( { model | page = ExercisesPage updated }, Cmd.map ExercisesMsg cmd )
 
                 _ ->
-                    let
-                        ( updatedRegisterModel, cmd ) =
-                            Register.update subMsg model.registerModel
-                    in
-                    ( { model | registerModel = updatedRegisterModel }
-                    , Cmd.map RegisterMsg cmd
-                    )
+                    ( model, Cmd.none )
 
         LoginMsg subMsg ->
-            case subMsg of
-                Login.LoginResult result ->
+            case model.page of
+                LoginPage m ->
                     let
-                        ( updatedLoginModel, cmd ) =
-                            Login.update subMsg model.loginModel
-
-                        loginAttempt =
-                            case result of
-                                Ok response ->
-                                    if response.ok then
-                                        ( { model | isLoggedIn = True, loginModel = updatedLoginModel }
-                                        , Cmd.batch
-                                            [ Auth.getMe (Dashboard.GotUser >> DashboardMsg)
-                                            , Nav.pushUrl model.key "/dashboard"
-                                            , Cmd.map LoginMsg cmd
-                                            ]
-                                        )
-
-                                    else
-                                        ( { model | loginModel = updatedLoginModel }, Cmd.map LoginMsg cmd )
-
-                                Err _ ->
-                                    ( { model | loginModel = updatedLoginModel }, Cmd.map LoginMsg cmd )
+                        ( updated, cmd ) =
+                            Login.update subMsg m
                     in
-                    loginAttempt
+                    case subMsg of
+                        Login.LoginResult (Ok response) ->
+                            if response.ok then
+                                ( { model | isLoggedIn = True, page = LoginPage updated }
+                                , Cmd.batch
+                                    [ Auth.getMe (Dashboard.GotUser >> DashboardMsg)
+                                    , Nav.pushUrl model.key "/dashboard"
+                                    , Cmd.map LoginMsg cmd
+                                    ]
+                                )
+
+                            else
+                                ( { model | page = LoginPage updated }, Cmd.map LoginMsg cmd )
+
+                        _ ->
+                            ( { model | page = LoginPage updated }, Cmd.map LoginMsg cmd )
 
                 _ ->
+                    ( model, Cmd.none )
+
+        RegisterMsg subMsg ->
+            case model.page of
+                RegisterPage m ->
                     let
-                        ( updatedLoginModel, cmd ) =
-                            Login.update subMsg model.loginModel
+                        ( updated, cmd ) =
+                            Register.update subMsg m
                     in
-                    ( { model | loginModel = updatedLoginModel }
-                    , Cmd.map LoginMsg cmd
-                    )
+                    case subMsg of
+                        Register.RegisterResult (Ok _) ->
+                            ( { model | page = RegisterPage updated }
+                            , Nav.pushUrl model.key "/login"
+                            )
+
+                        _ ->
+                            ( { model | page = RegisterPage updated }, Cmd.map RegisterMsg cmd )
+
+                _ ->
+                    ( model, Cmd.none )
 
         DashboardMsg subMsg ->
-            let
-                ( updatedDashboardModel, cmd ) =
-                    Dashboard.update subMsg model.dashboardModel
+            case model.page of
+                DashboardPage m ->
+                    let
+                        ( updated, cmd ) =
+                            Dashboard.update subMsg m
 
-                updatedIsLoggedIn =
-                    case subMsg of
-                        Dashboard.GotUser (Ok response) ->
-                            case response.user of
-                                Just _ ->
-                                    True
+                        updatedIsLoggedIn =
+                            case subMsg of
+                                Dashboard.GotUser (Ok response) ->
+                                    case response.user of
+                                        Just _ ->
+                                            True
 
-                                Nothing ->
+                                        Nothing ->
+                                            False
+
+                                Dashboard.GotUser (Err (Http.BadStatus 401)) ->
                                     False
 
-                        Dashboard.GotUser (Err (Http.BadStatus 401)) ->
-                            False
+                                _ ->
+                                    model.isLoggedIn
 
-                        _ ->
-                            model.isLoggedIn
+                        setIsLoading =
+                            case subMsg of
+                                Dashboard.GotUser _ ->
+                                    False
 
-                setIsLoading =
-                    case subMsg of
-                        Dashboard.GotUser _ ->
-                            False
+                        refreshCmd =
+                            case subMsg of
+                                Dashboard.GotUser (Err (Http.BadStatus 401)) ->
+                                    onProtectedCallFail RetryGetMe model |> Tuple.second
 
-                refreshCmd =
-                    case subMsg of
-                        Dashboard.GotUser (Err (Http.BadStatus 401)) ->
-                            onProtectedCallFail RetryGetMe model
-                                |> Tuple.second
+                                _ ->
+                                    Cmd.none
+                    in
+                    ( { model | page = DashboardPage updated, isLoggedIn = updatedIsLoggedIn, isLoading = setIsLoading }
+                    , Cmd.batch [ Cmd.map DashboardMsg cmd, refreshCmd ]
+                    )
 
-                        _ ->
-                            Cmd.none
-            in
-            ( { model
-                | dashboardModel = updatedDashboardModel
-                , isLoggedIn = updatedIsLoggedIn
-                , isLoading = setIsLoading
-              }
-            , Cmd.batch [ Cmd.map DashboardMsg cmd, refreshCmd ]
-            )
+                _ ->
+                    ( model, Cmd.none )
 
         AuthRefreshed result ->
             case result of
                 Ok _ ->
                     case model.auth.retryAfterRefresh of
                         Just ( RetryGetMe, url ) ->
-                            ( { model
-                                | auth = { refreshing = False, retryAfterRefresh = Nothing }
-                              }
+                            ( { model | auth = { refreshing = False, retryAfterRefresh = Nothing } }
                             , Cmd.batch
                                 [ Auth.getMe (Dashboard.GotUser >> DashboardMsg)
                                 , Nav.pushUrl model.key (Url.toString url)
@@ -318,22 +366,23 @@ update msg model =
                             )
 
                         Nothing ->
-                            ( { model | auth = { refreshing = False, retryAfterRefresh = Nothing } }
-                            , Cmd.none
-                            )
+                            ( { model | auth = { refreshing = False, retryAfterRefresh = Nothing } }, Cmd.none )
 
                 Err _ ->
-                    -- refresh failed → logout
-                    ( model, Cmd.none )
+                    ( { model
+                        | auth = { refreshing = False, retryAfterRefresh = Nothing }
+                        , isLoggedIn = False
+                        , isLoading = False
+                      }
+                    , Nav.pushUrl model.key "/login"
+                    )
 
         StopwatchMsg subMsg ->
             let
-                ( updatedStopwatch, cmd ) =
+                ( updated, cmd ) =
                     Stopwatch.update subMsg model.stopwatchModel
             in
-            ( { model | stopwatchModel = updatedStopwatch }
-            , Cmd.map StopwatchMsg cmd
-            )
+            ( { model | stopwatchModel = updated }, Cmd.map StopwatchMsg cmd )
 
         Logout ->
             ( model
@@ -344,46 +393,42 @@ update msg model =
             )
 
         LogoutCompleted ->
-            ( { model
-                | isLoggedIn = False
-              }
-            , Cmd.none
-            )
+            ( { model | isLoggedIn = False }, Cmd.none )
+
+
+
+-- VIEW
 
 
 view : Model -> Browser.Document Msg
 view model =
-    { title = viewTitle model.route
+    { title = viewTitle model.page
     , body =
         [ viewHeader model
         , Html.main_ []
-            [ viewRoute model
-            ]
+            [ viewRoute model ]
         , viewFooter
         ]
     }
 
 
-viewTitle : Route -> String
-viewTitle route =
-    case route of
-        Home ->
+viewTitle : Page -> String
+viewTitle page =
+    case page of
+        HomePage ->
             "Home"
 
-        Exercises ->
+        ExercisesPage _ ->
             "Exercises"
 
-        Login ->
+        LoginPage _ ->
             "Login"
 
-        Register ->
+        RegisterPage _ ->
             "Register"
 
-        Dashboard ->
+        DashboardPage _ ->
             "Dashboard"
-
-        NotFound ->
-            "Page not found"
 
 
 viewHeader : Model -> Html Msg
@@ -391,9 +436,7 @@ viewHeader model =
     Html.header []
         [ if model.isLoggedIn then
             Html.nav []
-                [ Html.a [ HA.class "logo", HA.href "/" ]
-                    [ Html.img [ HA.src "/assets/logo.png", HA.alt "TQ" ] []
-                    ]
+                [ Html.a [ HA.class "logo", HA.href "/" ] [ Html.img [ HA.src "/assets/logo.png", HA.alt "TQ" ] [] ]
                 , Html.ul []
                     [ Html.li [] [ viewLink "HOME" "/home" model.url.path ]
                     , Html.li [] [ viewLink "EXERCISES" "/all-exercises" model.url.path ]
@@ -406,9 +449,7 @@ viewHeader model =
 
           else
             Html.nav []
-                [ Html.a [ HA.class "logo", HA.href "/" ]
-                    [ Html.img [ HA.src "/assets/logo.png", HA.alt "TQ" ] []
-                    ]
+                [ Html.a [ HA.class "logo", HA.href "/" ] [ Html.img [ HA.src "/assets/logo.png", HA.alt "TQ" ] [] ]
                 , Html.ul []
                     [ Html.li [] [ viewLink "HOME" "/home" model.url.path ]
                     , Html.li [] [ viewLink "EXERCISES" "/all-exercises" model.url.path ]
@@ -428,40 +469,27 @@ viewRoute model =
         Html.div [] [ Html.text "Loading..." ]
 
     else
-        case model.route of
-            Home ->
+        case model.page of
+            HomePage ->
                 Html.section []
-                    [ Html.h1 []
-                        [ Html.text "MUSIC THEORY"
-                        , Html.br [] []
-                        , Html.text "MADE EASY"
-                        ]
-                    , Html.div
-                        []
-                        [ Html.a
-                            [ HA.href "/all-exercises" ]
-                            [ Html.text "Exercises" ]
-                        , Html.a
-                            [ HA.href "/theory" ]
-                            [ Html.text "Theory" ]
+                    [ Html.h1 [] [ Html.text "MUSIC THEORY", Html.br [] [], Html.text "MADE EASY" ]
+                    , Html.div []
+                        [ Html.a [ HA.href "/all-exercises" ] [ Html.text "Exercises" ]
+                        , Html.a [ HA.href "/theory" ] [ Html.text "Theory" ]
                         ]
                     ]
 
-            Exercises ->
-                Html.map ExercisesMsg (Exercises.view model.exercisesModel)
+            ExercisesPage m ->
+                Html.map ExercisesMsg (Exercises.view m)
 
-            Login ->
-                Html.map LoginMsg (Login.view model.loginModel)
+            LoginPage m ->
+                Html.map LoginMsg (Login.view m)
 
-            Register ->
-                Html.map RegisterMsg (Register.view model.registerModel)
+            RegisterPage m ->
+                Html.map RegisterMsg (Register.view m)
 
-            Dashboard ->
-                Html.map DashboardMsg (Dashboard.view model.dashboardModel model.isLoggedIn)
-
-            NotFound ->
-                Html.div []
-                    [ Html.text "Page not found" ]
+            DashboardPage m ->
+                Html.map DashboardMsg (Dashboard.view m model.isLoggedIn)
 
 
 viewLink : String -> String -> String -> Html Msg

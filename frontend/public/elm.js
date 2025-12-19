@@ -5447,18 +5447,31 @@ var $elm$browser$Browser$application = _Browser_application;
 var $author$project$Main$DashboardMsg = function (a) {
 	return {$: 'DashboardMsg', a: a};
 };
+var $author$project$Main$DashboardPage = function (a) {
+	return {$: 'DashboardPage', a: a};
+};
 var $author$project$Main$ExercisesMsg = function (a) {
 	return {$: 'ExercisesMsg', a: a};
+};
+var $author$project$Main$ExercisesPage = function (a) {
+	return {$: 'ExercisesPage', a: a};
 };
 var $author$project$Pages$Dashboard$GotUser = function (a) {
 	return {$: 'GotUser', a: a};
 };
+var $author$project$Main$HomePage = {$: 'HomePage'};
 var $author$project$Main$LoginMsg = function (a) {
 	return {$: 'LoginMsg', a: a};
+};
+var $author$project$Main$LoginPage = function (a) {
+	return {$: 'LoginPage', a: a};
 };
 var $author$project$Main$NotFound = {$: 'NotFound'};
 var $author$project$Main$RegisterMsg = function (a) {
 	return {$: 'RegisterMsg', a: a};
+};
+var $author$project$Main$RegisterPage = function (a) {
+	return {$: 'RegisterPage', a: a};
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Basics$composeR = F3(
@@ -6322,11 +6335,11 @@ var $author$project$Exercises$ChordGuesserExercise$init = function (_v0) {
 };
 var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Platform$Cmd$map = _Platform_map;
-var $author$project$Pages$Exercises$init = function (flags) {
-	var _v0 = $author$project$Exercises$ChordGuesserExercise$init(flags);
-	var chordModel = _v0.a;
-	var chordCmd = _v0.b;
-	var _v1 = A2($elm$core$Debug$log, 'ChordGuesserExercise init called', flags);
+var $author$project$Pages$Exercises$init = function (_v0) {
+	var _v1 = $author$project$Exercises$ChordGuesserExercise$init(_Utils_Tuple0);
+	var chordModel = _v1.a;
+	var chordCmd = _v1.b;
+	var _v2 = $elm$core$Debug$log('ChordGuesserExercise init called');
 	return _Utils_Tuple2(
 		{chordGuesserModel: chordModel, currentGame: $elm$core$Maybe$Nothing},
 		$elm$core$Platform$Cmd$batch(
@@ -6594,55 +6607,69 @@ var $elm$core$Maybe$withDefault = F2(
 		}
 	});
 var $author$project$Main$init = F3(
-	function (flags, url, key) {
-		var stopwatchModel = $author$project$Exercises$Stopwatch$init;
+	function (_v0, url, key) {
 		var route = A2(
 			$elm$core$Maybe$withDefault,
 			$author$project$Main$NotFound,
 			A2($elm$url$Url$Parser$parse, $author$project$Main$routeParser, url));
 		var checkLoginCmd = $author$project$Db$Auth$getMe(
 			A2($elm$core$Basics$composeR, $author$project$Pages$Dashboard$GotUser, $author$project$Main$DashboardMsg));
-		var _v0 = $author$project$Pages$Register$init;
-		var registerModel = _v0.a;
-		var registerCmd = _v0.b;
-		var _v1 = $author$project$Pages$Login$init;
-		var loginModel = _v1.a;
-		var loginCmd = _v1.b;
-		var _v2 = $author$project$Pages$Exercises$init(flags);
-		var exercisesModel = _v2.a;
-		var exercisesCmd = _v2.b;
-		var _v3 = $author$project$Pages$Dashboard$init;
-		var dashboardModel = _v3.a;
-		var dashboardCmd = _v3.b;
+		var _v1 = function () {
+			switch (route.$) {
+				case 'Exercises':
+					var _v3 = $author$project$Pages$Exercises$init(_Utils_Tuple0);
+					var m = _v3.a;
+					var c = _v3.b;
+					return _Utils_Tuple2(
+						$author$project$Main$ExercisesPage(m),
+						A2($elm$core$Platform$Cmd$map, $author$project$Main$ExercisesMsg, c));
+				case 'Login':
+					var _v4 = $author$project$Pages$Login$init;
+					var m = _v4.a;
+					var c = _v4.b;
+					return _Utils_Tuple2(
+						$author$project$Main$LoginPage(m),
+						A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, c));
+				case 'Register':
+					var _v5 = $author$project$Pages$Register$init;
+					var m = _v5.a;
+					var c = _v5.b;
+					return _Utils_Tuple2(
+						$author$project$Main$RegisterPage(m),
+						A2($elm$core$Platform$Cmd$map, $author$project$Main$RegisterMsg, c));
+				case 'Dashboard':
+					var _v6 = $author$project$Pages$Dashboard$init;
+					var m = _v6.a;
+					var c = _v6.b;
+					return _Utils_Tuple2(
+						$author$project$Main$DashboardPage(m),
+						A2($elm$core$Platform$Cmd$map, $author$project$Main$DashboardMsg, c));
+				default:
+					return _Utils_Tuple2($author$project$Main$HomePage, $elm$core$Platform$Cmd$none);
+			}
+		}();
+		var page = _v1.a;
+		var cmd = _v1.b;
 		return _Utils_Tuple2(
 			{
 				auth: {refreshing: false, retryAfterRefresh: $elm$core$Maybe$Nothing},
-				dashboardModel: dashboardModel,
-				exercisesModel: exercisesModel,
-				isLoading: true,
+				isLoading: false,
 				isLoggedIn: false,
 				key: key,
-				loginModel: loginModel,
-				registerModel: registerModel,
-				route: route,
-				stopwatchModel: stopwatchModel,
+				page: page,
+				stopwatchModel: $author$project$Exercises$Stopwatch$init,
 				url: url
 			},
 			$elm$core$Platform$Cmd$batch(
 				_List_fromArray(
-					[
-						A2($elm$core$Platform$Cmd$map, $author$project$Main$ExercisesMsg, exercisesCmd),
-						A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, loginCmd),
-						A2($elm$core$Platform$Cmd$map, $author$project$Main$RegisterMsg, registerCmd),
-						A2($elm$core$Platform$Cmd$map, $author$project$Main$DashboardMsg, dashboardCmd),
-						checkLoginCmd
-					])));
+					[cmd, checkLoginCmd])));
 	});
 var $author$project$Main$StopwatchMsg = function (a) {
 	return {$: 'StopwatchMsg', a: a};
 };
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$map = _Platform_map;
+var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Exercises$Stopwatch$Tick = function (a) {
 	return {$: 'Tick', a: a};
 };
@@ -6916,7 +6943,6 @@ var $elm$time$Time$every = F2(
 		return $elm$time$Time$subscription(
 			A2($elm$time$Time$Every, interval, tagger));
 	});
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Exercises$Stopwatch$subscriptions = function (model) {
 	return model.running ? A2($elm$time$Time$every, 10, $author$project$Exercises$Stopwatch$Tick) : $elm$core$Platform$Sub$none;
 };
@@ -6940,14 +6966,25 @@ var $author$project$Main$subscriptions = function (model) {
 				$elm$core$Platform$Sub$map,
 				$author$project$Main$StopwatchMsg,
 				$author$project$Exercises$Stopwatch$subscriptions(model.stopwatchModel)),
-				A2(
-				$elm$core$Platform$Sub$map,
-				$author$project$Main$ExercisesMsg,
-				$author$project$Pages$Exercises$subscriptions(model.exercisesModel)),
-				A2(
-				$elm$core$Platform$Sub$map,
-				$author$project$Main$DashboardMsg,
-				$author$project$Pages$Dashboard$subscriptions(model.dashboardModel))
+				function () {
+				var _v0 = model.page;
+				switch (_v0.$) {
+					case 'ExercisesPage':
+						var m = _v0.a;
+						return A2(
+							$elm$core$Platform$Sub$map,
+							$author$project$Main$ExercisesMsg,
+							$author$project$Pages$Exercises$subscriptions(m));
+					case 'DashboardPage':
+						var m = _v0.a;
+						return A2(
+							$elm$core$Platform$Sub$map,
+							$author$project$Main$DashboardMsg,
+							$author$project$Pages$Dashboard$subscriptions(m));
+					default:
+						return $elm$core$Platform$Sub$none;
+				}
+			}()
 			]));
 };
 var $author$project$Main$LogoutCompleted = {$: 'LogoutCompleted'};
@@ -7994,24 +8031,51 @@ var $author$project$Main$update = F2(
 		switch (msg.$) {
 			case 'UrlChanged':
 				var newUrl = msg.a;
-				var newRoute = A2(
+				var route = A2(
 					$elm$core$Maybe$withDefault,
 					$author$project$Main$NotFound,
 					A2($elm$url$Url$Parser$parse, $author$project$Main$routeParser, newUrl));
-				var exercisesFetchCmd = function () {
-					if (newRoute.$ === 'Exercises') {
-						return $elm$core$Platform$Cmd$none;
-					} else {
-						return $elm$core$Platform$Cmd$none;
+				var _v1 = function () {
+					switch (route.$) {
+						case 'Exercises':
+							var _v3 = $author$project$Pages$Exercises$init(_Utils_Tuple0);
+							var m = _v3.a;
+							var c = _v3.b;
+							return _Utils_Tuple2(
+								$author$project$Main$ExercisesPage(m),
+								A2($elm$core$Platform$Cmd$map, $author$project$Main$ExercisesMsg, c));
+						case 'Login':
+							var _v4 = $author$project$Pages$Login$init;
+							var m = _v4.a;
+							var c = _v4.b;
+							return _Utils_Tuple2(
+								$author$project$Main$LoginPage(m),
+								A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, c));
+						case 'Register':
+							var _v5 = $author$project$Pages$Register$init;
+							var m = _v5.a;
+							var c = _v5.b;
+							return _Utils_Tuple2(
+								$author$project$Main$RegisterPage(m),
+								A2($elm$core$Platform$Cmd$map, $author$project$Main$RegisterMsg, c));
+						case 'Dashboard':
+							var _v6 = $author$project$Pages$Dashboard$init;
+							var m = _v6.a;
+							var c = _v6.b;
+							return _Utils_Tuple2(
+								$author$project$Main$DashboardPage(m),
+								A2($elm$core$Platform$Cmd$map, $author$project$Main$DashboardMsg, c));
+						default:
+							return _Utils_Tuple2($author$project$Main$HomePage, $elm$core$Platform$Cmd$none);
 					}
 				}();
+				var page = _v1.a;
+				var cmd = _v1.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{route: newRoute, url: newUrl}),
-					$elm$core$Platform$Cmd$batch(
-						_List_fromArray(
-							[exercisesFetchCmd])));
+						{page: page, url: newUrl}),
+					cmd);
 			case 'LinkClicked':
 				var urlRequest = msg.a;
 				if (urlRequest.$ === 'Internal') {
@@ -8030,123 +8094,151 @@ var $author$project$Main$update = F2(
 				}
 			case 'ExercisesMsg':
 				var subMsg = msg.a;
-				var _v3 = A2($author$project$Pages$Exercises$update, subMsg, model.exercisesModel);
-				var updatedExercisesModel = _v3.a;
-				var cmd = _v3.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{exercisesModel: updatedExercisesModel}),
-					A2($elm$core$Platform$Cmd$map, $author$project$Main$ExercisesMsg, cmd));
-			case 'RegisterMsg':
-				var subMsg = msg.a;
-				if ((subMsg.$ === 'RegisterResult') && (subMsg.a.$ === 'Ok')) {
-					return _Utils_Tuple2(
-						model,
-						A2($elm$browser$Browser$Navigation$pushUrl, model.key, '/login'));
-				} else {
-					var _v5 = A2($author$project$Pages$Register$update, subMsg, model.registerModel);
-					var updatedRegisterModel = _v5.a;
-					var cmd = _v5.b;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{registerModel: updatedRegisterModel}),
-						A2($elm$core$Platform$Cmd$map, $author$project$Main$RegisterMsg, cmd));
-				}
-			case 'LoginMsg':
-				var subMsg = msg.a;
-				if (subMsg.$ === 'LoginResult') {
-					var result = subMsg.a;
-					var _v7 = A2($author$project$Pages$Login$update, subMsg, model.loginModel);
-					var updatedLoginModel = _v7.a;
-					var cmd = _v7.b;
-					var loginAttempt = function () {
-						if (result.$ === 'Ok') {
-							var response = result.a;
-							return response.ok ? _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{isLoggedIn: true, loginModel: updatedLoginModel}),
-								$elm$core$Platform$Cmd$batch(
-									_List_fromArray(
-										[
-											$author$project$Db$Auth$getMe(
-											A2($elm$core$Basics$composeR, $author$project$Pages$Dashboard$GotUser, $author$project$Main$DashboardMsg)),
-											A2($elm$browser$Browser$Navigation$pushUrl, model.key, '/dashboard'),
-											A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd)
-										]))) : _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{loginModel: updatedLoginModel}),
-								A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd));
-						} else {
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{loginModel: updatedLoginModel}),
-								A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd));
-						}
-					}();
-					return loginAttempt;
-				} else {
-					var _v9 = A2($author$project$Pages$Login$update, subMsg, model.loginModel);
-					var updatedLoginModel = _v9.a;
+				var _v8 = model.page;
+				if (_v8.$ === 'ExercisesPage') {
+					var m = _v8.a;
+					var _v9 = A2($author$project$Pages$Exercises$update, subMsg, m);
+					var updated = _v9.a;
 					var cmd = _v9.b;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{loginModel: updatedLoginModel}),
-						A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd));
+							{
+								page: $author$project$Main$ExercisesPage(updated)
+							}),
+						A2($elm$core$Platform$Cmd$map, $author$project$Main$ExercisesMsg, cmd));
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'LoginMsg':
+				var subMsg = msg.a;
+				var _v10 = model.page;
+				if (_v10.$ === 'LoginPage') {
+					var m = _v10.a;
+					var _v11 = A2($author$project$Pages$Login$update, subMsg, m);
+					var updated = _v11.a;
+					var cmd = _v11.b;
+					if ((subMsg.$ === 'LoginResult') && (subMsg.a.$ === 'Ok')) {
+						var response = subMsg.a.a;
+						return response.ok ? _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									isLoggedIn: true,
+									page: $author$project$Main$LoginPage(updated)
+								}),
+							$elm$core$Platform$Cmd$batch(
+								_List_fromArray(
+									[
+										$author$project$Db$Auth$getMe(
+										A2($elm$core$Basics$composeR, $author$project$Pages$Dashboard$GotUser, $author$project$Main$DashboardMsg)),
+										A2($elm$browser$Browser$Navigation$pushUrl, model.key, '/dashboard'),
+										A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd)
+									]))) : _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									page: $author$project$Main$LoginPage(updated)
+								}),
+							A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd));
+					} else {
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									page: $author$project$Main$LoginPage(updated)
+								}),
+							A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd));
+					}
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'RegisterMsg':
+				var subMsg = msg.a;
+				var _v13 = model.page;
+				if (_v13.$ === 'RegisterPage') {
+					var m = _v13.a;
+					var _v14 = A2($author$project$Pages$Register$update, subMsg, m);
+					var updated = _v14.a;
+					var cmd = _v14.b;
+					if ((subMsg.$ === 'RegisterResult') && (subMsg.a.$ === 'Ok')) {
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									page: $author$project$Main$RegisterPage(updated)
+								}),
+							A2($elm$browser$Browser$Navigation$pushUrl, model.key, '/login'));
+					} else {
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									page: $author$project$Main$RegisterPage(updated)
+								}),
+							A2($elm$core$Platform$Cmd$map, $author$project$Main$RegisterMsg, cmd));
+					}
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
 			case 'DashboardMsg':
 				var subMsg = msg.a;
-				var updatedIsLoggedIn = function () {
-					if (subMsg.a.$ === 'Ok') {
-						var response = subMsg.a.a;
-						var _v14 = response.user;
-						if (_v14.$ === 'Just') {
-							return true;
+				var _v16 = model.page;
+				if (_v16.$ === 'DashboardPage') {
+					var m = _v16.a;
+					var updatedIsLoggedIn = function () {
+						if (subMsg.a.$ === 'Ok') {
+							var response = subMsg.a.a;
+							var _v21 = response.user;
+							if (_v21.$ === 'Just') {
+								return true;
+							} else {
+								return false;
+							}
 						} else {
-							return false;
+							if ((subMsg.a.a.$ === 'BadStatus') && (subMsg.a.a.a === 401)) {
+								return false;
+							} else {
+								return model.isLoggedIn;
+							}
 						}
-					} else {
-						if ((subMsg.a.a.$ === 'BadStatus') && (subMsg.a.a.a === 401)) {
-							return false;
+					}();
+					var setIsLoading = false;
+					var refreshCmd = function () {
+						if (((subMsg.a.$ === 'Err') && (subMsg.a.a.$ === 'BadStatus')) && (subMsg.a.a.a === 401)) {
+							return A2($author$project$Main$onProtectedCallFail, $author$project$Main$RetryGetMe, model).b;
 						} else {
-							return model.isLoggedIn;
+							return $elm$core$Platform$Cmd$none;
 						}
-					}
-				}();
-				var setIsLoading = false;
-				var refreshCmd = function () {
-					if (((subMsg.a.$ === 'Err') && (subMsg.a.a.$ === 'BadStatus')) && (subMsg.a.a.a === 401)) {
-						return A2($author$project$Main$onProtectedCallFail, $author$project$Main$RetryGetMe, model).b;
-					} else {
-						return $elm$core$Platform$Cmd$none;
-					}
-				}();
-				var _v10 = A2($author$project$Pages$Dashboard$update, subMsg, model.dashboardModel);
-				var updatedDashboardModel = _v10.a;
-				var cmd = _v10.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{dashboardModel: updatedDashboardModel, isLoading: setIsLoading, isLoggedIn: updatedIsLoggedIn}),
-					$elm$core$Platform$Cmd$batch(
-						_List_fromArray(
-							[
-								A2($elm$core$Platform$Cmd$map, $author$project$Main$DashboardMsg, cmd),
-								refreshCmd
-							])));
+					}();
+					var _v17 = A2($author$project$Pages$Dashboard$update, subMsg, m);
+					var updated = _v17.a;
+					var cmd = _v17.b;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								isLoading: setIsLoading,
+								isLoggedIn: updatedIsLoggedIn,
+								page: $author$project$Main$DashboardPage(updated)
+							}),
+						$elm$core$Platform$Cmd$batch(
+							_List_fromArray(
+								[
+									A2($elm$core$Platform$Cmd$map, $author$project$Main$DashboardMsg, cmd),
+									refreshCmd
+								])));
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
 			case 'AuthRefreshed':
 				var result = msg.a;
 				if (result.$ === 'Ok') {
-					var _v16 = model.auth.retryAfterRefresh;
-					if (_v16.$ === 'Just') {
-						var _v17 = _v16.a;
-						var _v18 = _v17.a;
-						var url = _v17.b;
+					var _v23 = model.auth.retryAfterRefresh;
+					if (_v23.$ === 'Just') {
+						var _v24 = _v23.a;
+						var _v25 = _v24.a;
+						var url = _v24.b;
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -8173,17 +8265,25 @@ var $author$project$Main$update = F2(
 							$elm$core$Platform$Cmd$none);
 					}
 				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								auth: {refreshing: false, retryAfterRefresh: $elm$core$Maybe$Nothing},
+								isLoading: false,
+								isLoggedIn: false
+							}),
+						A2($elm$browser$Browser$Navigation$pushUrl, model.key, '/login'));
 				}
 			case 'StopwatchMsg':
 				var subMsg = msg.a;
-				var _v19 = A2($author$project$Exercises$Stopwatch$update, subMsg, model.stopwatchModel);
-				var updatedStopwatch = _v19.a;
-				var cmd = _v19.b;
+				var _v26 = A2($author$project$Exercises$Stopwatch$update, subMsg, model.stopwatchModel);
+				var updated = _v26.a;
+				var cmd = _v26.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{stopwatchModel: updatedStopwatch}),
+						{stopwatchModel: updated}),
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$StopwatchMsg, cmd));
 			case 'Logout':
 				return _Utils_Tuple2(
@@ -8193,7 +8293,7 @@ var $author$project$Main$update = F2(
 							[
 								A2($elm$browser$Browser$Navigation$pushUrl, model.key, '/login'),
 								$author$project$Db$Auth$logout(
-								function (_v20) {
+								function (_v27) {
 									return $author$project$Main$LogoutCompleted;
 								})
 							])));
@@ -9220,9 +9320,9 @@ var $author$project$Main$viewRoute = function (model) {
 					$elm$html$Html$text('Loading...')
 				]));
 	} else {
-		var _v0 = model.route;
+		var _v0 = model.page;
 		switch (_v0.$) {
-			case 'Home':
+			case 'HomePage':
 				return A2(
 					$elm$html$Html$section,
 					_List_Nil,
@@ -9264,51 +9364,45 @@ var $author$project$Main$viewRoute = function (model) {
 										]))
 								]))
 						]));
-			case 'Exercises':
+			case 'ExercisesPage':
+				var m = _v0.a;
 				return A2(
 					$elm$html$Html$map,
 					$author$project$Main$ExercisesMsg,
-					$author$project$Pages$Exercises$view(model.exercisesModel));
-			case 'Login':
+					$author$project$Pages$Exercises$view(m));
+			case 'LoginPage':
+				var m = _v0.a;
 				return A2(
 					$elm$html$Html$map,
 					$author$project$Main$LoginMsg,
-					$author$project$Pages$Login$view(model.loginModel));
-			case 'Register':
+					$author$project$Pages$Login$view(m));
+			case 'RegisterPage':
+				var m = _v0.a;
 				return A2(
 					$elm$html$Html$map,
 					$author$project$Main$RegisterMsg,
-					$author$project$Pages$Register$view(model.registerModel));
-			case 'Dashboard':
+					$author$project$Pages$Register$view(m));
+			default:
+				var m = _v0.a;
 				return A2(
 					$elm$html$Html$map,
 					$author$project$Main$DashboardMsg,
-					A2($author$project$Pages$Dashboard$view, model.dashboardModel, model.isLoggedIn));
-			default:
-				return A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text('Page not found')
-						]));
+					A2($author$project$Pages$Dashboard$view, m, model.isLoggedIn));
 		}
 	}
 };
-var $author$project$Main$viewTitle = function (route) {
-	switch (route.$) {
-		case 'Home':
+var $author$project$Main$viewTitle = function (page) {
+	switch (page.$) {
+		case 'HomePage':
 			return 'Home';
-		case 'Exercises':
+		case 'ExercisesPage':
 			return 'Exercises';
-		case 'Login':
+		case 'LoginPage':
 			return 'Login';
-		case 'Register':
+		case 'RegisterPage':
 			return 'Register';
-		case 'Dashboard':
-			return 'Dashboard';
 		default:
-			return 'Page not found';
+			return 'Dashboard';
 	}
 };
 var $author$project$Main$view = function (model) {
@@ -9325,9 +9419,10 @@ var $author$project$Main$view = function (model) {
 					])),
 				$author$project$Main$viewFooter
 			]),
-		title: $author$project$Main$viewTitle(model.route)
+		title: $author$project$Main$viewTitle(model.page)
 	};
 };
 var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$UrlChanged, onUrlRequest: $author$project$Main$LinkClicked, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
-_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$string)(0)}});}(this));
+_Platform_export({'Main':{'init':$author$project$Main$main(
+	$elm$json$Json$Decode$succeed(_Utils_Tuple0))(0)}});}(this));

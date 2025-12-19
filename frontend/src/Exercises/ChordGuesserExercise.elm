@@ -50,11 +50,9 @@ type Difficulty
     | Extreme
 
 
-type alias Flags =
-    String
 
 
-init : Flags -> ( Model, Cmd Msg )
+init : () -> ( Model, Cmd Msg )
 init _ =
     ( { maybeChords = Nothing
       , maybeChosenChord = Nothing

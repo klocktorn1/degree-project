@@ -24,18 +24,16 @@ type Msg
     | BackToList
 
 
-type alias Flags =
-    String
 
 
-init : Flags -> ( Model, Cmd Msg )
-init flags =
+init : () -> ( Model, Cmd Msg )
+init _ =
     let
         _ =
-            Debug.log "ChordGuesserExercise init called" flags
+            Debug.log "ChordGuesserExercise init called"
 
         ( chordModel, chordCmd ) =
-            ChordGuesserExercise.init flags
+            ChordGuesserExercise.init ()
     in
     ( { chordGuesserModel = chordModel, currentGame = Nothing }
     , Cmd.batch [ Cmd.map ChordGuesserMsg chordCmd ]
