@@ -134,24 +134,20 @@ const refreshToken = async (req, res) => {
 }
 
 const registerUser = async (req, res) => {
-    const { username, email, firstname, lastname, password } = req.body;
+    const { email, firstname, lastname, password } = req.body;
 
     const password_hash = await bcrypt.hash(password, 12);
     try {
         const [result] = await db.query(
-            'INSERT INTO users (username, email, firstname, lastname, password_hash) VALUES (?, ?, ?, ?, ?)',
-            [username, email, firstname, lastname, password_hash]
+            'INSERT INTO users ( email, firstname, lastname, password_hash) VALUES (?, ?, ?, ?)',
+            [email, firstname, lastname, password_hash]
         );
-        return res.json({ ok: true, message: `User created successfully`});
+        return res.json({ ok: true, message: `User created successfully` });
     } catch (err) {
-        if (err.code === 'ER_DUP_ENTRY') {
-            if (err.sqlMessage.includes('username')) {
-                return res.status(400).json({ ok: false, message: 'Username already in use' });
-            } else if (err.sqlMessage.includes('email')) {
-                return res.status(400).json({ ok: false, message: 'Email already in use' });
-            }
+        if (err.code === 'ER_DUP_ENTRY' && err.sqlMessage.includes('email')) {
+            return res.status(400).json({ ok: false, message: 'Email already in use' });
         }
-        res.status(500).json({ ok: false, message: 'Something went wrong during registration' });
+        res.status(500).json({ ok: false, message: 'Something went wrong during registration', err});
     }
 };
 

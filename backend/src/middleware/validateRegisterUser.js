@@ -1,8 +1,7 @@
 module.exports = function validateRegisterUser(req, res, next) {
-    const { username, email, firstname, lastname, password } = req.body;
+    const { email, firstname, lastname, password } = req.body;
     const missingFields = [];
 
-    if (!username) missingFields.push("username");
     if (!email) missingFields.push("email");
     if (!firstname) missingFields.push("firstname");
     if (!lastname) missingFields.push("lastname");

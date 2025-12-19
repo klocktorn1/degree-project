@@ -1,6 +1,6 @@
 module Exercises.ChordGuesserExercise exposing (..)
 
-import TheoryApi as TheoryApi
+import Api.TheoryApi as TheoryApi
 import Html exposing (Html, s)
 import Html.Attributes as HA
 import Html.Events as HE
@@ -36,7 +36,6 @@ type Msg
     | ChordGroupChosen (List String)
     | Shuffled (List String)
     | ToggleNotesShuffle
-    | ResetChordGuesser
     | GoBack
 
 
@@ -207,23 +206,27 @@ update msg model =
             in
             ( updatedModel, cmd )
 
-        ResetChordGuesser ->
-            ( { model
-                | maybeChosenChord = Nothing
-                , gameOver = False
-                , mistakes = 0
-                , score = 0
-              }
-            , Cmd.none
-            )
-
         GoBack ->
-            ( { model | isGameStarted = False }, Cmd.none )
+            let
+                updatedModel =
+                    { model
+                        | isGameStarted = False
+                        , maybeChosenChord = Nothing
+                        , gameOver = False
+                        , mistakes = 0
+                        , score = 0
+                    }
+
+                _ =
+                    Debug.log "hello" updatedModel
+            in
+            ( updatedModel, Cmd.none )
 
 
 listOfDifficulities : List Difficulty
 listOfDifficulities =
     [ Easy, Medium, Hard, Advanced, Extreme ]
+
 
 isToggleShuffleDisabled : Difficulty -> Bool
 isToggleShuffleDisabled difficulty =
@@ -253,7 +256,7 @@ view model =
             , viewChords model
             , Html.p [] [ Html.text <| "Score:  " ++ String.fromInt model.score ]
             , Html.p [] [ Html.text <| "Mistakes:  " ++ String.fromInt model.mistakes ]
-            , Html.button [ HA.class "custom-button", HE.onClick ResetChordGuesser ] [ Html.text "Reset" ]
+            , Html.button [ HA.class "custom-button", HE.onClick GoBack ] [ Html.text "< Back" ]
             ]
 
     else
@@ -288,7 +291,6 @@ view model =
                     , Html.li [ HE.onClick (ChordGroupChosen [ "sus13", "minorMaj7", "dim9" ]) ] [ Html.text "sus13, mMaj7 and dim9" ]
                     ]
                 ]
-            , Html.button [ HA.class "custom-button", HE.onClick GoBack ] [ Html.text "< Back" ]
             ]
 
 

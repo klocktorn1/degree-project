@@ -168,7 +168,7 @@ routeParser : UP.Parser (Route -> a) a
 routeParser =
     UP.oneOf
         [ UP.map Home (UP.s "home")
-        , UP.map Exercises (UP.s "exercises")
+        , UP.map Exercises (UP.s "all-exercises")
         , UP.map Login (UP.s "login")
         , UP.map Register (UP.s "register")
         , UP.map Dashboard (UP.s "dashboard")
@@ -246,27 +246,25 @@ update msg model =
                         ( updatedLoginModel, cmd ) =
                             Login.update subMsg model.loginModel
 
-                        successCmd =
+                        loginAttempt =
                             case result of
                                 Ok response ->
                                     if response.ok then
-                                        Cmd.batch
+                                        ( { model | isLoggedIn = True, loginModel = updatedLoginModel }
+                                        , Cmd.batch
                                             [ Auth.getMe (Dashboard.GotUser >> DashboardMsg)
                                             , Nav.pushUrl model.key "/dashboard"
+                                            , Cmd.map LoginMsg cmd
                                             ]
+                                        )
 
                                     else
-                                        Cmd.none
+                                        ( { model | loginModel = updatedLoginModel }, Cmd.map LoginMsg cmd )
 
                                 Err _ ->
-                                    Cmd.none
+                                    ( { model | loginModel = updatedLoginModel }, Cmd.map LoginMsg cmd )
                     in
-                    ( { model
-                        | loginModel = updatedLoginModel
-                        , isLoggedIn = True
-                      }
-                    , Cmd.batch [ Cmd.map LoginMsg cmd, successCmd ]
-                    )
+                    loginAttempt
 
                 _ ->
                     let
@@ -413,7 +411,7 @@ viewHeader model =
                     ]
                 , Html.ul []
                     [ Html.li [] [ viewLink "HOME" "/home" model.url.path ]
-                    , Html.li [] [ viewLink "EXERCISES" "/exercises" model.url.path ]
+                    , Html.li [] [ viewLink "EXERCISES" "/all-exercises" model.url.path ]
                     , Html.li [] [ viewLink "THEORY" "/theory" model.url.path ]
                     , Html.li [] [ viewLink "DASHBOARD" "/dashboard" model.url.path ]
                     , Html.li [] [ viewLink "ABOUT" "/about" model.url.path ]
@@ -428,7 +426,7 @@ viewHeader model =
                     ]
                 , Html.ul []
                     [ Html.li [] [ viewLink "HOME" "/home" model.url.path ]
-                    , Html.li [] [ viewLink "EXERCISES" "/exercises" model.url.path ]
+                    , Html.li [] [ viewLink "EXERCISES" "/all-exercises" model.url.path ]
                     , Html.li [] [ viewLink "THEORY" "/theory" model.url.path ]
                     , Html.li [] [ viewLink "DASHBOARD" "/dashboard" model.url.path ]
                     , Html.li [] [ viewLink "REGISTER" "/register" model.url.path ]
@@ -456,7 +454,7 @@ viewRoute model =
                     , Html.div
                         []
                         [ Html.a
-                            [ HA.href "/exercises" ]
+                            [ HA.href "/all-exercises" ]
                             [ Html.text "Exercises" ]
                         , Html.a
                             [ HA.href "/theory" ]

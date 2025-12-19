@@ -53,4 +53,35 @@ MEDIUM(Chords to guess from keys: C, G, F, D, A, B♭, E♭,),
 HARD(C, G, F, D, A, B♭, E♭, E, B, A♭, D♭,)
 EXTREME(C, G, F, D, A, B♭, E♭, E, B, A♭, D♭, F#, C#, G#, D#, A#)
 
+
+i think i need to add a level column to the user table. 
+i also think i need to add comleted_exercises column to user table
+
+new note: skip user-lvel. for each game there is easy hard medium, user chooses easy hard or medium and completes the exercises inside the difficulty instead
+
+users table column: completed_exercises. Needs to be marked for difficulty also. Ex chordguesser game on easy and complete Major and Minor
+
+maybe a new table? completed_exercises
+
+completed_exercises:
+id: PK
+userId: INT FK
+exerciseId: INT FK
+difficulty: INT (0 = easy 1 = medium etc)
+
+
+user chooses chord guesser game 
+-> user now chooses which "subexercise" ie which chord-types they want to practice on
+-> user is correct say 10 times, each time correct a bar fills up to show progress for that exercise. when user fills bar up subexercise is completed. 
+-> exercise will be marked as complete (maybe add completed levels column to user table?), user can still play subexercise to practice
+
    
+
+
+
+
+
+user level:
+starts off on level 1 ->
+level 1-2 needs 10 exp
+-> exp needed doubles for each level (2-3 is 20, 3-4 is 40 etc)

@@ -64,10 +64,16 @@ view : Model -> Html Msg
 view model =
     case model.currentGame of
         Just ChordGuesser ->
-            Html.div []
-                [ Html.button [ HA.class "custom-button", HE.onClick BackToList ] [ Html.text "< Back" ]
-                , Html.map ChordGuesserMsg (ChordGuesserExercise.view model.chordGuesserModel)
-                ]
+            if model.chordGuesserModel.isGameStarted then
+                Html.div []
+                    [ Html.map ChordGuesserMsg (ChordGuesserExercise.view model.chordGuesserModel)
+                    ]
+
+            else
+                Html.div []
+                    [ Html.map ChordGuesserMsg (ChordGuesserExercise.view model.chordGuesserModel)
+                    , Html.button [ HA.class "custom-button", HE.onClick BackToList ] [ Html.text "< Back to exercises" ]
+                    ]
 
         Nothing ->
             Html.div []

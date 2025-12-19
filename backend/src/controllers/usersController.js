@@ -24,8 +24,8 @@ const getUser = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const { username, email, firstname, lastname, created_at } = row[0]
-    res.json({ user: {username, email, firstname, lastname, createdAt: created_at} });
+    const { email, firstname, lastname, created_at } = row[0]
+    res.json({ user: { email, firstname, lastname, createdAt: created_at} });
   } catch (err) {
     res.status(500).json({ error: `getUser in usersController: ${err.message}` });
   }
@@ -37,11 +37,10 @@ const getUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   const { id } = req.params
-  const { username, email, firstname, lastname, password } = req.body;
+  const { email, firstname, lastname, password } = req.body;
 
   const fields = {}
 
-  if (username) fields.username = username;
   if (email) fields.email = email;
   if (firstname) fields.firstname = firstname;
   if (lastname) fields.lastname = lastname;

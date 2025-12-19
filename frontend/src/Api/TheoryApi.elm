@@ -1,4 +1,4 @@
-module TheoryApi exposing ( Chord, buildErrorMessage, fetchChord, fetchChords)
+module Api.TheoryApi exposing ( Chord, buildErrorMessage, fetchChord, fetchChords)
 
 import Http
 import Json.Decode as Decode

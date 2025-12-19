@@ -19,8 +19,8 @@ vecka 3
 måndag - Började med lite styling, skapade dashboard page och började smått försöka få till inlogg för användare. 
 tisdag - Fick till inlogg för användare som redirectar till dashboard page och visar lite info om användaren. Tog mycket längre tid än tänkt då Elm är extremt typsäkert och det ställde till det med hur jag skulle hämta och skicka access token. Bestämde mig för att spara den i elms model.
 onsdag - Skrotade iden med att spara accesstoken i elm modellen och istället har jag både access och refresh token som cookie. Gick väldigt snabbt att implementera detta jämfört med att ha det i elm model. Implemenetrade ett isLoggedIn state för att rendera olika saker beroende på om man är inloggad. Gjorde ett register formulär.
-torsdag -
-fredag - 
+torsdag - tog ledigt denna dag pga sambons födelsedag
+fredag - började tänka om kring hur jag ska implementera level-systemet. Jag ska inte ha att en user kan "gå upp i level" utan jag skapar en ny table i min db som håller completed_exercises som bara förmedlar vilka övningar användaren gjort. med detta kan jag markera olika övningar som färdiga för användaren. Tog bort username field från users då den var överflödig, räcker med email.
 
 vecka 4
 måndag - 

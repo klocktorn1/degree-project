@@ -11,8 +11,7 @@ type alias Model =
 
 
 type alias User =
-    { username : String
-    , email : String
+    { email : String
     , firstname : String
     , lastname : String
     , createdAt : String
@@ -50,25 +49,23 @@ update msg model =
 
 view : Model -> Bool -> Html Msg
 view model isLoggedIn =
-     if isLoggedIn then
-         Html.div []
-        [ case model.user of
-            Just user ->
-                Html.div []
-                    [ Html.p [] [ Html.text ("Username: " ++ user.username) ]
-                    , Html.p [] [ Html.text ("Email: " ++ user.email) ]
-                    , Html.p [] [ Html.text ("First Name: " ++ user.firstname) ]
-                    , Html.p [] [ Html.text ("Last Name: " ++ user.lastname) ]
-                    , Html.p [] [ Html.text ("Created At: " ++ user.createdAt) ]
-                    ]
+    if isLoggedIn then
+        Html.div []
+            [ case model.user of
+                Just user ->
+                    Html.div []
+                        [ Html.p [] [ Html.text ("Email: " ++ user.email) ]
+                        , Html.p [] [ Html.text ("First Name: " ++ user.firstname) ]
+                        , Html.p [] [ Html.text ("Last Name: " ++ user.lastname) ]
+                        , Html.p [] [ Html.text ("Created At: " ++ user.createdAt) ]
+                        ]
 
-            Nothing ->
-                Html.p [] [ Html.text "User data not available." ]
-        ]
-     else
-     Html.div [] [Html.text "Please log in"]
-        
-   
+                Nothing ->
+                    Html.p [] [ Html.text "User data not available." ]
+            ]
+
+    else
+        Html.div [] [ Html.text "Please log in" ]
 
 
 subscriptions : Model -> Sub Msg

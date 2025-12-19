@@ -12,8 +12,7 @@ import String
 
 
 type alias Model =
-    { username : String
-    , email : String
+    { email : String
     , firstname : String
     , lastname : String
     , password : String
@@ -25,8 +24,7 @@ type alias Model =
 
 
 type Msg
-    = SetUsername String
-    | SetEmail String
+    = SetEmail String
     | SetFirstname String
     | SetLastname String
     | SetPassword String
@@ -37,8 +35,7 @@ type Msg
 
 init : ( Model, Cmd Msg )
 init =
-    ( { username = ""
-      , email = ""
+    ( { email = ""
       , firstname = ""
       , lastname = ""
       , password = ""
@@ -54,9 +51,6 @@ init =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        SetUsername u ->
-            ( { model | username = u }, Cmd.none )
-
         SetEmail e ->
             ( { model | email = e }, Cmd.none )
 
@@ -75,7 +69,7 @@ update msg model =
                     else
                         ""
             in
-            ( { model | password = p, error = Just passwordMatch}, Cmd.none )
+            ( { model | password = p, error = Just passwordMatch }, Cmd.none )
 
         SetRepeatPassword p ->
             let
@@ -99,8 +93,7 @@ update msg model =
                 let
                     body =
                         Encode.object
-                            [ ( "username", Encode.string model.username )
-                            , ( "email", Encode.string model.email )
+                            [ ( "email", Encode.string model.email )
                             , ( "firstname", Encode.string model.firstname )
                             , ( "lastname", Encode.string model.lastname )
                             , ( "password", Encode.string model.password )
@@ -162,10 +155,6 @@ view model =
                 [ HA.class "login-form"
                 ]
                 [ Html.div []
-                    [ Html.label [] [ Html.text "Username" ]
-                    , Html.input [ HA.required True, HA.type_ "text", HA.value model.username, HE.onInput SetUsername ] []
-                    ]
-                , Html.div []
                     [ Html.label [] [ Html.text "Email" ]
                     , Html.input [ HA.required True, HA.type_ "email", HA.value model.email, HE.onInput SetEmail ] []
                     ]

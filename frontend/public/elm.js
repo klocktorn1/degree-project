@@ -6258,16 +6258,15 @@ var $elm$json$Json$Decode$maybe = function (decoder) {
 				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
 			]));
 };
-var $author$project$Api$Auth$User = F5(
-	function (username, email, firstname, lastname, createdAt) {
-		return {createdAt: createdAt, email: email, firstname: firstname, lastname: lastname, username: username};
+var $author$project$Api$Auth$User = F4(
+	function (email, firstname, lastname, createdAt) {
+		return {createdAt: createdAt, email: email, firstname: firstname, lastname: lastname};
 	});
-var $elm$json$Json$Decode$map5 = _Json_map5;
+var $elm$json$Json$Decode$map4 = _Json_map4;
 var $elm$json$Json$Decode$string = _Json_decodeString;
-var $author$project$Api$Auth$userDecoder = A6(
-	$elm$json$Json$Decode$map5,
+var $author$project$Api$Auth$userDecoder = A5(
+	$elm$json$Json$Decode$map4,
 	$author$project$Api$Auth$User,
-	A2($elm$json$Json$Decode$field, 'username', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'email', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'firstname', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'lastname', $elm$json$Json$Decode$string),
@@ -6333,7 +6332,7 @@ var $author$project$Pages$Login$init = _Utils_Tuple2(
 	{email: '', error: $elm$core$Maybe$Nothing, isSubmitting: false, password: ''},
 	$elm$core$Platform$Cmd$none);
 var $author$project$Pages$Register$init = _Utils_Tuple2(
-	{email: '', error: $elm$core$Maybe$Nothing, firstname: '', isSubmitting: false, lastname: '', password: '', repeatPassword: '', successMessage: $elm$core$Maybe$Nothing, username: ''},
+	{email: '', error: $elm$core$Maybe$Nothing, firstname: '', isSubmitting: false, lastname: '', password: '', repeatPassword: '', successMessage: $elm$core$Maybe$Nothing},
 	$elm$core$Platform$Cmd$none);
 var $elm$url$Url$Parser$State = F5(
 	function (visited, unvisited, params, frag, value) {
@@ -6563,7 +6562,7 @@ var $author$project$Main$routeParser = $elm$url$Url$Parser$oneOf(
 			A2(
 			$elm$url$Url$Parser$map,
 			$author$project$Main$Exercises,
-			$elm$url$Url$Parser$s('exercises')),
+			$elm$url$Url$Parser$s('all-exercises')),
 			A2(
 			$elm$url$Url$Parser$map,
 			$author$project$Main$Login,
@@ -7290,16 +7289,17 @@ var $author$project$Exercises$ChordGuesserExercise$checkIfChordIsCorrect = funct
 		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 	}
 };
-var $author$project$TheoryApi$baseUrl = 'http://localhost:5000/api/v1';
-var $author$project$TheoryApi$Chord = F5(
+var $author$project$Api$TheoryApi$baseUrl = 'http://localhost:5000/api/v1';
+var $author$project$Api$TheoryApi$Chord = F5(
 	function (chord, root, formula, degrees, notes) {
 		return {chord: chord, degrees: degrees, formula: formula, notes: notes, root: root};
 	});
 var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$json$Json$Decode$list = _Json_decodeList;
-var $author$project$TheoryApi$chordDecoder = A6(
+var $elm$json$Json$Decode$map5 = _Json_map5;
+var $author$project$Api$TheoryApi$chordDecoder = A6(
 	$elm$json$Json$Decode$map5,
-	$author$project$TheoryApi$Chord,
+	$author$project$Api$TheoryApi$Chord,
 	A2($elm$json$Json$Decode$field, 'chord', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'root', $elm$json$Json$Decode$string),
 	A2(
@@ -7314,18 +7314,18 @@ var $author$project$TheoryApi$chordDecoder = A6(
 		$elm$json$Json$Decode$field,
 		'notes',
 		$elm$json$Json$Decode$list($elm$json$Json$Decode$string)));
-var $author$project$TheoryApi$chordListDecoder = $elm$json$Json$Decode$list($author$project$TheoryApi$chordDecoder);
+var $author$project$Api$TheoryApi$chordListDecoder = $elm$json$Json$Decode$list($author$project$Api$TheoryApi$chordDecoder);
 var $elm$http$Http$get = function (r) {
 	return $elm$http$Http$request(
 		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
-var $author$project$TheoryApi$parseChordTypes = function (chordTypes) {
+var $author$project$Api$TheoryApi$parseChordTypes = function (chordTypes) {
 	return function (s) {
 		return '?types=' + s;
 	}(
 		A2($elm$core$String$join, '&types=', chordTypes));
 };
-var $author$project$TheoryApi$fetchChords = F3(
+var $author$project$Api$TheoryApi$fetchChords = F3(
 	function (rootNotes, chordTypes, toMsg) {
 		if (!rootNotes.b) {
 			return $elm$core$Platform$Cmd$none;
@@ -7336,13 +7336,14 @@ var $author$project$TheoryApi$fetchChords = F3(
 					function (root) {
 						return $elm$http$Http$get(
 							{
-								expect: A2($elm$http$Http$expectJson, toMsg, $author$project$TheoryApi$chordListDecoder),
-								url: $author$project$TheoryApi$baseUrl + ('/chords/' + (root + $author$project$TheoryApi$parseChordTypes(chordTypes)))
+								expect: A2($elm$http$Http$expectJson, toMsg, $author$project$Api$TheoryApi$chordListDecoder),
+								url: $author$project$Api$TheoryApi$baseUrl + ('/chords/' + (root + $author$project$Api$TheoryApi$parseChordTypes(chordTypes)))
 							});
 					},
 					rootNotes));
 		}
 	});
+var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Basics$not = _Basics_not;
 var $author$project$Exercises$ChordGuesserExercise$defaultChord = {chord: 'No chord found', degrees: _List_Nil, formula: _List_Nil, notes: _List_Nil, root: ''};
 var $elm$core$List$drop = F2(
@@ -7561,7 +7562,7 @@ var $author$project$Exercises$ChordGuesserExercise$update = F2(
 							maybeChords: $elm$core$Maybe$Just(_List_Nil),
 							pendingFetches: fetchCount
 						}),
-					A3($author$project$TheoryApi$fetchChords, model.rootNotes, chordTypes, $author$project$Exercises$ChordGuesserExercise$GotChordData));
+					A3($author$project$Api$TheoryApi$fetchChords, model.rootNotes, chordTypes, $author$project$Exercises$ChordGuesserExercise$GotChordData));
 			case 'Shuffled':
 				var chordNotes = msg.a;
 				return _Utils_Tuple2(
@@ -7619,18 +7620,12 @@ var $author$project$Exercises$ChordGuesserExercise$update = F2(
 				var updatedModel = _v3.a;
 				var cmd = _v3.b;
 				return _Utils_Tuple2(updatedModel, cmd);
-			case 'ResetChordGuesser':
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{gameOver: false, maybeChosenChord: $elm$core$Maybe$Nothing, mistakes: 0, score: 0}),
-					$elm$core$Platform$Cmd$none);
 			default:
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{isGameStarted: false}),
-					$elm$core$Platform$Cmd$none);
+				var updatedModel = _Utils_update(
+					model,
+					{gameOver: false, isGameStarted: false, maybeChosenChord: $elm$core$Maybe$Nothing, mistakes: 0, score: 0});
+				var _v4 = A2($elm$core$Debug$log, 'hello', updatedModel);
+				return _Utils_Tuple2(updatedModel, $elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Pages$Exercises$update = F2(
@@ -7838,13 +7833,6 @@ var $author$project$Api$Auth$register = F2(
 var $author$project$Pages$Register$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
-			case 'SetUsername':
-				var u = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{username: u}),
-					$elm$core$Platform$Cmd$none);
 			case 'SetEmail':
 				var e = msg.a;
 				return _Utils_Tuple2(
@@ -7904,9 +7892,6 @@ var $author$project$Pages$Register$update = F2(
 						var body = $elm$json$Json$Encode$object(
 							_List_fromArray(
 								[
-									_Utils_Tuple2(
-									'username',
-									$elm$json$Json$Encode$string(model.username)),
 									_Utils_Tuple2(
 									'email',
 									$elm$json$Json$Encode$string(model.email)),
@@ -8029,33 +8014,37 @@ var $author$project$Main$update = F2(
 				var subMsg = msg.a;
 				if (subMsg.$ === 'LoginResult') {
 					var result = subMsg.a;
-					var successCmd = function () {
-						if (result.$ === 'Ok') {
-							var response = result.a;
-							return response.ok ? $elm$core$Platform$Cmd$batch(
-								_List_fromArray(
-									[
-										$author$project$Api$Auth$getMe(
-										A2($elm$core$Basics$composeR, $author$project$Pages$Dashboard$GotUser, $author$project$Main$DashboardMsg)),
-										A2($elm$browser$Browser$Navigation$pushUrl, model.key, '/dashboard')
-									])) : $elm$core$Platform$Cmd$none;
-						} else {
-							return $elm$core$Platform$Cmd$none;
-						}
-					}();
 					var _v7 = A2($author$project$Pages$Login$update, subMsg, model.loginModel);
 					var updatedLoginModel = _v7.a;
 					var cmd = _v7.b;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{isLoggedIn: true, loginModel: updatedLoginModel}),
-						$elm$core$Platform$Cmd$batch(
-							_List_fromArray(
-								[
-									A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd),
-									successCmd
-								])));
+					var loginAttempt = function () {
+						if (result.$ === 'Ok') {
+							var response = result.a;
+							return response.ok ? _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{isLoggedIn: true, loginModel: updatedLoginModel}),
+								$elm$core$Platform$Cmd$batch(
+									_List_fromArray(
+										[
+											$author$project$Api$Auth$getMe(
+											A2($elm$core$Basics$composeR, $author$project$Pages$Dashboard$GotUser, $author$project$Main$DashboardMsg)),
+											A2($elm$browser$Browser$Navigation$pushUrl, model.key, '/dashboard'),
+											A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd)
+										]))) : _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{loginModel: updatedLoginModel}),
+								A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd));
+						} else {
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{loginModel: updatedLoginModel}),
+								A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd));
+						}
+					}();
+					return loginAttempt;
 				} else {
 					var _v9 = A2($author$project$Pages$Login$update, subMsg, model.loginModel);
 					var updatedLoginModel = _v9.a;
@@ -8324,7 +8313,7 @@ var $author$project$Main$viewHeader = function (model) {
 								_List_Nil,
 								_List_fromArray(
 									[
-										A3($author$project$Main$viewLink, 'EXERCISES', '/exercises', model.url.path)
+										A3($author$project$Main$viewLink, 'EXERCISES', '/all-exercises', model.url.path)
 									])),
 								A2(
 								$elm$html$Html$li,
@@ -8398,7 +8387,7 @@ var $author$project$Main$viewHeader = function (model) {
 								_List_Nil,
 								_List_fromArray(
 									[
-										A3($author$project$Main$viewLink, 'EXERCISES', '/exercises', model.url.path)
+										A3($author$project$Main$viewLink, 'EXERCISES', '/all-exercises', model.url.path)
 									])),
 								A2(
 								$elm$html$Html$li,
@@ -8470,13 +8459,6 @@ var $author$project$Pages$Dashboard$view = F2(
 									_List_Nil,
 									_List_fromArray(
 										[
-											$elm$html$Html$text('Username: ' + user.username)
-										])),
-									A2(
-									$elm$html$Html$p,
-									_List_Nil,
-									_List_fromArray(
-										[
 											$elm$html$Html$text('Email: ' + user.email)
 										])),
 									A2(
@@ -8529,7 +8511,6 @@ var $author$project$Exercises$ChordGuesserExercise$ChordGroupChosen = function (
 	return {$: 'ChordGroupChosen', a: a};
 };
 var $author$project$Exercises$ChordGuesserExercise$GoBack = {$: 'GoBack'};
-var $author$project$Exercises$ChordGuesserExercise$ResetChordGuesser = {$: 'ResetChordGuesser'};
 var $author$project$Exercises$ChordGuesserExercise$ToggleNotesShuffle = {$: 'ToggleNotesShuffle'};
 var $elm$json$Json$Encode$bool = _Json_wrap;
 var $elm$html$Html$Attributes$boolProperty = F2(
@@ -8696,11 +8677,11 @@ var $author$project$Exercises$ChordGuesserExercise$view = function (model) {
 				_List_fromArray(
 					[
 						$elm$html$Html$Attributes$class('custom-button'),
-						$elm$html$Html$Events$onClick($author$project$Exercises$ChordGuesserExercise$ResetChordGuesser)
+						$elm$html$Html$Events$onClick($author$project$Exercises$ChordGuesserExercise$GoBack)
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text('Reset')
+						$elm$html$Html$text('< Back')
 					]))
 			])) : A2(
 		$elm$html$Html$section,
@@ -8915,17 +8896,6 @@ var $author$project$Exercises$ChordGuesserExercise$view = function (model) {
 										$elm$html$Html$text('sus13, mMaj7 and dim9')
 									]))
 							]))
-					])),
-				A2(
-				$elm$html$Html$button,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('custom-button'),
-						$elm$html$Html$Events$onClick($author$project$Exercises$ChordGuesserExercise$GoBack)
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('< Back')
 					]))
 			]));
 };
@@ -8933,11 +8903,24 @@ var $author$project$Pages$Exercises$view = function (model) {
 	var _v0 = model.currentGame;
 	if (_v0.$ === 'Just') {
 		var _v1 = _v0.a;
-		return A2(
+		return model.chordGuesserModel.isGameStarted ? A2(
 			$elm$html$Html$div,
 			_List_Nil,
 			_List_fromArray(
 				[
+					A2(
+					$elm$html$Html$map,
+					$author$project$Pages$Exercises$ChordGuesserMsg,
+					$author$project$Exercises$ChordGuesserExercise$view(model.chordGuesserModel))
+				])) : A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$map,
+					$author$project$Pages$Exercises$ChordGuesserMsg,
+					$author$project$Exercises$ChordGuesserExercise$view(model.chordGuesserModel)),
 					A2(
 					$elm$html$Html$button,
 					_List_fromArray(
@@ -8947,12 +8930,8 @@ var $author$project$Pages$Exercises$view = function (model) {
 						]),
 					_List_fromArray(
 						[
-							$elm$html$Html$text('< Back')
-						])),
-					A2(
-					$elm$html$Html$map,
-					$author$project$Pages$Exercises$ChordGuesserMsg,
-					$author$project$Exercises$ChordGuesserExercise$view(model.chordGuesserModel))
+							$elm$html$Html$text('< Back to exercises')
+						]))
 				]));
 	} else {
 		return A2(
@@ -9148,9 +9127,6 @@ var $author$project$Pages$Register$SetPassword = function (a) {
 var $author$project$Pages$Register$SetRepeatPassword = function (a) {
 	return {$: 'SetRepeatPassword', a: a};
 };
-var $author$project$Pages$Register$SetUsername = function (a) {
-	return {$: 'SetUsername', a: a};
-};
 var $author$project$Pages$Register$Submit = {$: 'Submit'};
 var $elm$html$Html$Attributes$required = $elm$html$Html$Attributes$boolProperty('required');
 var $author$project$Pages$Register$view = function (model) {
@@ -9173,29 +9149,6 @@ var $author$project$Pages$Register$view = function (model) {
 				]),
 			_List_fromArray(
 				[
-					A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(
-							$elm$html$Html$label,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Username')
-								])),
-							A2(
-							$elm$html$Html$input,
-							_List_fromArray(
-								[
-									$elm$html$Html$Attributes$required(true),
-									$elm$html$Html$Attributes$type_('text'),
-									$elm$html$Html$Attributes$value(model.username),
-									$elm$html$Html$Events$onInput($author$project$Pages$Register$SetUsername)
-								]),
-							_List_Nil)
-						])),
 					A2(
 					$elm$html$Html$div,
 					_List_Nil,
@@ -9380,7 +9333,7 @@ var $author$project$Main$viewRoute = function (model) {
 									$elm$html$Html$a,
 									_List_fromArray(
 										[
-											$elm$html$Html$Attributes$href('/exercises')
+											$elm$html$Html$Attributes$href('/all-exercises')
 										]),
 									_List_fromArray(
 										[

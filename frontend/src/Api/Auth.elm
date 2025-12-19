@@ -23,8 +23,7 @@ type alias UserResponse =
 
 
 type alias User =
-    { username : String
-    , email : String
+    { email : String
     , firstname : String
     , lastname : String
     , createdAt : String
@@ -58,8 +57,7 @@ userResponseDecoder =
 
 userDecoder : Decode.Decoder User
 userDecoder =
-    Decode.map5 User
-        (Decode.field "username" Decode.string)
+    Decode.map4 User
         (Decode.field "email" Decode.string)
         (Decode.field "firstname" Decode.string)
         (Decode.field "lastname" Decode.string)

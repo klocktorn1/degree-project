@@ -5,7 +5,6 @@ const createTables = async () => {
     await db.query(`
       CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        username VARCHAR(255) NOT NULL UNIQUE,
         email VARCHAR(255) NOT NULL UNIQUE,
         firstname VARCHAR(255) NOT NULL,
         lastname VARCHAR(255) NOT NULL,
