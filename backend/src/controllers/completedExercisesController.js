@@ -11,7 +11,7 @@ const getAllCompletedExercises = async (req, res) => {
 
 // Get exercise result by user id
 const getCompletedExercise = async (req, res) => {
-    const userId = req.user.id
+  const userId = req.user.id
   try {
     const [rows] = await db.query(
       'SELECT * FROM completed_exercises WHERE user_id = ?',
@@ -30,18 +30,16 @@ const getCompletedExercise = async (req, res) => {
 
 // Create a new exercise result
 const createCompletedExercises = async (req, res) => {
-  const { exercise_id, difficulty, completed_at } = req.body;
+  const { sub_exercise_id, difficulty } = req.body;
   const userId = req.user.id
-  
-
 
   try {
     const [result] = await db.query(
-      'INSERT INTO completed_exercises (user_id, exercise_id, difficulty, completed_at) VALUES (?, ?, ?, ?)',
-      [userId, exercise_id, difficulty, completed_at || null]
+      'INSERT INTO completed_exercises (user_id, sub_exercise_id, difficulty) VALUES (?, ?, ?)',
+      [userId, sub_exercise_id, difficulty || null]
     );
 
-    res.json({ id: result.insertId });
+    return res.json({ ok: true, message: `Completed entry inserted` });
   } catch (err) {
     res.status(500).json({ error: `createCompletedExercises inside completedExercisesController: ${err.message}` })
   }

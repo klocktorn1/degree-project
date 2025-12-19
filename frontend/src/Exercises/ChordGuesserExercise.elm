@@ -6,6 +6,7 @@ import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
 import Http
+import Json.Encode as Encode
 import List.Extra as ListExtra
 import Random
 import Random.List as RandomList
@@ -27,6 +28,8 @@ type alias Model =
     , mistakes : Int
     , gameOver : Bool
     , subExercises : Maybe (List Exercises.SubExercise)
+    , chosenSubExercise : Maybe Exercises.SubExercise
+    , hasUserWon : Bool
     }
 
 
@@ -36,10 +39,12 @@ type Msg
     | RandomChordPicked Int
     | DifficultyChosen Difficulty
     | ChordChosen TheoryApi.Chord
-    | ChordGroupChosen (List String)
+    | ChordGroupChosen Exercises.SubExercise
     | Shuffled (List String)
     | ToggleNotesShuffle
+    | SendCompletion
     | GoBack
+    | CompletedExerciseEntryResponse (Result Http.Error Exercises.CompletedResponse)
 
 
 type Difficulty
@@ -48,8 +53,6 @@ type Difficulty
     | Hard
     | Advanced
     | Extreme
-
-
 
 
 init : () -> ( Model, Cmd Msg )
@@ -68,6 +71,8 @@ init _ =
       , mistakes = 0
       , gameOver = False
       , subExercises = Nothing
+      , hasUserWon = False
+      , chosenSubExercise = Nothing
       }
     , Cmd.none
     )
@@ -145,13 +150,18 @@ update msg model =
             in
             ( { model | chosenDifficulty = newDifficulty, rootNotes = setRootNotes newDifficulty, areNotesShuffled = areNotesShuffled }, Cmd.none )
 
-        ChordGroupChosen chordTypes ->
+        ChordGroupChosen subExercise ->
             let
                 fetchCount =
                     List.length model.rootNotes
             in
-            ( { model | isGameStarted = True, maybeChords = Just [], pendingFetches = fetchCount }
-            , TheoryApi.fetchChords model.rootNotes chordTypes GotChordData
+            ( { model
+                | isGameStarted = True
+                , maybeChords = Just []
+                , pendingFetches = fetchCount
+                , chosenSubExercise = Just subExercise
+              }
+            , TheoryApi.fetchChords model.rootNotes subExercise.endpoints GotChordData
             )
 
         Shuffled chordNotes ->
@@ -230,6 +240,32 @@ update msg model =
         GotSubExercises (Err error) ->
             ( model, Cmd.none )
 
+        SendCompletion ->
+            let
+                cmd =
+                    case model.chosenSubExercise of
+                        Just chosenSubExercise ->
+                            let
+                                body =
+                                    Encode.object
+                                        [ ( "sub_exercise_id", Encode.int chosenSubExercise.id )
+                                        , ( "difficulty", Encode.string "2" )
+                                        ]
+                            in
+                            Exercises.createCompletedExerciseEntry body CompletedExerciseEntryResponse
+
+                        Nothing ->
+                            Cmd.none
+            in
+            ( model, cmd )
+
+        CompletedExerciseEntryResponse (Ok response) ->
+            (model, Cmd.none)
+
+        CompletedExerciseEntryResponse (Err err) ->
+            (model, Cmd.none)
+        
+
 
 listOfDifficulities : List Difficulty
 listOfDifficulities =
@@ -263,14 +299,21 @@ isToggleShuffleDisabled difficulty =
 view : Model -> Html Msg
 view model =
     if model.isGameStarted then
-        Html.div []
-            [ Html.text "Chord guesser"
-            , viewRandomizedChordNotes model
-            , viewChords model
-            , Html.p [] [ Html.text <| "Score:  " ++ String.fromInt model.score ]
-            , Html.p [] [ Html.text <| "Mistakes:  " ++ String.fromInt model.mistakes ]
-            , Html.button [ HA.class "custom-button", HE.onClick GoBack ] [ Html.text "< Back" ]
-            ]
+        if model.hasUserWon then
+            Html.div []
+                [ Html.text "Completed "
+                , Html.button [ HE.onClick SendCompletion ] [ Html.text "Button to send completed SubExercise to DB" ]
+                ]
+
+        else
+            Html.div []
+                [ Html.text "Chord guesser"
+                , viewRandomizedChordNotes model
+                , viewChords model
+                , Html.p [] [ Html.text <| "Score:  " ++ String.fromInt model.score ++ "/10" ]
+                , Html.p [] [ Html.text <| "Mistakes:  " ++ String.fromInt model.mistakes ]
+                , Html.button [ HA.class "custom-button", HE.onClick GoBack ] [ Html.text "< Back" ]
+                ]
 
     else
         Html.section []
@@ -306,7 +349,7 @@ viewSubExercises model =
 
 viewSubExercise : Exercises.SubExercise -> Html Msg
 viewSubExercise subExercise =
-    Html.li [ HE.onClick (ChordGroupChosen subExercise.endpoints) ] [ Html.text subExercise.name ]
+    Html.li [ HE.onClick (ChordGroupChosen subExercise) ] [ Html.text subExercise.name ]
 
 
 viewDifficultyButtons : List Difficulty -> Html Msg
@@ -362,16 +405,6 @@ stringFromDifficulty difficulty =
 
         Extreme ->
             "Extreme"
-
-
-
--- rotateLeft : List a -> List a
--- rotateLeft list =
---     case list of
---         x :: xs ->
---             xs ++ [ x ]
---         [] ->
---             []
 
 
 viewChords : Model -> Html Msg
@@ -452,8 +485,6 @@ checkIfChordIsCorrect : Model -> ( Model, Cmd Msg )
 checkIfChordIsCorrect model =
     case ( model.maybeChosenChord, model.randomizedChord ) of
         ( Just chosenChord, Just randomizedChord ) ->
-            -- Compare by the chord identifier (the `chord` string) so presentation-only
-            -- reordering of `notes` doesn't affect correctness.
             if chosenChord.chord == randomizedChord.chord then
                 let
                     newScore =
@@ -461,8 +492,15 @@ checkIfChordIsCorrect model =
 
                     chordCount =
                         List.length (Maybe.withDefault [] model.maybeChords)
+
+                    updatedModel =
+                        if newScore == 3 then
+                            ( { model | hasUserWon = True }, Cmd.none )
+
+                        else
+                            ( { model | score = newScore }, randomizeChord chordCount )
                 in
-                ( { model | score = newScore }, randomizeChord chordCount )
+                updatedModel
 
             else
                 let

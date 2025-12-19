@@ -6317,7 +6317,9 @@ var $author$project$Exercises$ChordGuesserExercise$init = function (_v0) {
 		{
 			areNotesShuffled: false,
 			chosenDifficulty: $author$project$Exercises$ChordGuesserExercise$Easy,
+			chosenSubExercise: $elm$core$Maybe$Nothing,
 			gameOver: false,
+			hasUserWon: false,
 			isGameStarted: false,
 			lastRandomIndex: $elm$core$Maybe$Nothing,
 			maybeChords: $elm$core$Maybe$Nothing,
@@ -7162,15 +7164,15 @@ var $elm$http$Http$get = function (r) {
 		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
 var $elm$json$Json$Decode$list = _Json_decodeList;
-var $author$project$Db$Exercises$SubExercise = F3(
-	function (exerciseId, name, endpoints) {
-		return {endpoints: endpoints, exerciseId: exerciseId, name: name};
+var $author$project$Db$Exercises$SubExercise = F4(
+	function (id, exerciseId, name, endpoints) {
+		return {endpoints: endpoints, exerciseId: exerciseId, id: id, name: name};
 	});
 var $elm$json$Json$Decode$int = _Json_decodeInt;
-var $elm$json$Json$Decode$map3 = _Json_map3;
-var $author$project$Db$Exercises$subExerciseDecoder = A4(
-	$elm$json$Json$Decode$map3,
+var $author$project$Db$Exercises$subExerciseDecoder = A5(
+	$elm$json$Json$Decode$map4,
 	$author$project$Db$Exercises$SubExercise,
+	A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$int),
 	A2($elm$json$Json$Decode$field, 'exercise_id', $elm$json$Json$Decode$int),
 	A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string),
 	A2(
@@ -7189,6 +7191,9 @@ var $author$project$Db$Exercises$fetchSubExercises = F2(
 			});
 	});
 var $author$project$Exercises$ChordGuesserExercise$fetchSubExercisesCmd = A2($author$project$Db$Exercises$fetchSubExercises, '1', $author$project$Exercises$ChordGuesserExercise$GotSubExercises);
+var $author$project$Exercises$ChordGuesserExercise$CompletedExerciseEntryResponse = function (a) {
+	return {$: 'CompletedExerciseEntryResponse', a: a};
+};
 var $author$project$Exercises$ChordGuesserExercise$GotChordData = function (a) {
 	return {$: 'GotChordData', a: a};
 };
@@ -7344,11 +7349,16 @@ var $author$project$Exercises$ChordGuesserExercise$checkIfChordIsCorrect = funct
 			var newScore = model.score + 1;
 			var chordCount = $elm$core$List$length(
 				A2($elm$core$Maybe$withDefault, _List_Nil, model.maybeChords));
-			return _Utils_Tuple2(
+			var updatedModel = (newScore === 3) ? _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{hasUserWon: true}),
+				$elm$core$Platform$Cmd$none) : _Utils_Tuple2(
 				_Utils_update(
 					model,
 					{score: newScore}),
 				$author$project$Exercises$ChordGuesserExercise$randomizeChord(chordCount));
+			return updatedModel;
 		} else {
 			var newMistakes = model.mistakes + 1;
 			var setGameOver = (newMistakes >= 3) ? true : false;
@@ -7362,6 +7372,35 @@ var $author$project$Exercises$ChordGuesserExercise$checkIfChordIsCorrect = funct
 		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 	}
 };
+var $author$project$Db$Exercises$CompletedResponse = F2(
+	function (ok, message) {
+		return {message: message, ok: ok};
+	});
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $author$project$Db$Exercises$completedDecoder = A3(
+	$elm$json$Json$Decode$map2,
+	$author$project$Db$Exercises$CompletedResponse,
+	A2($elm$json$Json$Decode$field, 'ok', $elm$json$Json$Decode$bool),
+	A2($elm$json$Json$Decode$field, 'message', $elm$json$Json$Decode$string));
+var $elm$http$Http$jsonBody = function (value) {
+	return A2(
+		_Http_pair,
+		'application/json',
+		A2($elm$json$Json$Encode$encode, 0, value));
+};
+var $author$project$Db$Exercises$createCompletedExerciseEntry = F2(
+	function (body, toMsg) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(body),
+				expect: A2($elm$http$Http$expectJson, toMsg, $author$project$Db$Exercises$completedDecoder),
+				headers: _List_Nil,
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: $author$project$Db$Exercises$baseUrl + '/completed-exercises'
+			});
+	});
 var $author$project$Db$TheoryApi$baseUrl = 'http://localhost:5000/api/v1';
 var $author$project$Db$TheoryApi$Chord = F5(
 	function (chord, root, formula, degrees, notes) {
@@ -7410,7 +7449,21 @@ var $author$project$Db$TheoryApi$fetchChords = F3(
 					rootNotes));
 		}
 	});
+var $elm$json$Json$Encode$int = _Json_wrap;
 var $elm$core$Basics$not = _Basics_not;
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
 var $author$project$Exercises$ChordGuesserExercise$defaultChord = {chord: 'No chord found', degrees: _List_Nil, formula: _List_Nil, notes: _List_Nil, root: ''};
 var $elm$core$List$drop = F2(
 	function (n, list) {
@@ -7561,6 +7614,7 @@ var $author$project$Exercises$ChordGuesserExercise$shuffleNotesInChord = F2(
 			$author$project$Exercises$ChordGuesserExercise$Shuffled,
 			$elm_community$random_extra$Random$List$shuffle(notes)) : $elm$core$Platform$Cmd$none;
 	});
+var $elm$json$Json$Encode$string = _Json_wrap;
 var $author$project$Exercises$ChordGuesserExercise$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -7618,17 +7672,18 @@ var $author$project$Exercises$ChordGuesserExercise$update = F2(
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'ChordGroupChosen':
-				var chordTypes = msg.a;
+				var subExercise = msg.a;
 				var fetchCount = $elm$core$List$length(model.rootNotes);
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
+							chosenSubExercise: $elm$core$Maybe$Just(subExercise),
 							isGameStarted: true,
 							maybeChords: $elm$core$Maybe$Just(_List_Nil),
 							pendingFetches: fetchCount
 						}),
-					A3($author$project$Db$TheoryApi$fetchChords, model.rootNotes, chordTypes, $author$project$Exercises$ChordGuesserExercise$GotChordData));
+					A3($author$project$Db$TheoryApi$fetchChords, model.rootNotes, subExercise.endpoints, $author$project$Exercises$ChordGuesserExercise$GotChordData));
 			case 'Shuffled':
 				var chordNotes = msg.a;
 				return _Utils_Tuple2(
@@ -7692,7 +7747,7 @@ var $author$project$Exercises$ChordGuesserExercise$update = F2(
 					{gameOver: false, isGameStarted: false, maybeChosenChord: $elm$core$Maybe$Nothing, mistakes: 0, score: 0});
 				var _v4 = A2($elm$core$Debug$log, 'hello', updatedModel);
 				return _Utils_Tuple2(updatedModel, $elm$core$Platform$Cmd$none);
-			default:
+			case 'GotSubExercises':
 				if (msg.a.$ === 'Ok') {
 					var result = msg.a.a;
 					return _Utils_Tuple2(
@@ -7704,6 +7759,35 @@ var $author$project$Exercises$ChordGuesserExercise$update = F2(
 						$elm$core$Platform$Cmd$none);
 				} else {
 					var error = msg.a.a;
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'SendCompletion':
+				var cmd = function () {
+					var _v5 = model.chosenSubExercise;
+					if (_v5.$ === 'Just') {
+						var chosenSubExercise = _v5.a;
+						var body = $elm$json$Json$Encode$object(
+							_List_fromArray(
+								[
+									_Utils_Tuple2(
+									'sub_exercise_id',
+									$elm$json$Json$Encode$int(chosenSubExercise.id)),
+									_Utils_Tuple2(
+									'difficulty',
+									$elm$json$Json$Encode$string('2'))
+								]));
+						return A2($author$project$Db$Exercises$createCompletedExerciseEntry, body, $author$project$Exercises$ChordGuesserExercise$CompletedExerciseEntryResponse);
+					} else {
+						return $elm$core$Platform$Cmd$none;
+					}
+				}();
+				return _Utils_Tuple2(model, cmd);
+			default:
+				if (msg.a.$ === 'Ok') {
+					var response = msg.a.a;
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				} else {
+					var err = msg.a.a;
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
 		}
@@ -7759,17 +7843,10 @@ var $author$project$Pages$Login$httpErrorToString = function (httpError) {
 			return 'Bad body: ' + msg;
 	}
 };
-var $elm$http$Http$jsonBody = function (value) {
-	return A2(
-		_Http_pair,
-		'application/json',
-		A2($elm$json$Json$Encode$encode, 0, value));
-};
 var $author$project$Db$Auth$LoginResponse = F2(
 	function (ok, message) {
 		return {message: message, ok: ok};
 	});
-var $elm$json$Json$Decode$bool = _Json_decodeBool;
 var $author$project$Db$Auth$loginDecoder = A3(
 	$elm$json$Json$Decode$map2,
 	$author$project$Db$Auth$LoginResponse,
@@ -7788,20 +7865,6 @@ var $author$project$Db$Auth$login = F2(
 				url: $author$project$Db$Auth$baseUrl + '/auth/login'
 			});
 	});
-var $elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_v0, obj) {
-					var k = _v0.a;
-					var v = _v0.b;
-					return A3(_Json_addField, k, v, obj);
-				}),
-			_Json_emptyObject(_Utils_Tuple0),
-			pairs));
-};
-var $elm$json$Json$Encode$string = _Json_wrap;
 var $author$project$Pages$Login$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -8651,6 +8714,7 @@ var $author$project$Pages$Exercises$SelectGame = function (a) {
 };
 var $elm$html$Html$h2 = _VirtualDom_node('h2');
 var $author$project$Exercises$ChordGuesserExercise$GoBack = {$: 'GoBack'};
+var $author$project$Exercises$ChordGuesserExercise$SendCompletion = {$: 'SendCompletion'};
 var $author$project$Exercises$ChordGuesserExercise$ToggleNotesShuffle = {$: 'ToggleNotesShuffle'};
 var $elm$json$Json$Encode$bool = _Json_wrap;
 var $elm$html$Html$Attributes$boolProperty = F2(
@@ -8796,7 +8860,7 @@ var $author$project$Exercises$ChordGuesserExercise$viewSubExercise = function (s
 		_List_fromArray(
 			[
 				$elm$html$Html$Events$onClick(
-				$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(subExercise.endpoints))
+				$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(subExercise))
 			]),
 		_List_fromArray(
 			[
@@ -8822,7 +8886,23 @@ var $author$project$Exercises$ChordGuesserExercise$viewSubExercises = function (
 	}
 };
 var $author$project$Exercises$ChordGuesserExercise$view = function (model) {
-	return model.isGameStarted ? A2(
+	return model.isGameStarted ? (model.hasUserWon ? A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$text('Completed '),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick($author$project$Exercises$ChordGuesserExercise$SendCompletion)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Button to send completed SubExercise to DB')
+					]))
+			])) : A2(
 		$elm$html$Html$div,
 		_List_Nil,
 		_List_fromArray(
@@ -8836,7 +8916,7 @@ var $author$project$Exercises$ChordGuesserExercise$view = function (model) {
 				_List_fromArray(
 					[
 						$elm$html$Html$text(
-						'Score:  ' + $elm$core$String$fromInt(model.score))
+						'Score:  ' + ($elm$core$String$fromInt(model.score) + '/10'))
 					])),
 				A2(
 				$elm$html$Html$p,
@@ -8857,7 +8937,7 @@ var $author$project$Exercises$ChordGuesserExercise$view = function (model) {
 					[
 						$elm$html$Html$text('< Back')
 					]))
-			])) : A2(
+			]))) : A2(
 		$elm$html$Html$section,
 		_List_Nil,
 		_List_fromArray(
