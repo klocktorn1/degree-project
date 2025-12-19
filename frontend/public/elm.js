@@ -5466,7 +5466,7 @@ var $elm$core$Basics$composeR = F3(
 		return g(
 			f(x));
 	});
-var $author$project$Api$Auth$baseUrl = 'http://localhost:3000';
+var $author$project$Db$Auth$baseUrl = 'http://localhost:3000';
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
 		return {$: 'BadStatus_', a: a, b: b};
@@ -6245,7 +6245,7 @@ var $elm$http$Http$request = function (r) {
 		$elm$http$Http$Request(
 			{allowCookiesFromOtherDomains: false, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
 };
-var $author$project$Api$Auth$UserResponse = function (user) {
+var $author$project$Db$Auth$UserResponse = function (user) {
 	return {user: user};
 };
 var $elm$json$Json$Decode$field = _Json_decodeField;
@@ -6258,42 +6258,42 @@ var $elm$json$Json$Decode$maybe = function (decoder) {
 				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
 			]));
 };
-var $author$project$Api$Auth$User = F4(
+var $author$project$Db$Auth$User = F4(
 	function (email, firstname, lastname, createdAt) {
 		return {createdAt: createdAt, email: email, firstname: firstname, lastname: lastname};
 	});
 var $elm$json$Json$Decode$map4 = _Json_map4;
 var $elm$json$Json$Decode$string = _Json_decodeString;
-var $author$project$Api$Auth$userDecoder = A5(
+var $author$project$Db$Auth$userDecoder = A5(
 	$elm$json$Json$Decode$map4,
-	$author$project$Api$Auth$User,
+	$author$project$Db$Auth$User,
 	A2($elm$json$Json$Decode$field, 'email', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'firstname', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'lastname', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'createdAt', $elm$json$Json$Decode$string));
-var $author$project$Api$Auth$userResponseDecoder = A2(
+var $author$project$Db$Auth$userResponseDecoder = A2(
 	$elm$json$Json$Decode$map,
-	$author$project$Api$Auth$UserResponse,
+	$author$project$Db$Auth$UserResponse,
 	A2(
 		$elm$json$Json$Decode$field,
 		'user',
-		$elm$json$Json$Decode$maybe($author$project$Api$Auth$userDecoder)));
-var $author$project$Api$Auth$getMe = function (toMsg) {
+		$elm$json$Json$Decode$maybe($author$project$Db$Auth$userDecoder)));
+var $author$project$Db$Auth$getMe = function (toMsg) {
 	return $elm$http$Http$request(
 		{
 			body: $elm$http$Http$emptyBody,
-			expect: A2($elm$http$Http$expectJson, toMsg, $author$project$Api$Auth$userResponseDecoder),
+			expect: A2($elm$http$Http$expectJson, toMsg, $author$project$Db$Auth$userResponseDecoder),
 			headers: _List_Nil,
 			method: 'GET',
 			timeout: $elm$core$Maybe$Nothing,
 			tracker: $elm$core$Maybe$Nothing,
-			url: $author$project$Api$Auth$baseUrl + '/users/me'
+			url: $author$project$Db$Auth$baseUrl + '/users/me'
 		});
 };
 var $author$project$Exercises$Stopwatch$init = {running: false, stopwatchInMs: 0};
 var $author$project$Pages$Dashboard$init = _Utils_Tuple2(
 	{user: $elm$core$Maybe$Nothing},
-	$author$project$Api$Auth$getMe($author$project$Pages$Dashboard$GotUser));
+	$author$project$Db$Auth$getMe($author$project$Pages$Dashboard$GotUser));
 var $author$project$Pages$Exercises$ChordGuesserMsg = function (a) {
 	return {$: 'ChordGuesserMsg', a: a};
 };
@@ -6315,18 +6315,25 @@ var $author$project$Exercises$ChordGuesserExercise$init = function (_v0) {
 			randomizedChordNotes: $elm$core$Maybe$Nothing,
 			rootNotes: _List_fromArray(
 				['C', 'G', 'F']),
-			score: 0
+			score: 0,
+			subExercises: $elm$core$Maybe$Nothing
 		},
 		$elm$core$Platform$Cmd$none);
 };
+var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Platform$Cmd$map = _Platform_map;
 var $author$project$Pages$Exercises$init = function (flags) {
 	var _v0 = $author$project$Exercises$ChordGuesserExercise$init(flags);
 	var chordModel = _v0.a;
 	var chordCmd = _v0.b;
+	var _v1 = A2($elm$core$Debug$log, 'ChordGuesserExercise init called', flags);
 	return _Utils_Tuple2(
 		{chordGuesserModel: chordModel, currentGame: $elm$core$Maybe$Nothing},
-		A2($elm$core$Platform$Cmd$map, $author$project$Pages$Exercises$ChordGuesserMsg, chordCmd));
+		$elm$core$Platform$Cmd$batch(
+			_List_fromArray(
+				[
+					A2($elm$core$Platform$Cmd$map, $author$project$Pages$Exercises$ChordGuesserMsg, chordCmd)
+				])));
 };
 var $author$project$Pages$Login$init = _Utils_Tuple2(
 	{email: '', error: $elm$core$Maybe$Nothing, isSubmitting: false, password: ''},
@@ -6593,14 +6600,7 @@ var $author$project$Main$init = F3(
 			$elm$core$Maybe$withDefault,
 			$author$project$Main$NotFound,
 			A2($elm$url$Url$Parser$parse, $author$project$Main$routeParser, url));
-		var exercisesFetchOnStart = function () {
-			if (route.$ === 'Exercises') {
-				return $elm$core$Platform$Cmd$none;
-			} else {
-				return $elm$core$Platform$Cmd$none;
-			}
-		}();
-		var checkLoginCmd = $author$project$Api$Auth$getMe(
+		var checkLoginCmd = $author$project$Db$Auth$getMe(
 			A2($elm$core$Basics$composeR, $author$project$Pages$Dashboard$GotUser, $author$project$Main$DashboardMsg));
 		var _v0 = $author$project$Pages$Register$init;
 		var registerModel = _v0.a;
@@ -6632,7 +6632,6 @@ var $author$project$Main$init = F3(
 				_List_fromArray(
 					[
 						A2($elm$core$Platform$Cmd$map, $author$project$Main$ExercisesMsg, exercisesCmd),
-						exercisesFetchOnStart,
 						A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, loginCmd),
 						A2($elm$core$Platform$Cmd$map, $author$project$Main$RegisterMsg, registerCmd),
 						A2($elm$core$Platform$Cmd$map, $author$project$Main$DashboardMsg, dashboardCmd),
@@ -6975,18 +6974,18 @@ var $elm$http$Http$post = function (r) {
 	return $elm$http$Http$request(
 		{body: r.body, expect: r.expect, headers: _List_Nil, method: 'POST', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
-var $author$project$Api$Auth$logout = function (toMsg) {
+var $author$project$Db$Auth$logout = function (toMsg) {
 	return $elm$http$Http$post(
 		{
 			body: $elm$http$Http$emptyBody,
 			expect: $elm$http$Http$expectWhatever(toMsg),
-			url: $author$project$Api$Auth$baseUrl + '/auth/logout'
+			url: $author$project$Db$Auth$baseUrl + '/auth/logout'
 		});
 };
 var $author$project$Main$AuthRefreshed = function (a) {
 	return {$: 'AuthRefreshed', a: a};
 };
-var $author$project$Api$Auth$refreshToken = function (toMsg) {
+var $author$project$Db$Auth$refreshToken = function (toMsg) {
 	return $elm$http$Http$request(
 		{
 			body: $elm$http$Http$emptyBody,
@@ -6995,7 +6994,7 @@ var $author$project$Api$Auth$refreshToken = function (toMsg) {
 			method: 'POST',
 			timeout: $elm$core$Maybe$Nothing,
 			tracker: $elm$core$Maybe$Nothing,
-			url: $author$project$Api$Auth$baseUrl + '/auth/refresh'
+			url: $author$project$Db$Auth$baseUrl + '/auth/refresh'
 		});
 };
 var $author$project$Main$onProtectedCallFail = F2(
@@ -7020,7 +7019,7 @@ var $author$project$Main$onProtectedCallFail = F2(
 							_Utils_Tuple2(retry, model.url))
 					}
 				}),
-			$author$project$Api$Auth$refreshToken($author$project$Main$AuthRefreshed));
+			$author$project$Db$Auth$refreshToken($author$project$Main$AuthRefreshed));
 	});
 var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
 var $elm$core$Tuple$second = function (_v0) {
@@ -7116,6 +7115,43 @@ var $author$project$Pages$Dashboard$update = F2(
 			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
+var $author$project$Pages$Exercises$ChordGuesser = {$: 'ChordGuesser'};
+var $author$project$Exercises$ChordGuesserExercise$GotSubExercises = function (a) {
+	return {$: 'GotSubExercises', a: a};
+};
+var $author$project$Db$Exercises$baseUrl = 'http://localhost:3000';
+var $elm$http$Http$get = function (r) {
+	return $elm$http$Http$request(
+		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
+};
+var $elm$json$Json$Decode$list = _Json_decodeList;
+var $author$project$Db$Exercises$SubExercise = F3(
+	function (exerciseId, name, endpoints) {
+		return {endpoints: endpoints, exerciseId: exerciseId, name: name};
+	});
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $elm$json$Json$Decode$map3 = _Json_map3;
+var $author$project$Db$Exercises$subExerciseDecoder = A4(
+	$elm$json$Json$Decode$map3,
+	$author$project$Db$Exercises$SubExercise,
+	A2($elm$json$Json$Decode$field, 'exercise_id', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string),
+	A2(
+		$elm$json$Json$Decode$field,
+		'endpoints',
+		$elm$json$Json$Decode$list($elm$json$Json$Decode$string)));
+var $author$project$Db$Exercises$fetchSubExercises = F2(
+	function (exerciseId, toMsg) {
+		return $elm$http$Http$get(
+			{
+				expect: A2(
+					$elm$http$Http$expectJson,
+					toMsg,
+					$elm$json$Json$Decode$list($author$project$Db$Exercises$subExerciseDecoder)),
+				url: $author$project$Db$Exercises$baseUrl + ('/sub-exercises/exercise-id/' + exerciseId)
+			});
+	});
+var $author$project$Exercises$ChordGuesserExercise$fetchSubExercisesCmd = A2($author$project$Db$Exercises$fetchSubExercises, '1', $author$project$Exercises$ChordGuesserExercise$GotSubExercises);
 var $author$project$Exercises$ChordGuesserExercise$GotChordData = function (a) {
 	return {$: 'GotChordData', a: a};
 };
@@ -7289,17 +7325,15 @@ var $author$project$Exercises$ChordGuesserExercise$checkIfChordIsCorrect = funct
 		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 	}
 };
-var $author$project$Api$TheoryApi$baseUrl = 'http://localhost:5000/api/v1';
-var $author$project$Api$TheoryApi$Chord = F5(
+var $author$project$Db$TheoryApi$baseUrl = 'http://localhost:5000/api/v1';
+var $author$project$Db$TheoryApi$Chord = F5(
 	function (chord, root, formula, degrees, notes) {
 		return {chord: chord, degrees: degrees, formula: formula, notes: notes, root: root};
 	});
-var $elm$json$Json$Decode$int = _Json_decodeInt;
-var $elm$json$Json$Decode$list = _Json_decodeList;
 var $elm$json$Json$Decode$map5 = _Json_map5;
-var $author$project$Api$TheoryApi$chordDecoder = A6(
+var $author$project$Db$TheoryApi$chordDecoder = A6(
 	$elm$json$Json$Decode$map5,
-	$author$project$Api$TheoryApi$Chord,
+	$author$project$Db$TheoryApi$Chord,
 	A2($elm$json$Json$Decode$field, 'chord', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'root', $elm$json$Json$Decode$string),
 	A2(
@@ -7314,18 +7348,14 @@ var $author$project$Api$TheoryApi$chordDecoder = A6(
 		$elm$json$Json$Decode$field,
 		'notes',
 		$elm$json$Json$Decode$list($elm$json$Json$Decode$string)));
-var $author$project$Api$TheoryApi$chordListDecoder = $elm$json$Json$Decode$list($author$project$Api$TheoryApi$chordDecoder);
-var $elm$http$Http$get = function (r) {
-	return $elm$http$Http$request(
-		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
-};
-var $author$project$Api$TheoryApi$parseChordTypes = function (chordTypes) {
+var $author$project$Db$TheoryApi$chordListDecoder = $elm$json$Json$Decode$list($author$project$Db$TheoryApi$chordDecoder);
+var $author$project$Db$TheoryApi$parseChordTypes = function (chordTypes) {
 	return function (s) {
 		return '?types=' + s;
 	}(
 		A2($elm$core$String$join, '&types=', chordTypes));
 };
-var $author$project$Api$TheoryApi$fetchChords = F3(
+var $author$project$Db$TheoryApi$fetchChords = F3(
 	function (rootNotes, chordTypes, toMsg) {
 		if (!rootNotes.b) {
 			return $elm$core$Platform$Cmd$none;
@@ -7336,14 +7366,13 @@ var $author$project$Api$TheoryApi$fetchChords = F3(
 					function (root) {
 						return $elm$http$Http$get(
 							{
-								expect: A2($elm$http$Http$expectJson, toMsg, $author$project$Api$TheoryApi$chordListDecoder),
-								url: $author$project$Api$TheoryApi$baseUrl + ('/chords/' + (root + $author$project$Api$TheoryApi$parseChordTypes(chordTypes)))
+								expect: A2($elm$http$Http$expectJson, toMsg, $author$project$Db$TheoryApi$chordListDecoder),
+								url: $author$project$Db$TheoryApi$baseUrl + ('/chords/' + (root + $author$project$Db$TheoryApi$parseChordTypes(chordTypes)))
 							});
 					},
 					rootNotes));
 		}
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Basics$not = _Basics_not;
 var $author$project$Exercises$ChordGuesserExercise$defaultChord = {chord: 'No chord found', degrees: _List_Nil, formula: _List_Nil, notes: _List_Nil, root: ''};
 var $elm$core$List$drop = F2(
@@ -7562,7 +7591,7 @@ var $author$project$Exercises$ChordGuesserExercise$update = F2(
 							maybeChords: $elm$core$Maybe$Just(_List_Nil),
 							pendingFetches: fetchCount
 						}),
-					A3($author$project$Api$TheoryApi$fetchChords, model.rootNotes, chordTypes, $author$project$Exercises$ChordGuesserExercise$GotChordData));
+					A3($author$project$Db$TheoryApi$fetchChords, model.rootNotes, chordTypes, $author$project$Exercises$ChordGuesserExercise$GotChordData));
 			case 'Shuffled':
 				var chordNotes = msg.a;
 				return _Utils_Tuple2(
@@ -7620,20 +7649,34 @@ var $author$project$Exercises$ChordGuesserExercise$update = F2(
 				var updatedModel = _v3.a;
 				var cmd = _v3.b;
 				return _Utils_Tuple2(updatedModel, cmd);
-			default:
+			case 'GoBack':
 				var updatedModel = _Utils_update(
 					model,
 					{gameOver: false, isGameStarted: false, maybeChosenChord: $elm$core$Maybe$Nothing, mistakes: 0, score: 0});
 				var _v4 = A2($elm$core$Debug$log, 'hello', updatedModel);
 				return _Utils_Tuple2(updatedModel, $elm$core$Platform$Cmd$none);
+			default:
+				if (msg.a.$ === 'Ok') {
+					var result = msg.a.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								subExercises: $elm$core$Maybe$Just(result)
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					var error = msg.a.a;
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
 		}
 	});
 var $author$project$Pages$Exercises$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
 			case 'ChordGuesserMsg':
-				var sub = msg.a;
-				var _v1 = A2($author$project$Exercises$ChordGuesserExercise$update, sub, model.chordGuesserModel);
+				var subMsg = msg.a;
+				var _v1 = A2($author$project$Exercises$ChordGuesserExercise$update, subMsg, model.chordGuesserModel);
 				var updated = _v1.a;
 				var cmd = _v1.b;
 				return _Utils_Tuple2(
@@ -7642,14 +7685,15 @@ var $author$project$Pages$Exercises$update = F2(
 						{chordGuesserModel: updated}),
 					A2($elm$core$Platform$Cmd$map, $author$project$Pages$Exercises$ChordGuesserMsg, cmd));
 			case 'SelectGame':
-				var game = msg.a;
+				var _v2 = msg.a;
+				var fetchCmd = $author$project$Exercises$ChordGuesserExercise$fetchSubExercisesCmd;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							currentGame: $elm$core$Maybe$Just(game)
+							currentGame: $elm$core$Maybe$Just($author$project$Pages$Exercises$ChordGuesser)
 						}),
-					$elm$core$Platform$Cmd$none);
+					A2($elm$core$Platform$Cmd$map, $author$project$Pages$Exercises$ChordGuesserMsg, fetchCmd));
 			default:
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -7684,27 +7728,27 @@ var $elm$http$Http$jsonBody = function (value) {
 		'application/json',
 		A2($elm$json$Json$Encode$encode, 0, value));
 };
-var $author$project$Api$Auth$LoginResponse = F2(
+var $author$project$Db$Auth$LoginResponse = F2(
 	function (ok, message) {
 		return {message: message, ok: ok};
 	});
 var $elm$json$Json$Decode$bool = _Json_decodeBool;
-var $author$project$Api$Auth$loginDecoder = A3(
+var $author$project$Db$Auth$loginDecoder = A3(
 	$elm$json$Json$Decode$map2,
-	$author$project$Api$Auth$LoginResponse,
+	$author$project$Db$Auth$LoginResponse,
 	A2($elm$json$Json$Decode$field, 'ok', $elm$json$Json$Decode$bool),
 	A2($elm$json$Json$Decode$field, 'message', $elm$json$Json$Decode$string));
-var $author$project$Api$Auth$login = F2(
+var $author$project$Db$Auth$login = F2(
 	function (body, toMsg) {
 		return $elm$http$Http$request(
 			{
 				body: $elm$http$Http$jsonBody(body),
-				expect: A2($elm$http$Http$expectJson, toMsg, $author$project$Api$Auth$loginDecoder),
+				expect: A2($elm$http$Http$expectJson, toMsg, $author$project$Db$Auth$loginDecoder),
 				headers: _List_Nil,
 				method: 'POST',
 				timeout: $elm$core$Maybe$Nothing,
 				tracker: $elm$core$Maybe$Nothing,
-				url: $author$project$Api$Auth$baseUrl + '/auth/login'
+				url: $author$project$Db$Auth$baseUrl + '/auth/login'
 			});
 	});
 var $elm$json$Json$Encode$object = function (pairs) {
@@ -7756,7 +7800,7 @@ var $author$project$Pages$Login$update = F2(
 						_Utils_update(
 							model,
 							{error: $elm$core$Maybe$Nothing, isSubmitting: true}),
-						A2($author$project$Api$Auth$login, body, $author$project$Pages$Login$LoginResult));
+						A2($author$project$Db$Auth$login, body, $author$project$Pages$Login$LoginResult));
 				}
 			default:
 				if (msg.a.$ === 'Ok') {
@@ -7808,26 +7852,26 @@ var $author$project$Pages$Register$httpErrorToString = function (httpError) {
 	}
 };
 var $elm$core$Basics$neq = _Utils_notEqual;
-var $author$project$Api$Auth$RegisterResponse = F2(
+var $author$project$Db$Auth$RegisterResponse = F2(
 	function (ok, message) {
 		return {message: message, ok: ok};
 	});
-var $author$project$Api$Auth$registerDecoder = A3(
+var $author$project$Db$Auth$registerDecoder = A3(
 	$elm$json$Json$Decode$map2,
-	$author$project$Api$Auth$RegisterResponse,
+	$author$project$Db$Auth$RegisterResponse,
 	A2($elm$json$Json$Decode$field, 'ok', $elm$json$Json$Decode$bool),
 	A2($elm$json$Json$Decode$field, 'message', $elm$json$Json$Decode$string));
-var $author$project$Api$Auth$register = F2(
+var $author$project$Db$Auth$register = F2(
 	function (body, toMsg) {
 		return $elm$http$Http$request(
 			{
 				body: $elm$http$Http$jsonBody(body),
-				expect: A2($elm$http$Http$expectJson, toMsg, $author$project$Api$Auth$registerDecoder),
+				expect: A2($elm$http$Http$expectJson, toMsg, $author$project$Db$Auth$registerDecoder),
 				headers: _List_Nil,
 				method: 'POST',
 				timeout: $elm$core$Maybe$Nothing,
 				tracker: $elm$core$Maybe$Nothing,
-				url: $author$project$Api$Auth$baseUrl + '/auth/register'
+				url: $author$project$Db$Auth$baseUrl + '/auth/register'
 			});
 	});
 var $author$project$Pages$Register$update = F2(
@@ -7909,7 +7953,7 @@ var $author$project$Pages$Register$update = F2(
 							_Utils_update(
 								model,
 								{error: $elm$core$Maybe$Nothing, isSubmitting: true}),
-							A2($author$project$Api$Auth$register, body, $author$project$Pages$Register$RegisterResult));
+							A2($author$project$Db$Auth$register, body, $author$project$Pages$Register$RegisterResult));
 					}
 				}
 			default:
@@ -8027,7 +8071,7 @@ var $author$project$Main$update = F2(
 								$elm$core$Platform$Cmd$batch(
 									_List_fromArray(
 										[
-											$author$project$Api$Auth$getMe(
+											$author$project$Db$Auth$getMe(
 											A2($elm$core$Basics$composeR, $author$project$Pages$Dashboard$GotUser, $author$project$Main$DashboardMsg)),
 											A2($elm$browser$Browser$Navigation$pushUrl, model.key, '/dashboard'),
 											A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd)
@@ -8112,7 +8156,7 @@ var $author$project$Main$update = F2(
 							$elm$core$Platform$Cmd$batch(
 								_List_fromArray(
 									[
-										$author$project$Api$Auth$getMe(
+										$author$project$Db$Auth$getMe(
 										A2($elm$core$Basics$composeR, $author$project$Pages$Dashboard$GotUser, $author$project$Main$DashboardMsg)),
 										A2(
 										$elm$browser$Browser$Navigation$pushUrl,
@@ -8148,7 +8192,7 @@ var $author$project$Main$update = F2(
 						_List_fromArray(
 							[
 								A2($elm$browser$Browser$Navigation$pushUrl, model.key, '/login'),
-								$author$project$Api$Auth$logout(
+								$author$project$Db$Auth$logout(
 								function (_v20) {
 									return $author$project$Main$LogoutCompleted;
 								})
@@ -8502,14 +8546,10 @@ var $author$project$Pages$Dashboard$view = F2(
 				]));
 	});
 var $author$project$Pages$Exercises$BackToList = {$: 'BackToList'};
-var $author$project$Pages$Exercises$ChordGuesser = {$: 'ChordGuesser'};
 var $author$project$Pages$Exercises$SelectGame = function (a) {
 	return {$: 'SelectGame', a: a};
 };
 var $elm$html$Html$h2 = _VirtualDom_node('h2');
-var $author$project$Exercises$ChordGuesserExercise$ChordGroupChosen = function (a) {
-	return {$: 'ChordGroupChosen', a: a};
-};
 var $author$project$Exercises$ChordGuesserExercise$GoBack = {$: 'GoBack'};
 var $author$project$Exercises$ChordGuesserExercise$ToggleNotesShuffle = {$: 'ToggleNotesShuffle'};
 var $elm$json$Json$Encode$bool = _Json_wrap;
@@ -8647,6 +8687,40 @@ var $author$project$Exercises$ChordGuesserExercise$viewRandomizedChordNotes = fu
 				]));
 	}
 };
+var $author$project$Exercises$ChordGuesserExercise$ChordGroupChosen = function (a) {
+	return {$: 'ChordGroupChosen', a: a};
+};
+var $author$project$Exercises$ChordGuesserExercise$viewSubExercise = function (subExercise) {
+	return A2(
+		$elm$html$Html$li,
+		_List_fromArray(
+			[
+				$elm$html$Html$Events$onClick(
+				$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(subExercise.endpoints))
+			]),
+		_List_fromArray(
+			[
+				$elm$html$Html$text(subExercise.name)
+			]));
+};
+var $author$project$Exercises$ChordGuesserExercise$viewSubExercises = function (model) {
+	var _v0 = model.subExercises;
+	if (_v0.$ === 'Just') {
+		var subExercises = _v0.a;
+		return A2(
+			$elm$html$Html$ul,
+			_List_Nil,
+			A2($elm$core$List$map, $author$project$Exercises$ChordGuesserExercise$viewSubExercise, subExercises));
+	} else {
+		return A2(
+			$elm$html$Html$p,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text('Error')
+				]));
+	}
+};
 var $author$project$Exercises$ChordGuesserExercise$view = function (model) {
 	return model.isGameStarted ? A2(
 		$elm$html$Html$div,
@@ -8734,168 +8808,7 @@ var $author$project$Exercises$ChordGuesserExercise$view = function (model) {
 				_List_Nil,
 				_List_fromArray(
 					[
-						A2(
-						$elm$html$Html$ul,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$li,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
-											_List_fromArray(
-												['major', 'minor'])))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Major and minor')
-									])),
-								A2(
-								$elm$html$Html$li,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
-											_List_fromArray(
-												['dom7', 'maj7', 'minor7'])))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Dom7, Maj7 and Minor7')
-									])),
-								A2(
-								$elm$html$Html$li,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
-											_List_fromArray(
-												['diminished', 'dim7', 'minor7flat5'])))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Dim, dim7 and m7b5')
-									])),
-								A2(
-								$elm$html$Html$li,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
-											_List_fromArray(
-												['augmented', 'aug7', 'maj7sharp5'])))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Aug, aug7 and maj7#5')
-									])),
-								A2(
-								$elm$html$Html$li,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
-											_List_fromArray(
-												['sus2', 'sus4'])))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Sus2 and sus4')
-									])),
-								A2(
-								$elm$html$Html$li,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
-											_List_fromArray(
-												['major6', 'minor6'])))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('6 and m6')
-									])),
-								A2(
-								$elm$html$Html$li,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
-											_List_fromArray(
-												['dom9', 'maj9', 'minor9'])))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Dom9, maj9 and minor9')
-									])),
-								A2(
-								$elm$html$Html$li,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
-											_List_fromArray(
-												['dom11', 'maj11', 'minor11'])))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Dom11, maj11 and minor11')
-									])),
-								A2(
-								$elm$html$Html$li,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
-											_List_fromArray(
-												['dom13', 'maj13', 'minor13'])))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Dom13, maj13 and minor13')
-									])),
-								A2(
-								$elm$html$Html$li,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
-											_List_fromArray(
-												['dom7flat9', 'dom7sharp9', 'dom7sharp11'])))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('7b9, 7#9 and 7#11')
-									])),
-								A2(
-								$elm$html$Html$li,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
-											_List_fromArray(
-												['dom7flat13', 'dom7sharp5', 'dom7flat5'])))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('7b13, 7#5 and 7b5')
-									])),
-								A2(
-								$elm$html$Html$li,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$Exercises$ChordGuesserExercise$ChordGroupChosen(
-											_List_fromArray(
-												['sus13', 'minorMaj7', 'dim9'])))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('sus13, mMaj7 and dim9')
-									]))
-							]))
+						$author$project$Exercises$ChordGuesserExercise$viewSubExercises(model)
 					]))
 			]));
 };

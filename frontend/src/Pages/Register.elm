@@ -1,11 +1,10 @@
 module Pages.Register exposing (..)
 
-import Api.Auth as Auth
+import Db.Auth as Auth
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
 import Http
-import Json.Decode as Decode
 import Json.Encode as Encode
 import Platform.Cmd exposing (Cmd)
 import String

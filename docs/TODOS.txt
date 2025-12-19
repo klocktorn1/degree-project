@@ -17,10 +17,56 @@ MyStrongP@ssw0rd123
 
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFzZGFzZGFzZGFzZDZAZ21haWwuY29tIiwicGFzc3dvcmQiOiJhc2QxMjMiLCJpYXQiOjE3NjQ4NTU5MDYsImV4cCI6MTc2NDg1NjgwNn0.rS-ypcTxfKYlyLYoO0YM6oGd6VFdHKXIPG4xAknx7sk"
 
-
+maybe remove description from exercises table?
 
 api:
 
 “root descriptor” (a list of available endpoints) when navigating to url without specific endpoints
 
 frontend:
+
+
+
+User clicks exercises -> Exercises page -> User chooses an exercise (chord guesser)-> Chord Guesser Exercise Startpage
+-> at top of page user can choose 
+EASY(Chords to guess from keys: C, G, F)
+MEDIUM(Chords to guess from keys: C, G, F, D, A, B♭, E♭,), 
+HARD(C, G, F, D, A, B♭, E♭, E, B, A♭, D♭,)
+EXTREME(C, G, F, D, A, B♭, E♭, E, B, A♭, D♭, F#, C#, G#, D#, A#)
+
+
+i also think i need to add comleted_exercises column to user table
+
+new note: skip user-lvel. for each game there is easy hard medium, user chooses easy hard or medium and completes the exercises inside the difficulty instead
+
+users table column: completed_exercises. Needs to be marked for difficulty also. Ex chordguesser game on easy and complete Major and Minor
+
+maybe a new table? completed_exercises
+
+completed_exercises:
+id: PK
+userId: INT FK
+exerciseId: INT FK
+subexerciseId: INT FK
+
+subexercises:
+id: PK
+exerciseId: INT FK
+difficulty: INT (0 = easy 1 = medium etc)
+
+
+user chooses chord guesser game 
+-> user now chooses which "subexercise" ie which chord-types they want to practice on
+-> user is correct say 10 times, each time correct a bar fills up to show progress for that exercise. when user fills bar up subexercise is completed. 
+-> exercise will be marked as complete (maybe add completed levels column to user table?), user can still play subexercise to practice
+
+   
+
+
+need to create subexercises table also. each s
+
+
+user level:
+starts off on level 1 ->
+level 1-2 needs 10 exp
+-> exp needed doubles for each level (2-3 is 20, 3-4 is 40 etc)

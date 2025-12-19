@@ -1,6 +1,6 @@
 module Pages.Login exposing (Model, Msg(..), init, update, view)
 
-import Api.Auth as Auth
+import Db.Auth as Auth
 import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE

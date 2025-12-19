@@ -1,4 +1,4 @@
-module Api.TheoryApi exposing ( Chord, buildErrorMessage, fetchChord, fetchChords)
+module Db.TheoryApi exposing ( Chord, buildErrorMessage, fetchChord, fetchChords)
 
 import Http
 import Json.Decode as Decode
@@ -13,6 +13,8 @@ type alias Chord =
     , degrees : List String
     , notes : List String
     }
+
+
 
 
 

@@ -1,6 +1,6 @@
 module Pages.Dashboard exposing (..)
 
-import Api.Auth as Auth
+import Db.Auth as Auth
 import Html exposing (Html)
 import Http
 

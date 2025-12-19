@@ -1,8 +1,8 @@
 module Main exposing (..)
 
-import Api.Auth as Auth
 import Browser exposing (UrlRequest(..))
 import Browser.Navigation as Nav
+import Db.Auth as Auth
 import Exercises.Stopwatch as Stopwatch
 import Html exposing (Html)
 import Html.Attributes as HA
@@ -96,6 +96,8 @@ subscriptions model =
 init : Flags -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
     let
+
+
         route =
             UP.parse routeParser url
                 |> Maybe.withDefault NotFound
@@ -115,14 +117,6 @@ init flags url key =
         stopwatchModel =
             Stopwatch.init
 
-        exercisesFetchOnStart =
-            case route of
-                Exercises ->
-                    Cmd.none
-
-                _ ->
-                    Cmd.none
-
         checkLoginCmd =
             Auth.getMe (Dashboard.GotUser >> DashboardMsg)
     in
@@ -140,7 +134,6 @@ init flags url key =
       }
     , Cmd.batch
         [ Cmd.map ExercisesMsg exercisesCmd
-        , exercisesFetchOnStart
         , Cmd.map LoginMsg loginCmd
         , Cmd.map RegisterMsg registerCmd
         , Cmd.map DashboardMsg dashboardCmd
@@ -173,15 +166,7 @@ routeParser =
         , UP.map Register (UP.s "register")
         , UP.map Dashboard (UP.s "dashboard")
         , UP.map Home UP.top
-
-        -- removed Game route from top-level routing; exercises and their games are handled in Exercises.elm
         ]
-
-
-startGame : msg -> Html msg
-startGame msg =
-    Html.div []
-        [ Html.button [ HE.onClick msg ] [ Html.text "Start" ] ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

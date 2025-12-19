@@ -36,7 +36,6 @@ const loginUser = async (req, res) => {
     try {
         const [row] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
         const user = row[0]
-        const userId = row[0].id
         if (!user) {
             return res.json({
                 ok: false,
@@ -53,6 +52,9 @@ const loginUser = async (req, res) => {
             } else {
                 const accessToken = createAccessToken(user);
                 const refreshToken = createRefreshToken(user);
+
+                console.log(accessToken);
+                
 
                 res.cookie('accessToken', accessToken, {
                     httpOnly: true,

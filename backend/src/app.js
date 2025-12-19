@@ -11,8 +11,10 @@ app.use(express.json());
 
 const usersRouter = require('./routes/users');
 const exerciseRouter = require('./routes/exercises');
-const exerciseResultsRouter = require('./routes/exercise_results');
+const subExercisesRouter = require('./routes/subExercises');
+const completedExercisesRouter = require('./routes/completed_exercises');
 const authRouter = require('./routes/auth');
+const cors = require('cors')
 const requireAuth = require('./middleware/requireAuth')
 
 
@@ -21,10 +23,11 @@ const requireAuth = require('./middleware/requireAuth')
 
 app.use(express.static(path.join(__dirname, "../../frontend/public")));
 
-
+app.use(cors())
 app.use('/users', requireAuth, usersRouter);
 app.use('/exercises', exerciseRouter);
-app.use('/exercise_results', requireAuth, exerciseResultsRouter);
+app.use('/sub-exercises', subExercisesRouter);
+app.use('/completed-exercises', requireAuth, completedExercisesRouter);
 app.use('/auth', authRouter);
 
 app.get(/.*/, (req, res) => {

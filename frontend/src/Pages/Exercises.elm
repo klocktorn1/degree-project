@@ -31,11 +31,14 @@ type alias Flags =
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
+        _ =
+            Debug.log "ChordGuesserExercise init called" flags
+
         ( chordModel, chordCmd ) =
             ChordGuesserExercise.init flags
     in
     ( { chordGuesserModel = chordModel, currentGame = Nothing }
-    , Cmd.map ChordGuesserMsg chordCmd
+    , Cmd.batch [ Cmd.map ChordGuesserMsg chordCmd ]
     )
 
 
@@ -46,15 +49,21 @@ init flags =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        ChordGuesserMsg sub ->
+        ChordGuesserMsg subMsg ->
             let
                 ( updated, cmd ) =
-                    ChordGuesserExercise.update sub model.chordGuesserModel
+                    ChordGuesserExercise.update subMsg model.chordGuesserModel
             in
             ( { model | chordGuesserModel = updated }, Cmd.map ChordGuesserMsg cmd )
 
-        SelectGame game ->
-            ( { model | currentGame = Just game }, Cmd.none )
+        SelectGame ChordGuesser ->
+            let
+                fetchCmd =
+                    ChordGuesserExercise.fetchSubExercisesCmd
+            in
+            ( { model | currentGame = Just ChordGuesser }
+            , Cmd.map ChordGuesserMsg fetchCmd
+            )
 
         BackToList ->
             ( { model | currentGame = Nothing }, Cmd.none )

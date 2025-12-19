@@ -1,4 +1,4 @@
-module Api.Auth exposing (..)
+module Db.Auth exposing (..)
 
 import Http
 import Json.Decode as Decode

@@ -1,7 +1,8 @@
 module Exercises.ChordGuesserExercise exposing (..)
 
-import Api.TheoryApi as TheoryApi
-import Html exposing (Html, s)
+import Db.Exercises as Exercises
+import Db.TheoryApi as TheoryApi
+import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
 import Http
@@ -25,11 +26,13 @@ type alias Model =
     , score : Int
     , mistakes : Int
     , gameOver : Bool
+    , subExercises : Maybe (List Exercises.SubExercise)
     }
 
 
 type Msg
     = GotChordData (Result Http.Error (List TheoryApi.Chord))
+    | GotSubExercises (Result Http.Error (List Exercises.SubExercise))
     | RandomChordPicked Int
     | DifficultyChosen Difficulty
     | ChordChosen TheoryApi.Chord
@@ -66,6 +69,7 @@ init _ =
       , score = 0
       , mistakes = 0
       , gameOver = False
+      , subExercises = Nothing
       }
     , Cmd.none
     )
@@ -222,10 +226,21 @@ update msg model =
             in
             ( updatedModel, Cmd.none )
 
+        GotSubExercises (Ok result) ->
+            ( { model | subExercises = Just result }, Cmd.none )
+
+        GotSubExercises (Err error) ->
+            ( model, Cmd.none )
+
 
 listOfDifficulities : List Difficulty
 listOfDifficulities =
     [ Easy, Medium, Hard, Advanced, Extreme ]
+
+
+fetchSubExercisesCmd : Cmd Msg
+fetchSubExercisesCmd =
+    Exercises.fetchSubExercises "1" GotSubExercises
 
 
 isToggleShuffleDisabled : Difficulty -> Bool
@@ -276,22 +291,24 @@ view model =
                 ]
                 [ Html.text "Toggle Shuffle Notes" ]
             , Html.div []
-                [ Html.ul []
-                    [ Html.li [ HE.onClick (ChordGroupChosen [ "major", "minor" ]) ] [ Html.text "Major and minor" ]
-                    , Html.li [ HE.onClick (ChordGroupChosen [ "dom7", "maj7", "minor7" ]) ] [ Html.text "Dom7, Maj7 and Minor7" ]
-                    , Html.li [ HE.onClick (ChordGroupChosen [ "diminished", "dim7", "minor7flat5" ]) ] [ Html.text "Dim, dim7 and m7b5" ]
-                    , Html.li [ HE.onClick (ChordGroupChosen [ "augmented", "aug7", "maj7sharp5" ]) ] [ Html.text "Aug, aug7 and maj7#5" ]
-                    , Html.li [ HE.onClick (ChordGroupChosen [ "sus2", "sus4" ]) ] [ Html.text "Sus2 and sus4" ]
-                    , Html.li [ HE.onClick (ChordGroupChosen [ "major6", "minor6" ]) ] [ Html.text "6 and m6" ]
-                    , Html.li [ HE.onClick (ChordGroupChosen [ "dom9", "maj9", "minor9" ]) ] [ Html.text "Dom9, maj9 and minor9" ]
-                    , Html.li [ HE.onClick (ChordGroupChosen [ "dom11", "maj11", "minor11" ]) ] [ Html.text "Dom11, maj11 and minor11" ]
-                    , Html.li [ HE.onClick (ChordGroupChosen [ "dom13", "maj13", "minor13" ]) ] [ Html.text "Dom13, maj13 and minor13" ]
-                    , Html.li [ HE.onClick (ChordGroupChosen [ "dom7flat9", "dom7sharp9", "dom7sharp11" ]) ] [ Html.text "7b9, 7#9 and 7#11" ]
-                    , Html.li [ HE.onClick (ChordGroupChosen [ "dom7flat13", "dom7sharp5", "dom7flat5" ]) ] [ Html.text "7b13, 7#5 and 7b5" ]
-                    , Html.li [ HE.onClick (ChordGroupChosen [ "sus13", "minorMaj7", "dim9" ]) ] [ Html.text "sus13, mMaj7 and dim9" ]
-                    ]
+                [ viewSubExercises model
                 ]
             ]
+
+
+viewSubExercises : Model -> Html Msg
+viewSubExercises model =
+    case model.subExercises of
+        Just subExercises ->
+            Html.ul [] (List.map viewSubExercise subExercises)
+
+        Nothing ->
+            Html.p [] [ Html.text "Error" ]
+
+
+viewSubExercise : Exercises.SubExercise -> Html Msg
+viewSubExercise subExercise =
+    Html.li [ HE.onClick (ChordGroupChosen subExercise.endpoints) ] [ Html.text subExercise.name ]
 
 
 viewDifficultyButtons : List Difficulty -> Html Msg
