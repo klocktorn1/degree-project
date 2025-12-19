@@ -8181,7 +8181,7 @@ var $author$project$Main$viewFooter = A2(
 	_List_Nil,
 	_List_fromArray(
 		[
-			$elm$html$Html$text('© 2024 My Elm App')
+			$elm$html$Html$text('© 2025 Footer')
 		]));
 var $author$project$Main$Logout = {$: 'Logout'};
 var $elm$html$Html$a = _VirtualDom_node('a');

@@ -505,4 +505,4 @@ viewLink label path currentPath =
 
 viewFooter : Html Msg
 viewFooter =
-    Html.footer [] [ Html.text "© 2024 My Elm App" ]
+    Html.footer [] [ Html.text "© 2025 Footer" ]
