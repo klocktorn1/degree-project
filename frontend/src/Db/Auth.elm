@@ -30,6 +30,8 @@ type alias User =
     }
 
 
+
+
 baseUrl : String
 baseUrl =
     "http://localhost:3000"

@@ -13024,62 +13024,62 @@ var $author$project$Main$update = F2(
 				}
 			case 'DashboardMsg':
 				var subMsg = msg.a;
-				var _v17 = model.page;
-				if (_v17.$ === 'DashboardPage') {
-					var m = _v17.a;
-					var updatedIsLoggedIn = function () {
-						if (subMsg.a.$ === 'Ok') {
-							var response = subMsg.a.a;
-							var _v22 = response.user;
-							if (_v22.$ === 'Just') {
-								return true;
-							} else {
-								return false;
-							}
+				var updatedIsLoggedIn = function () {
+					if (subMsg.a.$ === 'Ok') {
+						var response = subMsg.a.a;
+						var _v23 = response.user;
+						if (_v23.$ === 'Just') {
+							return true;
 						} else {
-							if ((subMsg.a.a.$ === 'BadStatus') && (subMsg.a.a.a === 401)) {
-								return false;
-							} else {
-								return model.isLoggedIn;
-							}
+							return false;
 						}
-					}();
-					var setIsLoading = false;
-					var refreshCmd = function () {
-						if (((subMsg.a.$ === 'Err') && (subMsg.a.a.$ === 'BadStatus')) && (subMsg.a.a.a === 401)) {
-							return A2($author$project$Main$onProtectedCallFail, $author$project$Main$RetryGetMe, model).b;
+					} else {
+						if ((subMsg.a.a.$ === 'BadStatus') && (subMsg.a.a.a === 401)) {
+							return false;
 						} else {
-							return $elm$core$Platform$Cmd$none;
+							return model.isLoggedIn;
 						}
-					}();
-					var _v18 = A2($author$project$Pages$Dashboard$update, subMsg, m);
-					var updated = _v18.a;
-					var cmd = _v18.b;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								isLoading: setIsLoading,
-								isLoggedIn: updatedIsLoggedIn,
-								page: $author$project$Main$DashboardPage(updated)
-							}),
-						$elm$core$Platform$Cmd$batch(
-							_List_fromArray(
-								[
-									A2($elm$core$Platform$Cmd$map, $author$project$Main$DashboardMsg, cmd),
-									refreshCmd
-								])));
-				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
+					}
+				}();
+				var updatedIsLoading = false;
+				var refreshCmd = function () {
+					if (((subMsg.a.$ === 'Err') && (subMsg.a.a.$ === 'BadStatus')) && (subMsg.a.a.a === 401)) {
+						return A2($author$project$Main$onProtectedCallFail, $author$project$Main$RetryGetMe, model).b;
+					} else {
+						return $elm$core$Platform$Cmd$none;
+					}
+				}();
+				var _v17 = function () {
+					var _v18 = model.page;
+					if (_v18.$ === 'DashboardPage') {
+						var m = _v18.a;
+						var _v19 = A2($author$project$Pages$Dashboard$update, subMsg, m);
+						var updated = _v19.a;
+						var c = _v19.b;
+						return _Utils_Tuple2(
+							$author$project$Main$DashboardPage(updated),
+							A2($elm$core$Platform$Cmd$map, $author$project$Main$DashboardMsg, c));
+					} else {
+						return _Utils_Tuple2(model.page, $elm$core$Platform$Cmd$none);
+					}
+				}();
+				var updatedPage = _v17.a;
+				var cmd = _v17.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{isLoading: updatedIsLoading, isLoggedIn: updatedIsLoggedIn, page: updatedPage}),
+					$elm$core$Platform$Cmd$batch(
+						_List_fromArray(
+							[cmd, refreshCmd])));
 			case 'AuthRefreshed':
 				var result = msg.a;
 				if (result.$ === 'Ok') {
-					var _v24 = model.auth.retryAfterRefresh;
-					if (_v24.$ === 'Just') {
-						var _v25 = _v24.a;
+					var _v25 = model.auth.retryAfterRefresh;
+					if (_v25.$ === 'Just') {
 						var _v26 = _v25.a;
-						var url = _v25.b;
+						var _v27 = _v26.a;
+						var url = _v26.b;
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -13118,9 +13118,9 @@ var $author$project$Main$update = F2(
 				}
 			case 'StopwatchMsg':
 				var subMsg = msg.a;
-				var _v27 = A2($author$project$Exercises$Stopwatch$update, subMsg, model.stopwatchModel);
-				var updated = _v27.a;
-				var cmd = _v27.b;
+				var _v28 = A2($author$project$Exercises$Stopwatch$update, subMsg, model.stopwatchModel);
+				var updated = _v28.a;
+				var cmd = _v28.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -13134,7 +13134,7 @@ var $author$project$Main$update = F2(
 							[
 								A2($elm$browser$Browser$Navigation$pushUrl, model.key, '/login'),
 								$author$project$Db$Auth$logout(
-								function (_v28) {
+								function (_v29) {
 									return $author$project$Main$LogoutCompleted;
 								})
 							])));

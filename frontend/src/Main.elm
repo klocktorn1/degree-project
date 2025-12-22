@@ -185,7 +185,6 @@ update msg model =
                 route =
                     Route.fromUrl newUrl
 
-
                 ( page, cmd ) =
                     case route of
                         Exercises exercisesRoute ->
@@ -250,7 +249,6 @@ update msg model =
                         _ ->
                             ( model, Cmd.none )
 
-
         LoginMsg subMsg ->
             case model.page of
                 LoginPage m ->
@@ -304,47 +302,60 @@ update msg model =
                     ( model, Cmd.none )
 
         DashboardMsg subMsg ->
-            case model.page of
-                DashboardPage m ->
-                    let
-                        ( updated, cmd ) =
-                            Dashboard.update subMsg m
+            let
+                -- Determine the new global isLoggedIn value
+                updatedIsLoggedIn =
+                    case subMsg of
+                        Dashboard.GotUser (Ok response) ->
+                            case response.user of
+                                Just _ ->
+                                    True
 
-                        updatedIsLoggedIn =
-                            case subMsg of
-                                Dashboard.GotUser (Ok response) ->
-                                    case response.user of
-                                        Just _ ->
-                                            True
-
-                                        Nothing ->
-                                            False
-
-                                Dashboard.GotUser (Err (Http.BadStatus 401)) ->
+                                Nothing ->
                                     False
 
-                                _ ->
-                                    model.isLoggedIn
+                        Dashboard.GotUser (Err (Http.BadStatus 401)) ->
+                            False
 
-                        setIsLoading =
-                            case subMsg of
-                                Dashboard.GotUser _ ->
-                                    False
+                        _ ->
+                            model.isLoggedIn
 
-                        refreshCmd =
-                            case subMsg of
-                                Dashboard.GotUser (Err (Http.BadStatus 401)) ->
-                                    onProtectedCallFail RetryGetMe model |> Tuple.second
+                -- Determine if loading should be turned off
+                updatedIsLoading =
+                    case subMsg of
+                        Dashboard.GotUser _ ->
+                            False
 
-                                _ ->
-                                    Cmd.none
-                    in
-                    ( { model | page = DashboardPage updated, isLoggedIn = updatedIsLoggedIn, isLoading = setIsLoading }
-                    , Cmd.batch [ Cmd.map DashboardMsg cmd, refreshCmd ]
-                    )
+                -- Determine the page-specific update if we are on the dashboard
+                ( updatedPage, cmd ) =
+                    case model.page of
+                        DashboardPage m ->
+                            let
+                                ( updated, c ) =
+                                    Dashboard.update subMsg m
+                            in
+                            ( DashboardPage updated, Cmd.map DashboardMsg c )
 
-                _ ->
-                    ( model, Cmd.none )
+                        _ ->
+                            -- Keep the page as-is and no commands
+                            ( model.page, Cmd.none )
+
+                -- Handle refresh on 401
+                refreshCmd =
+                    case subMsg of
+                        Dashboard.GotUser (Err (Http.BadStatus 401)) ->
+                            onProtectedCallFail RetryGetMe model |> Tuple.second
+
+                        _ ->
+                            Cmd.none
+            in
+            ( { model
+                | page = updatedPage
+                , isLoggedIn = updatedIsLoggedIn
+                , isLoading = updatedIsLoading
+              }
+            , Cmd.batch [ cmd, refreshCmd ]
+            )
 
         AuthRefreshed result ->
             case result of
