@@ -12261,7 +12261,6 @@ var $author$project$Db$TheoryApi$fetchChords = F3(
 					rootNotes));
 		}
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $author$project$Exercises$ChordGuesserExercise$defaultChord = {chord: 'No chord found', degrees: _List_Nil, formula: _List_Nil, notes: _List_Nil, root: ''};
 var $elm$core$List$head = function (list) {
 	if (list.b) {
@@ -12541,9 +12540,10 @@ var $author$project$Exercises$ChordGuesserExercise$update = F2(
 			case 'GoBack':
 				var updatedModel = _Utils_update(
 					model,
-					{gameOver: false, isGameStarted: false, maybeChosenChord: $elm$core$Maybe$Nothing, mistakes: 0, score: 0});
-				var _v4 = A2($elm$core$Debug$log, 'hello', updatedModel);
-				return _Utils_Tuple2(updatedModel, $elm$core$Platform$Cmd$none);
+					{chosenSubExercise: $elm$core$Maybe$Nothing, gameOver: false, hasUserWon: false, isGameStarted: false, maybeChosenChord: $elm$core$Maybe$Nothing, mistakes: 0, score: 0});
+				return _Utils_Tuple2(
+					updatedModel,
+					$author$project$Db$Exercises$fetchCompletedExercises($author$project$Exercises$ChordGuesserExercise$GotCompletedSubExercises));
 			case 'GotSubExercises':
 				if (msg.a.$ === 'Ok') {
 					var result = msg.a.a;
@@ -13496,6 +13496,7 @@ var $author$project$Exercises$ChordGuesserExercise$Hard = {$: 'Hard'};
 var $author$project$Exercises$ChordGuesserExercise$Medium = {$: 'Medium'};
 var $author$project$Exercises$ChordGuesserExercise$listOfDifficulities = _List_fromArray(
 	[$author$project$Exercises$ChordGuesserExercise$Easy, $author$project$Exercises$ChordGuesserExercise$Medium, $author$project$Exercises$ChordGuesserExercise$Hard, $author$project$Exercises$ChordGuesserExercise$Advanced, $author$project$Exercises$ChordGuesserExercise$Extreme]);
+var $elm$core$Debug$toString = _Debug_toString;
 var $author$project$Exercises$ChordGuesserExercise$ChordChosen = function (a) {
 	return {$: 'ChordChosen', a: a};
 };
@@ -13608,19 +13609,14 @@ var $elm$core$List$any = F2(
 	});
 var $author$project$Exercises$ChordGuesserExercise$checkIfCompleted = F3(
 	function (chosenDifficulty, completed, subExercise) {
-		return (A2(
+		return A2(
 			$elm$core$List$any,
 			function (c) {
-				return _Utils_eq(c.subExerciseId, subExercise.id);
-			},
-			completed) && A2(
-			$elm$core$List$any,
-			function (c) {
-				return _Utils_eq(
+				return _Utils_eq(c.subExerciseId, subExercise.id) && _Utils_eq(
 					c.difficulty,
 					$author$project$Exercises$ChordGuesserExercise$difficultyToInt(chosenDifficulty));
 			},
-			completed)) ? true : false;
+			completed) ? true : false;
 	});
 var $author$project$Exercises$ChordGuesserExercise$viewSubExercise = F3(
 	function (chosenDifficulty, maybeCompleted, subExercise) {
@@ -13726,6 +13722,8 @@ var $author$project$Exercises$ChordGuesserExercise$view = function (model) {
 						$elm$html$Html$text(
 						'Mistakes:  ' + $elm$core$String$fromInt(model.mistakes))
 					])),
+				$elm$html$Html$text(
+				$elm$core$Debug$toString(model.randomizedChord)),
 				A2(
 				$elm$html$Html$button,
 				_List_fromArray(

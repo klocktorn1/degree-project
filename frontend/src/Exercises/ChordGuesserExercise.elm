@@ -78,7 +78,7 @@ init _ =
       , hasUserWon = False
       , chosenSubExercise = Nothing
       }
-    , Cmd.batch[Exercises.fetchCompletedExercises GotCompletedSubExercises, fetchSubExercisesCmd]
+    , Cmd.batch [ Exercises.fetchCompletedExercises GotCompletedSubExercises, fetchSubExercisesCmd ]
     )
 
 
@@ -235,21 +235,19 @@ update msg model =
                         | isGameStarted = False
                         , maybeChosenChord = Nothing
                         , gameOver = False
+                        , hasUserWon = False
                         , mistakes = 0
                         , score = 0
+                        , chosenSubExercise = Nothing
                     }
-
-                _ =
-                    Debug.log "hello" updatedModel
             in
-            ( updatedModel, Cmd.none )
+            ( updatedModel, Exercises.fetchCompletedExercises GotCompletedSubExercises )
 
         GotSubExercises (Ok result) ->
             ( { model | subExercises = Just result }, Cmd.none )
 
         GotSubExercises (Err error) ->
             ( model, Cmd.none )
-
 
         CompletedExerciseEntryResponse (Ok response) ->
             ( model, Cmd.none )
@@ -322,6 +320,7 @@ view model =
                 , viewChords model
                 , Html.p [] [ Html.text <| "Score:  " ++ String.fromInt model.score ++ "/10" ]
                 , Html.p [] [ Html.text <| "Mistakes:  " ++ String.fromInt model.mistakes ]
+                , Html.text (Debug.toString model.randomizedChord)
                 , Html.button [ HA.class "custom-button", HE.onClick GoBack ] [ Html.text "< Back" ]
                 ]
 
@@ -566,7 +565,14 @@ checkIfChordIsCorrect model =
 
 checkIfCompleted : Difficulty -> List Exercises.CompletedSubExercise -> Exercises.SubExercise -> Bool
 checkIfCompleted chosenDifficulty completed subExercise =
-    if List.any (\c -> c.subExerciseId == subExercise.id) completed && List.any (\c -> c.difficulty == difficultyToInt chosenDifficulty) completed then
+    if
+        List.any
+            (\c ->
+                c.subExerciseId == subExercise.id
+                    && c.difficulty == difficultyToInt chosenDifficulty
+            )
+            completed
+    then
         True
 
     else
