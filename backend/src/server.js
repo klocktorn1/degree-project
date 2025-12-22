@@ -1,4 +1,3 @@
-console.log("Working directory:", process.cwd());
 
 
 const app = require('./app');

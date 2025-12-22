@@ -12,6 +12,7 @@ import Pages.Dashboard as Dashboard
 import Pages.Exercises as Exercises
 import Pages.Login as Login
 import Pages.Register as Register
+import Route exposing (ExercisesRoute(..), Route(..))
 import Time exposing (Posix)
 import Url
 import Url.Parser as UP exposing ((</>), (<?>))
@@ -63,15 +64,6 @@ type Msg
     | LogoutCompleted
 
 
-type Route
-    = Home
-    | Exercises
-    | Login
-    | Register
-    | Dashboard
-    | NotFound
-
-
 
 -- MAIN PROGRAM
 
@@ -116,14 +108,14 @@ init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init _ url key =
     let
         route =
-            UP.parse routeParser url |> Maybe.withDefault NotFound
+            Route.fromUrl url
 
         ( page, cmd ) =
             case route of
-                Exercises ->
+                Exercises exercisesRoute ->
                     let
                         ( m, c ) =
-                            Exercises.init ()
+                            Exercises.init exercisesRoute
                     in
                     ( ExercisesPage m, Cmd.map ExercisesMsg c )
 
@@ -167,22 +159,6 @@ init _ url key =
 
 
 
--- ROUTING
-
-
-routeParser : UP.Parser (Route -> a) a
-routeParser =
-    UP.oneOf
-        [ UP.map Home (UP.s "home")
-        , UP.map Exercises (UP.s "all-exercises")
-        , UP.map Login (UP.s "login")
-        , UP.map Register (UP.s "register")
-        , UP.map Dashboard (UP.s "dashboard")
-        , UP.map Home UP.top
-        ]
-
-
-
 -- HELPER: PROTECTED CALL FAIL
 
 
@@ -207,14 +183,15 @@ update msg model =
         UrlChanged newUrl ->
             let
                 route =
-                    UP.parse routeParser newUrl |> Maybe.withDefault NotFound
+                    Route.fromUrl newUrl
+
 
                 ( page, cmd ) =
                     case route of
-                        Exercises ->
+                        Exercises exercisesRoute ->
                             let
                                 ( m, c ) =
-                                    Exercises.init ()
+                                    Exercises.init exercisesRoute
                             in
                             ( ExercisesPage m, Cmd.map ExercisesMsg c )
 
@@ -253,16 +230,26 @@ update msg model =
                     ( model, Nav.load href )
 
         ExercisesMsg subMsg ->
-            case model.page of
-                ExercisesPage m ->
-                    let
-                        ( updated, cmd ) =
-                            Exercises.update subMsg m
-                    in
-                    ( { model | page = ExercisesPage updated }, Cmd.map ExercisesMsg cmd )
+            case subMsg of
+                Exercises.RequestNavigateToChordGuesser ->
+                    ( model
+                    , Nav.pushUrl model.key "/all-exercises/chord-guesser"
+                    )
 
                 _ ->
-                    ( model, Cmd.none )
+                    case model.page of
+                        ExercisesPage m ->
+                            let
+                                ( updated, cmd ) =
+                                    Exercises.update subMsg m
+                            in
+                            ( { model | page = ExercisesPage updated }
+                            , Cmd.map ExercisesMsg cmd
+                            )
+
+                        _ ->
+                            ( model, Cmd.none )
+
 
         LoginMsg subMsg ->
             case model.page of
@@ -299,10 +286,16 @@ update msg model =
                             Register.update subMsg m
                     in
                     case subMsg of
-                        Register.RegisterResult (Ok _) ->
-                            ( { model | page = RegisterPage updated }
-                            , Nav.pushUrl model.key "/login"
-                            )
+                        Register.RegisterResult (Ok value) ->
+                            if value.ok then
+                                ( { model | page = RegisterPage updated }
+                                , Nav.pushUrl model.key "/login"
+                                )
+
+                            else
+                                ( { model | page = RegisterPage updated }
+                                , Nav.pushUrl model.key "/login"
+                                )
 
                         _ ->
                             ( { model | page = RegisterPage updated }, Cmd.map RegisterMsg cmd )

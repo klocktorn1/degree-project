@@ -1,4 +1,4 @@
-module Pages.Exercises exposing (Model, Msg, init, subscriptions, update, view)
+module Pages.Exercises exposing (..)
 
 import Exercises.ChordGuesserExercise as ChordGuesserExercise
 import Html exposing (Html)
@@ -6,6 +6,7 @@ import Html.Attributes as HA
 import Html.Events as HE
 import Platform.Cmd exposing (Cmd)
 import Platform.Sub exposing (Sub)
+import Route exposing (ExercisesRoute(..), Route(..))
 
 
 type alias Model =
@@ -20,22 +21,25 @@ type Game
 
 type Msg
     = ChordGuesserMsg ChordGuesserExercise.Msg
-    | SelectGame Game
     | BackToList
+    | RequestNavigateToChordGuesser
 
 
-
-
-init : () -> ( Model, Cmd Msg )
-init _ =
+init : ExercisesRoute -> ( Model, Cmd Msg )
+init route =
     let
-        _ =
-            Debug.log "ChordGuesserExercise init called"
-
         ( chordModel, chordCmd ) =
             ChordGuesserExercise.init ()
+
+        currentGame =
+            case route of
+                ChordGuesserRoute ->
+                    Just ChordGuesser
+
+                ExercisesHome ->
+                    Nothing
     in
-    ( { chordGuesserModel = chordModel, currentGame = Nothing }
+    ( { chordGuesserModel = chordModel, currentGame = currentGame }
     , Cmd.batch [ Cmd.map ChordGuesserMsg chordCmd ]
     )
 
@@ -52,19 +56,15 @@ update msg model =
                 ( updated, cmd ) =
                     ChordGuesserExercise.update subMsg model.chordGuesserModel
             in
-            ( { model | chordGuesserModel = updated }, Cmd.map ChordGuesserMsg cmd )
-
-        SelectGame ChordGuesser ->
-            let
-                fetchCmd =
-                    ChordGuesserExercise.fetchSubExercisesCmd
-            in
-            ( { model | currentGame = Just ChordGuesser }
-            , Cmd.map ChordGuesserMsg fetchCmd
+            ( { model | chordGuesserModel = updated }
+            , Cmd.map ChordGuesserMsg cmd
             )
 
         BackToList ->
             ( { model | currentGame = Nothing }, Cmd.none )
+
+        RequestNavigateToChordGuesser ->
+            ( model, Cmd.none )
 
 
 view : Model -> Html Msg
@@ -88,7 +88,7 @@ view model =
                 , Html.ul []
                     [ Html.li []
                         [ Html.button
-                            [ HE.onClick (SelectGame ChordGuesser), HA.class "custom-button" ]
+                            [ HE.onClick RequestNavigateToChordGuesser, HA.class "custom-button" ]
                             [ Html.text "Chord Guesser" ]
                         ]
                     ]

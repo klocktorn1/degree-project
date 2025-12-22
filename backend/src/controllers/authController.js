@@ -18,11 +18,7 @@ const createRefreshToken = (user) => {
         expiresIn: "7d"
     })
 }
-const debug = ((req, res) => {
 
-    console.log("Cookies:", req.cookies);
-    res.json(req.cookies);
-})
 
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
@@ -147,9 +143,9 @@ const registerUser = async (req, res) => {
         return res.json({ ok: true, message: `User created successfully` });
     } catch (err) {
         if (err.code === 'ER_DUP_ENTRY' && err.sqlMessage.includes('email')) {
-            return res.status(400).json({ ok: false, message: 'Email already in use' });
+            return res.json({ ok: false, message: 'Email already in use' });
         }
-        res.status(500).json({ ok: false, message: 'Something went wrong during registration', err});
+        res.json({ ok: false, message: 'Something went wrong during registration', err});
     }
 };
 
@@ -243,6 +239,5 @@ module.exports = {
     refreshToken,
     forgotPassword,
     resetPassword,
-    logoutUser,
-    debug
+    logoutUser
 }

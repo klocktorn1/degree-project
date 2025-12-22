@@ -1,15 +1,25 @@
 const db = require('../db/connection'); // mysql2 pool
 
-const getAllCompletedExercises = async (req, res) => {
+const getAllCompletedExercisesByUserId = async (req, res) => {
+  const userId = req.user.id
   try {
-    const [rows] = await db.query('SELECT * FROM completed_exercises');
+    const [rows] = await db.query(
+      'SELECT * FROM completed_exercises WHERE user_id = ?',
+      [userId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Completed exercises not found' });
+    }
+
     res.json({ completed_exercises: rows });
   } catch (err) {
     res.status(500).json({ error: `getAllCompletedExercises inside completedExercisesController: ${err.message}` })
   }
 };
 
-// Get exercise result by user id
+
+
 const getCompletedExercise = async (req, res) => {
   const userId = req.user.id
   try {
@@ -22,21 +32,22 @@ const getCompletedExercise = async (req, res) => {
       return res.status(404).json({ error: 'Completed exercise not found' });
     }
 
-    res.json({ completed_exercise: rows[0] });
+    return res.json({ completed_exercise: rows[0] });
   } catch (err) {
     res.status(500).json({ error: `getCompletedExercise inside completedExercisesController: ${err.message}` })
   }
 };
 
-// Create a new exercise result
 const createCompletedExercises = async (req, res) => {
   const { sub_exercise_id, difficulty } = req.body;
   const userId = req.user.id
 
+  
+
   try {
     const [result] = await db.query(
       'INSERT INTO completed_exercises (user_id, sub_exercise_id, difficulty) VALUES (?, ?, ?)',
-      [userId, sub_exercise_id, difficulty || null]
+      [userId, sub_exercise_id, difficulty]
     );
 
     return res.json({ ok: true, message: `Completed entry inserted` });
@@ -67,7 +78,7 @@ const deleteCompletedExercise = async (req, res) => {
 }
 
 module.exports = {
-  getAllCompletedExercises,
+  getAllCompletedExercisesByUserId,
   getCompletedExercise,
   createCompletedExercises,
   deleteCompletedExercise
