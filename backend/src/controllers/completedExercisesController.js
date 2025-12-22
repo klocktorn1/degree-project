@@ -39,15 +39,15 @@ const getCompletedExercise = async (req, res) => {
 };
 
 const createCompletedExercises = async (req, res) => {
-  const { sub_exercise_id, difficulty } = req.body;
+  const { sub_exercise_id, difficulty, shuffled } = req.body;
   const userId = req.user.id
 
   
 
   try {
     const [result] = await db.query(
-      'INSERT INTO completed_exercises (user_id, sub_exercise_id, difficulty) VALUES (?, ?, ?)',
-      [userId, sub_exercise_id, difficulty]
+      'INSERT INTO completed_exercises (user_id, sub_exercise_id, difficulty, shuffled) VALUES (?, ?, ?, ?)',
+      [userId, sub_exercise_id, difficulty, shuffled]
     );
 
     return res.json({ ok: true, message: `Completed entry inserted` });

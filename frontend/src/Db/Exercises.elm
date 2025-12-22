@@ -26,6 +26,7 @@ type alias CompletedSubExercise =
     { id : Int
     , subExerciseId : Int
     , difficulty : Int
+    , shuffled : Int
     }
 
 
@@ -61,10 +62,11 @@ completedExercisesDecoder =
 
 completedExerciseDecoder : Decode.Decoder CompletedSubExercise
 completedExerciseDecoder =
-    Decode.map3 CompletedSubExercise
+    Decode.map4 CompletedSubExercise
         (Decode.field "id" Decode.int)
         (Decode.field "sub_exercise_id" Decode.int)
         (Decode.field "difficulty" Decode.int)
+        (Decode.field "shuffled" Decode.int)
 
 
 

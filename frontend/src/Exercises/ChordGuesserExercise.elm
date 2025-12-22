@@ -22,6 +22,7 @@ type alias Model =
     , maybeChosenChord : Maybe TheoryApi.Chord
     , randomizedChord : Maybe TheoryApi.Chord
     , randomizedChordNotes : Maybe (List String)
+    , randomizedChordNotesBeforeShuffle : Maybe (List String)
     , lastRandomIndex : Maybe Int
     , areNotesShuffled : Bool
     , score : Int
@@ -54,7 +55,6 @@ type Difficulty
     | Medium
     | Hard
     | Advanced
-    | Extreme
 
 
 init : () -> ( Model, Cmd Msg )
@@ -67,6 +67,7 @@ init _ =
       , rootNotes = [ "C", "G", "F" ]
       , randomizedChord = Nothing
       , randomizedChordNotes = Nothing
+      , randomizedChordNotesBeforeShuffle = Nothing
       , lastRandomIndex = Nothing
       , areNotesShuffled = False
       , score = 0
@@ -153,9 +154,6 @@ update msg model =
                             True
 
                         Advanced ->
-                            True
-
-                        Extreme ->
                             True
             in
             ( { model | chosenDifficulty = newDifficulty, rootNotes = setRootNotes newDifficulty, areNotesShuffled = areNotesShuffled }, Cmd.none )
@@ -258,7 +256,7 @@ update msg model =
 
 listOfDifficulities : List Difficulty
 listOfDifficulities =
-    [ Easy, Medium, Hard, Advanced, Extreme ]
+    [ Easy, Medium, Hard, Advanced ]
 
 
 fetchSubExercisesCmd : Cmd Msg
@@ -280,28 +278,6 @@ difficultyToInt difficulty =
 
         Advanced ->
             3
-
-        Extreme ->
-            4
-
-
-isToggleShuffleDisabled : Difficulty -> Bool
-isToggleShuffleDisabled difficulty =
-    case difficulty of
-        Easy ->
-            False
-
-        Medium ->
-            False
-
-        Hard ->
-            True
-
-        Advanced ->
-            True
-
-        Extreme ->
-            False
 
 
 view : Model -> Html Msg
@@ -337,7 +313,6 @@ view model =
                 , HA.checked model.areNotesShuffled
                 , HA.id "shuffle-notes-checkbox"
                 , HE.onClick ToggleNotesShuffle
-                , HA.disabled (isToggleShuffleDisabled model.chosenDifficulty)
                 ]
                 [ Html.text "Toggle Shuffle Notes" ]
             , Html.div []
@@ -366,8 +341,25 @@ viewSubExercise chosenDifficulty maybeCompleted subExercise =
 
                 Nothing ->
                     False
+
+        _ =
+            Debug.log "asd" maybeCompleted
+
+        isCompletedWithShuffle =
+            case maybeCompleted of
+                Just completed ->
+                    checkIfCompletedWithShuffle chosenDifficulty completed.completedSubExercises subExercise
+
+                Nothing ->
+                    False
     in
-    if isCompleted then
+    if isCompletedWithShuffle then
+        Html.li [ HE.onClick (ChordGroupChosen subExercise) ]
+            [ Html.text subExercise.name
+            , Html.span [ HA.class "completed" ] [ Html.text " Completed *" ]
+            ]
+
+    else if isCompleted then
         Html.li [ HE.onClick (ChordGroupChosen subExercise) ]
             [ Html.text subExercise.name
             , Html.span [ HA.class "completed" ] [ Html.text " Completed" ]
@@ -411,9 +403,6 @@ setRootNotes difficulty =
         Advanced ->
             [ "C", "G", "F", "D", "A", "Bb", "Eb", "E", "B", "Ab", "Db" ]
 
-        Extreme ->
-            [ "C", "G", "F", "D", "A", "Bb", "Eb", "E", "B", "Ab", "Db", "Fsharp", "Csharp", "Gsharp", "Dsharp", "Asharp" ]
-
 
 difficultyToString : Difficulty -> String
 difficultyToString difficulty =
@@ -429,9 +418,6 @@ difficultyToString difficulty =
 
         Advanced ->
             "Advanced"
-
-        Extreme ->
-            "Extreme"
 
 
 viewChords : Model -> Html Msg
@@ -453,9 +439,21 @@ viewChord chord =
 
 viewRandomizedChordNotes : Model -> Html Msg
 viewRandomizedChordNotes model =
-    case model.randomizedChordNotes of
-        Just randomizedChordNotes ->
-            Html.p [] [ Html.text ("Which chord is this? " ++ String.join ", " randomizedChordNotes) ]
+    case model.randomizedChord of
+        Just chord ->
+            case model.randomizedChordNotes of
+                Just randomizedChordNotes ->
+                    if model.areNotesShuffled then
+                        Html.div []
+                            [ Html.p [] [ Html.text ("Which chord is this? " ++ String.join ", " randomizedChordNotes) ]
+                            , Html.p [] [ Html.text ("The root note is " ++ (List.head chord.notes |> Maybe.withDefault "Something went wrong")) ]
+                            ]
+
+                    else
+                        Html.p [] [ Html.text ("Which chord is this? " ++ String.join ", " randomizedChordNotes) ]
+
+                Nothing ->
+                    Html.p [] [ Html.text "No chord found" ]
 
         Nothing ->
             Html.p [] [ Html.text "No chord found" ]
@@ -508,6 +506,15 @@ randomizeChord maxIndex =
         Random.generate RandomChordPicked (Random.int 0 (maxIndex - 1))
 
 
+boolToInt : Bool -> Int
+boolToInt bool =
+    if bool then
+        1
+
+    else
+        0
+
+
 checkIfChordIsCorrect : Model -> ( Model, Cmd Msg )
 checkIfChordIsCorrect model =
     case ( model.maybeChosenChord, model.randomizedChord ) of
@@ -531,6 +538,7 @@ checkIfChordIsCorrect model =
                                                     Encode.object
                                                         [ ( "sub_exercise_id", Encode.int chosenSubExercise.id )
                                                         , ( "difficulty", Encode.int (difficultyToInt model.chosenDifficulty) )
+                                                        , ( "shuffled", Encode.int (boolToInt model.areNotesShuffled) )
                                                         ]
                                             in
                                             Exercises.createCompletedExerciseEntry body CompletedExerciseEntryResponse
@@ -568,8 +576,30 @@ checkIfCompleted chosenDifficulty completed subExercise =
     if
         List.any
             (\c ->
-                c.subExerciseId == subExercise.id
-                    && c.difficulty == difficultyToInt chosenDifficulty
+                c.subExerciseId
+                    == subExercise.id
+                    && c.difficulty
+                    == difficultyToInt chosenDifficulty
+            )
+            completed
+    then
+        True
+
+    else
+        False
+
+
+checkIfCompletedWithShuffle : Difficulty -> List Exercises.CompletedSubExercise -> Exercises.SubExercise -> Bool
+checkIfCompletedWithShuffle chosenDifficulty completed subExercise =
+    if
+        List.any
+            (\c ->
+                c.subExerciseId
+                    == subExercise.id
+                    && c.difficulty
+                    == difficultyToInt chosenDifficulty
+                    && c.shuffled
+                    == 1
             )
             completed
     then
