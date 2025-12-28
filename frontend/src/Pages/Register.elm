@@ -11,7 +11,8 @@ import String
 
 
 type alias Model =
-    { email : String
+    { username : String
+    , email : String
     , firstname : String
     , lastname : String
     , password : String
@@ -23,7 +24,8 @@ type alias Model =
 
 
 type Msg
-    = SetEmail String
+    = SetUsername String
+    | SetEmail String
     | SetFirstname String
     | SetLastname String
     | SetPassword String
@@ -34,7 +36,8 @@ type Msg
 
 init : ( Model, Cmd Msg )
 init =
-    ( { email = ""
+    ( { username = ""
+      , email = ""
       , firstname = ""
       , lastname = ""
       , password = ""
@@ -50,6 +53,9 @@ init =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        SetUsername u ->
+            ( { model | username = u }, Cmd.none )
+
         SetEmail e ->
             ( { model | email = e }, Cmd.none )
 
@@ -92,7 +98,8 @@ update msg model =
                 let
                     body =
                         Encode.object
-                            [ ( "email", Encode.string model.email )
+                            [ ( "username", Encode.string model.username )
+                            , ( "email", Encode.string model.email )
                             , ( "firstname", Encode.string model.firstname )
                             , ( "lastname", Encode.string model.lastname )
                             , ( "password", Encode.string model.password )
@@ -154,6 +161,10 @@ view model =
                 [ HA.class "login-form"
                 ]
                 [ Html.div []
+                    [ Html.label [] [ Html.text "Username" ]
+                    , Html.input [ HA.required True, HA.type_ "text", HA.value model.username, HE.onInput SetUsername ] []
+                    ]
+                , Html.div []
                     [ Html.label [] [ Html.text "Email" ]
                     , Html.input [ HA.required True, HA.type_ "email", HA.value model.email, HE.onInput SetEmail ] []
                     ]

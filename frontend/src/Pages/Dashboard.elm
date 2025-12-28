@@ -11,9 +11,9 @@ type alias Model =
 
 
 type alias User =
-    { email : String
-    , firstname : String
-    , lastname : String
+    { email : Maybe String
+    , firstname : Maybe String
+    , lastname : Maybe String
     , createdAt : String
     }
 
@@ -54,9 +54,9 @@ view model isLoggedIn =
             [ case model.user of
                 Just user ->
                     Html.div []
-                        [ Html.p [] [ Html.text ("Email: " ++ user.email) ]
-                        , Html.p [] [ Html.text ("First Name: " ++ user.firstname) ]
-                        , Html.p [] [ Html.text ("Last Name: " ++ user.lastname) ]
+                        [ Html.p [] [ Html.text ("Email: " ++ (Maybe.withDefault "Not provided" user.email)) ]
+                        , Html.p [] [ Html.text ("First Name: " ++ (Maybe.withDefault "Not provided" user.firstname)) ]
+                        , Html.p [] [ Html.text ("Last Name: " ++ (Maybe.withDefault "Not provided"  user.lastname)) ]
                         , Html.p [] [ Html.text ("Created At: " ++ user.createdAt) ]
                         ]
 

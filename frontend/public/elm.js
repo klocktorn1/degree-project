@@ -11348,9 +11348,18 @@ var $elm$json$Json$Decode$map4 = _Json_map4;
 var $author$project$Db$Auth$userDecoder = A5(
 	$elm$json$Json$Decode$map4,
 	$author$project$Db$Auth$User,
-	A2($elm$json$Json$Decode$field, 'email', $elm$json$Json$Decode$string),
-	A2($elm$json$Json$Decode$field, 'firstname', $elm$json$Json$Decode$string),
-	A2($elm$json$Json$Decode$field, 'lastname', $elm$json$Json$Decode$string),
+	A2(
+		$elm$json$Json$Decode$field,
+		'email',
+		$elm$json$Json$Decode$maybe($elm$json$Json$Decode$string)),
+	A2(
+		$elm$json$Json$Decode$field,
+		'firstname',
+		$elm$json$Json$Decode$maybe($elm$json$Json$Decode$string)),
+	A2(
+		$elm$json$Json$Decode$field,
+		'lastname',
+		$elm$json$Json$Decode$maybe($elm$json$Json$Decode$string)),
 	A2($elm$json$Json$Decode$field, 'createdAt', $elm$json$Json$Decode$string));
 var $author$project$Db$Auth$userResponseDecoder = A2(
 	$elm$json$Json$Decode$map,
@@ -11501,10 +11510,10 @@ var $author$project$Pages$Exercises$init = function (route) {
 				])));
 };
 var $author$project$Pages$Login$init = _Utils_Tuple2(
-	{email: '', error: $elm$core$Maybe$Nothing, isSubmitting: false, password: ''},
+	{error: $elm$core$Maybe$Nothing, isSubmitting: false, password: '', username: ''},
 	$elm$core$Platform$Cmd$none);
 var $author$project$Pages$Register$init = _Utils_Tuple2(
-	{email: '', error: $elm$core$Maybe$Nothing, firstname: '', isSubmitting: false, lastname: '', password: '', repeatPassword: '', successMessage: $elm$core$Maybe$Nothing},
+	{email: '', error: $elm$core$Maybe$Nothing, firstname: '', isSubmitting: false, lastname: '', password: '', repeatPassword: '', successMessage: $elm$core$Maybe$Nothing, username: ''},
 	$elm$core$Platform$Cmd$none);
 var $author$project$Main$init = F3(
 	function (_v0, url, key) {
@@ -11795,6 +11804,12 @@ var $author$project$Main$subscriptions = function (model) {
 };
 var $author$project$Main$LogoutCompleted = {$: 'LogoutCompleted'};
 var $author$project$Main$RetryGetMe = {$: 'RetryGetMe'};
+var $author$project$Db$Auth$githubClientId = 'Ov23lipFKY1qAxXvIpVE';
+var $author$project$Db$Auth$githubRedirectUri = $author$project$Db$Auth$baseUrl + '/auth/github/callback';
+var $author$project$Db$Auth$githubOAuthUrl = 'https://github.com/login/oauth/authorize?' + ('client_id=' + ($author$project$Db$Auth$githubClientId + ('&redirect_uri=' + ($author$project$Db$Auth$githubRedirectUri + '&scope=read:user user:email'))));
+var $author$project$Db$Auth$googleClientId = '410839726466-rp4h8fsnjcftj6lpkel3rsfu74thk41v.apps.googleusercontent.com';
+var $author$project$Db$Auth$googleRedirectUri = $author$project$Db$Auth$baseUrl + '/auth/google/callback';
+var $author$project$Db$Auth$googleOAuthUrl = 'https://accounts.google.com/o/oauth2/v2/auth?' + ('client_id=' + ($author$project$Db$Auth$googleClientId + ('&redirect_uri=' + ($author$project$Db$Auth$googleRedirectUri + ('&response_type=code' + ('&scope=openid email profile' + ('&access_type=offline' + '&prompt=consent')))))));
 var $elm$browser$Browser$Navigation$load = _Browser_load;
 var $elm$http$Http$expectBytesResponse = F2(
 	function (toMsg, toResult) {
@@ -12638,12 +12653,12 @@ var $author$project$Db$Auth$login = F2(
 var $author$project$Pages$Login$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
-			case 'SetEmail':
-				var e = msg.a;
+			case 'SetUsername':
+				var u = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{email: e}),
+						{username: u}),
 					$elm$core$Platform$Cmd$none);
 			case 'SetPassword':
 				var p = msg.a;
@@ -12652,6 +12667,10 @@ var $author$project$Pages$Login$update = F2(
 						model,
 						{password: p}),
 					$elm$core$Platform$Cmd$none);
+			case 'GoogleLogin':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'GithubLogin':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 			case 'Submit':
 				if (model.isSubmitting) {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -12660,8 +12679,8 @@ var $author$project$Pages$Login$update = F2(
 						_List_fromArray(
 							[
 								_Utils_Tuple2(
-								'email',
-								$elm$json$Json$Encode$string(model.email)),
+								'username',
+								$elm$json$Json$Encode$string(model.username)),
 								_Utils_Tuple2(
 								'password',
 								$elm$json$Json$Encode$string(model.password))
@@ -12746,6 +12765,13 @@ var $author$project$Db$Auth$register = F2(
 var $author$project$Pages$Register$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
+			case 'SetUsername':
+				var u = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{username: u}),
+					$elm$core$Platform$Cmd$none);
 			case 'SetEmail':
 				var e = msg.a;
 				return _Utils_Tuple2(
@@ -12805,6 +12831,9 @@ var $author$project$Pages$Register$update = F2(
 						var body = $elm$json$Json$Encode$object(
 							_List_fromArray(
 								[
+									_Utils_Tuple2(
+									'username',
+									$elm$json$Json$Encode$string(model.username)),
 									_Utils_Tuple2(
 									'email',
 									$elm$json$Json$Encode$string(model.email)),
@@ -12954,38 +12983,55 @@ var $author$project$Main$update = F2(
 					var _v12 = A2($author$project$Pages$Login$update, subMsg, m);
 					var updated = _v12.a;
 					var cmd = _v12.b;
-					if ((subMsg.$ === 'LoginResult') && (subMsg.a.$ === 'Ok')) {
-						var response = subMsg.a.a;
-						return response.ok ? _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									isLoggedIn: true,
-									page: $author$project$Main$LoginPage(updated)
-								}),
-							$elm$core$Platform$Cmd$batch(
-								_List_fromArray(
-									[
-										$author$project$Db$Auth$getMe(
-										A2($elm$core$Basics$composeR, $author$project$Pages$Dashboard$GotUser, $author$project$Main$DashboardMsg)),
-										A2($elm$browser$Browser$Navigation$pushUrl, model.key, '/dashboard'),
-										A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd)
-									]))) : _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									page: $author$project$Main$LoginPage(updated)
-								}),
-							A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd));
-					} else {
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									page: $author$project$Main$LoginPage(updated)
-								}),
-							A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd));
+					_v13$3:
+					while (true) {
+						switch (subMsg.$) {
+							case 'LoginResult':
+								if (subMsg.a.$ === 'Ok') {
+									var response = subMsg.a.a;
+									return response.ok ? _Utils_Tuple2(
+										_Utils_update(
+											model,
+											{
+												isLoggedIn: true,
+												page: $author$project$Main$LoginPage(updated)
+											}),
+										$elm$core$Platform$Cmd$batch(
+											_List_fromArray(
+												[
+													$author$project$Db$Auth$getMe(
+													A2($elm$core$Basics$composeR, $author$project$Pages$Dashboard$GotUser, $author$project$Main$DashboardMsg)),
+													A2($elm$browser$Browser$Navigation$pushUrl, model.key, '/dashboard'),
+													A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd)
+												]))) : _Utils_Tuple2(
+										_Utils_update(
+											model,
+											{
+												page: $author$project$Main$LoginPage(updated)
+											}),
+										A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd));
+								} else {
+									break _v13$3;
+								}
+							case 'GoogleLogin':
+								return _Utils_Tuple2(
+									model,
+									$elm$browser$Browser$Navigation$load($author$project$Db$Auth$googleOAuthUrl));
+							case 'GithubLogin':
+								return _Utils_Tuple2(
+									model,
+									$elm$browser$Browser$Navigation$load($author$project$Db$Auth$githubOAuthUrl));
+							default:
+								break _v13$3;
+						}
 					}
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								page: $author$project$Main$LoginPage(updated)
+							}),
+						A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, cmd));
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
@@ -13011,7 +13057,7 @@ var $author$project$Main$update = F2(
 								{
 									page: $author$project$Main$RegisterPage(updated)
 								}),
-							A2($elm$browser$Browser$Navigation$pushUrl, model.key, '/login'));
+							$elm$core$Platform$Cmd$none);
 					} else {
 						return _Utils_Tuple2(
 							_Utils_update(
@@ -13116,7 +13162,7 @@ var $author$project$Main$update = F2(
 								isLoading: false,
 								isLoggedIn: false
 							}),
-						A2($elm$browser$Browser$Navigation$pushUrl, model.key, '/login'));
+						$elm$core$Platform$Cmd$none);
 				}
 			case 'StopwatchMsg':
 				var subMsg = msg.a;
@@ -13351,13 +13397,6 @@ var $author$project$Main$viewHeader = function (model) {
 								_List_Nil,
 								_List_fromArray(
 									[
-										A3($author$project$Main$viewLink, 'DASHBOARD', '/dashboard', model.url.path)
-									])),
-								A2(
-								$elm$html$Html$li,
-								_List_Nil,
-								_List_fromArray(
-									[
 										A3($author$project$Main$viewLink, 'REGISTER', '/register', model.url.path)
 									])),
 								A2(
@@ -13405,21 +13444,24 @@ var $author$project$Pages$Dashboard$view = F2(
 									_List_Nil,
 									_List_fromArray(
 										[
-											$elm$html$Html$text('Email: ' + user.email)
+											$elm$html$Html$text(
+											'Email: ' + A2($elm$core$Maybe$withDefault, 'Not provided', user.email))
 										])),
 									A2(
 									$elm$html$Html$p,
 									_List_Nil,
 									_List_fromArray(
 										[
-											$elm$html$Html$text('First Name: ' + user.firstname)
+											$elm$html$Html$text(
+											'First Name: ' + A2($elm$core$Maybe$withDefault, 'Not provided', user.firstname))
 										])),
 									A2(
 									$elm$html$Html$p,
 									_List_Nil,
 									_List_fromArray(
 										[
-											$elm$html$Html$text('Last Name: ' + user.lastname)
+											$elm$html$Html$text(
+											'Last Name: ' + A2($elm$core$Maybe$withDefault, 'Not provided', user.lastname))
 										])),
 									A2(
 									$elm$html$Html$p,
@@ -13922,11 +13964,13 @@ var $author$project$Pages$Exercises$view = function (model) {
 				]));
 	}
 };
-var $author$project$Pages$Login$SetEmail = function (a) {
-	return {$: 'SetEmail', a: a};
-};
+var $author$project$Pages$Login$GithubLogin = {$: 'GithubLogin'};
+var $author$project$Pages$Login$GoogleLogin = {$: 'GoogleLogin'};
 var $author$project$Pages$Login$SetPassword = function (a) {
 	return {$: 'SetPassword', a: a};
+};
+var $author$project$Pages$Login$SetUsername = function (a) {
+	return {$: 'SetUsername', a: a};
 };
 var $author$project$Pages$Login$Submit = {$: 'Submit'};
 var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
@@ -13965,15 +14009,15 @@ var $author$project$Pages$Login$view = function (model) {
 						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$text('Email')
+								$elm$html$Html$text('Username')
 							])),
 						A2(
 						$elm$html$Html$input,
 						_List_fromArray(
 							[
 								$elm$html$Html$Attributes$type_('text'),
-								$elm$html$Html$Attributes$value(model.email),
-								$elm$html$Html$Events$onInput($author$project$Pages$Login$SetEmail)
+								$elm$html$Html$Attributes$value(model.username),
+								$elm$html$Html$Events$onInput($author$project$Pages$Login$SetUsername)
 							]),
 						_List_Nil)
 					])),
@@ -14027,6 +14071,26 @@ var $author$project$Pages$Login$view = function (model) {
 					[
 						$elm$html$Html$text(
 						model.isSubmitting ? 'Signing in...' : 'Sign in')
+					])),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick($author$project$Pages$Login$GoogleLogin)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Login with Google')
+					])),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick($author$project$Pages$Login$GithubLogin)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Login with Github')
 					]))
 			]));
 };
@@ -14044,6 +14108,9 @@ var $author$project$Pages$Register$SetPassword = function (a) {
 };
 var $author$project$Pages$Register$SetRepeatPassword = function (a) {
 	return {$: 'SetRepeatPassword', a: a};
+};
+var $author$project$Pages$Register$SetUsername = function (a) {
+	return {$: 'SetUsername', a: a};
 };
 var $author$project$Pages$Register$Submit = {$: 'Submit'};
 var $elm$html$Html$Attributes$required = $elm$html$Html$Attributes$boolProperty('required');
@@ -14067,6 +14134,29 @@ var $author$project$Pages$Register$view = function (model) {
 				]),
 			_List_fromArray(
 				[
+					A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$label,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Username')
+								])),
+							A2(
+							$elm$html$Html$input,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$required(true),
+									$elm$html$Html$Attributes$type_('text'),
+									$elm$html$Html$Attributes$value(model.username),
+									$elm$html$Html$Events$onInput($author$project$Pages$Register$SetUsername)
+								]),
+							_List_Nil)
+						])),
 					A2(
 					$elm$html$Html$div,
 					_List_Nil,
@@ -14330,4 +14420,4 @@ var $author$project$Main$view = function (model) {
 var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$UrlChanged, onUrlRequest: $author$project$Main$LinkClicked, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
-	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Db.Auth.LoginResponse":{"args":[],"type":"{ ok : Basics.Bool, message : String.String }"},"Db.Auth.RegisterResponse":{"args":[],"type":"{ ok : Basics.Bool, message : String.String }"},"Db.Auth.User":{"args":[],"type":"{ email : String.String, firstname : String.String, lastname : String.String, createdAt : String.String }"},"Db.Auth.UserResponse":{"args":[],"type":"{ user : Maybe.Maybe Db.Auth.User }"},"Db.TheoryApi.Chord":{"args":[],"type":"{ chord : String.String, root : String.String, formula : List.List Basics.Int, degrees : List.List String.String, notes : List.List String.String }"},"Db.Exercises.CompletedResponse":{"args":[],"type":"{ ok : Basics.Bool, message : String.String }"},"Db.Exercises.CompletedSubExercise":{"args":[],"type":"{ id : Basics.Int, subExerciseId : Basics.Int, difficulty : Basics.Int, shuffled : Basics.Int }"},"Db.Exercises.CompletedSubExercises":{"args":[],"type":"{ completedSubExercises : List.List Db.Exercises.CompletedSubExercise }"},"Db.Exercises.SubExercise":{"args":[],"type":"{ id : Basics.Int, exerciseId : Basics.Int, name : String.String, endpoints : List.List String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UrlChanged":["Url.Url"],"LinkClicked":["Browser.UrlRequest"],"ExercisesMsg":["Pages.Exercises.Msg"],"LoginMsg":["Pages.Login.Msg"],"RegisterMsg":["Pages.Register.Msg"],"DashboardMsg":["Pages.Dashboard.Msg"],"StopwatchMsg":["Exercises.Stopwatch.Msg"],"AuthRefreshed":["Result.Result Http.Error ()"],"Logout":[],"LogoutCompleted":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Exercises.Stopwatch.Msg":{"args":[],"tags":{"Tick":["Time.Posix"],"Start":[],"Stop":[]}},"Pages.Dashboard.Msg":{"args":[],"tags":{"GotUser":["Result.Result Http.Error Db.Auth.UserResponse"]}},"Pages.Exercises.Msg":{"args":[],"tags":{"ChordGuesserMsg":["Exercises.ChordGuesserExercise.Msg"],"BackToList":[],"RequestNavigateToChordGuesser":[]}},"Pages.Login.Msg":{"args":[],"tags":{"SetEmail":["String.String"],"SetPassword":["String.String"],"Submit":[],"LoginResult":["Result.Result Http.Error Db.Auth.LoginResponse"]}},"Pages.Register.Msg":{"args":[],"tags":{"SetEmail":["String.String"],"SetFirstname":["String.String"],"SetLastname":["String.String"],"SetPassword":["String.String"],"SetRepeatPassword":["String.String"],"Submit":[],"RegisterResult":["Result.Result Http.Error Db.Auth.RegisterResponse"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Exercises.ChordGuesserExercise.Msg":{"args":[],"tags":{"GotChordData":["Result.Result Http.Error (List.List Db.TheoryApi.Chord)"],"GotSubExercises":["Result.Result Http.Error (List.List Db.Exercises.SubExercise)"],"GotCompletedSubExercises":["Result.Result Http.Error Db.Exercises.CompletedSubExercises"],"CompletedExerciseEntryResponse":["Result.Result Http.Error Db.Exercises.CompletedResponse"],"RandomChordPicked":["Basics.Int"],"DifficultyChosen":["Exercises.ChordGuesserExercise.Difficulty"],"ChordChosen":["Db.TheoryApi.Chord"],"ChordGroupChosen":["Db.Exercises.SubExercise"],"Shuffled":["List.List String.String"],"ToggleNotesShuffle":[],"GoBack":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Exercises.ChordGuesserExercise.Difficulty":{"args":[],"tags":{"Easy":[],"Medium":[],"Hard":[],"Advanced":[]}},"List.List":{"args":["a"],"tags":{}}}}})}});}(this));
+	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Db.Auth.LoginResponse":{"args":[],"type":"{ ok : Basics.Bool, message : String.String }"},"Db.Auth.RegisterResponse":{"args":[],"type":"{ ok : Basics.Bool, message : String.String }"},"Db.Auth.User":{"args":[],"type":"{ email : Maybe.Maybe String.String, firstname : Maybe.Maybe String.String, lastname : Maybe.Maybe String.String, createdAt : String.String }"},"Db.Auth.UserResponse":{"args":[],"type":"{ user : Maybe.Maybe Db.Auth.User }"},"Db.TheoryApi.Chord":{"args":[],"type":"{ chord : String.String, root : String.String, formula : List.List Basics.Int, degrees : List.List String.String, notes : List.List String.String }"},"Db.Exercises.CompletedResponse":{"args":[],"type":"{ ok : Basics.Bool, message : String.String }"},"Db.Exercises.CompletedSubExercise":{"args":[],"type":"{ id : Basics.Int, subExerciseId : Basics.Int, difficulty : Basics.Int, shuffled : Basics.Int }"},"Db.Exercises.CompletedSubExercises":{"args":[],"type":"{ completedSubExercises : List.List Db.Exercises.CompletedSubExercise }"},"Db.Exercises.SubExercise":{"args":[],"type":"{ id : Basics.Int, exerciseId : Basics.Int, name : String.String, endpoints : List.List String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UrlChanged":["Url.Url"],"LinkClicked":["Browser.UrlRequest"],"ExercisesMsg":["Pages.Exercises.Msg"],"LoginMsg":["Pages.Login.Msg"],"RegisterMsg":["Pages.Register.Msg"],"DashboardMsg":["Pages.Dashboard.Msg"],"StopwatchMsg":["Exercises.Stopwatch.Msg"],"AuthRefreshed":["Result.Result Http.Error ()"],"Logout":[],"LogoutCompleted":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Exercises.Stopwatch.Msg":{"args":[],"tags":{"Tick":["Time.Posix"],"Start":[],"Stop":[]}},"Pages.Dashboard.Msg":{"args":[],"tags":{"GotUser":["Result.Result Http.Error Db.Auth.UserResponse"]}},"Pages.Exercises.Msg":{"args":[],"tags":{"ChordGuesserMsg":["Exercises.ChordGuesserExercise.Msg"],"BackToList":[],"RequestNavigateToChordGuesser":[]}},"Pages.Login.Msg":{"args":[],"tags":{"SetUsername":["String.String"],"SetPassword":["String.String"],"Submit":[],"LoginResult":["Result.Result Http.Error Db.Auth.LoginResponse"],"GoogleLogin":[],"GithubLogin":[]}},"Pages.Register.Msg":{"args":[],"tags":{"SetUsername":["String.String"],"SetEmail":["String.String"],"SetFirstname":["String.String"],"SetLastname":["String.String"],"SetPassword":["String.String"],"SetRepeatPassword":["String.String"],"Submit":[],"RegisterResult":["Result.Result Http.Error Db.Auth.RegisterResponse"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Exercises.ChordGuesserExercise.Msg":{"args":[],"tags":{"GotChordData":["Result.Result Http.Error (List.List Db.TheoryApi.Chord)"],"GotSubExercises":["Result.Result Http.Error (List.List Db.Exercises.SubExercise)"],"GotCompletedSubExercises":["Result.Result Http.Error Db.Exercises.CompletedSubExercises"],"CompletedExerciseEntryResponse":["Result.Result Http.Error Db.Exercises.CompletedResponse"],"RandomChordPicked":["Basics.Int"],"DifficultyChosen":["Exercises.ChordGuesserExercise.Difficulty"],"ChordChosen":["Db.TheoryApi.Chord"],"ChordGroupChosen":["Db.Exercises.SubExercise"],"Shuffled":["List.List String.String"],"ToggleNotesShuffle":[],"GoBack":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Exercises.ChordGuesserExercise.Difficulty":{"args":[],"tags":{"Easy":[],"Medium":[],"Hard":[],"Advanced":[]}},"List.List":{"args":["a"],"tags":{}}}}})}});}(this));

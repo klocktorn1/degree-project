@@ -270,6 +270,12 @@ update msg model =
                             else
                                 ( { model | page = LoginPage updated }, Cmd.map LoginMsg cmd )
 
+                        Login.GoogleLogin ->
+                            ( model, Nav.load Auth.googleOAuthUrl )
+
+                        Login.GithubLogin ->
+                            ( model, Nav.load Auth.githubOAuthUrl )
+
                         _ ->
                             ( { model | page = LoginPage updated }, Cmd.map LoginMsg cmd )
 
@@ -292,7 +298,7 @@ update msg model =
 
                             else
                                 ( { model | page = RegisterPage updated }
-                                , Nav.pushUrl model.key "/login"
+                                , Cmd.none
                                 )
 
                         _ ->
@@ -378,7 +384,7 @@ update msg model =
                         , isLoggedIn = False
                         , isLoading = False
                       }
-                    , Nav.pushUrl model.key "/login"
+                    , Cmd.none
                     )
 
         StopwatchMsg subMsg ->
@@ -458,7 +464,6 @@ viewHeader model =
                     [ Html.li [] [ viewLink "HOME" "/home" model.url.path ]
                     , Html.li [] [ viewLink "EXERCISES" "/all-exercises" model.url.path ]
                     , Html.li [] [ viewLink "THEORY" "/theory" model.url.path ]
-                    , Html.li [] [ viewLink "DASHBOARD" "/dashboard" model.url.path ]
                     , Html.li [] [ viewLink "REGISTER" "/register" model.url.path ]
                     , Html.li [] [ viewLink "ABOUT" "/about" model.url.path ]
                     ]
