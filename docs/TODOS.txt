@@ -71,5 +71,3 @@ starts off on level 1 ->
 level 1-2 needs 10 exp
 -> exp needed doubles for each level (2-3 is 20, 3-4 is 40 etc)
 
-
-
