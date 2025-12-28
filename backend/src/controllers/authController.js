@@ -471,7 +471,7 @@ const githubCallback = async (req, res) => {
     } catch (err) {
         console.log(err);
 
-        return res.status(500).send('Google login failed ');
+        return res.status(500).send('Github login failed ');
 
     }
 

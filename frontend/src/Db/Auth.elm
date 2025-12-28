@@ -32,7 +32,7 @@ type alias User =
 
 googleClientId : String
 googleClientId =
-    "410839726466-rp4h8fsnjcftj6lpkel3rsfu74thk41v.apps.googleusercontent.com"
+    "410839726466-e2f6cb7hfk5n3euenjngsia9qdfkjrhn.apps.googleusercontent.com"
 
 
 googleRedirectUri : String
@@ -55,7 +55,7 @@ googleOAuthUrl =
 
 githubClientId : String
 githubClientId =
-    "Ov23lipFKY1qAxXvIpVE"
+    "Ov23li9EHrE7iB79p8Ph"
 
 
 githubRedirectUri : String
