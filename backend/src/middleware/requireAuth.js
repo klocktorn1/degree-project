@@ -12,8 +12,7 @@ function requireAuth(req, res, next) {
 
     // Attach user info to request
     req.user = {
-      id: decoded.id,
-      email: decoded.email
+      id: decoded.id
     };
 
     next();

@@ -23,13 +23,54 @@ type alias UserResponse =
 
 
 type alias User =
-    { email : String
-    , firstname : String
-    , lastname : String
+    { email : Maybe String
+    , firstname : Maybe String
+    , lastname : Maybe String
     , createdAt : String
     }
 
 
+googleClientId : String
+googleClientId =
+    "410839726466-rp4h8fsnjcftj6lpkel3rsfu74thk41v.apps.googleusercontent.com"
+
+
+googleRedirectUri : String
+googleRedirectUri =
+    baseUrl ++ "/auth/google/callback"
+
+
+googleOAuthUrl : String
+googleOAuthUrl =
+    "https://accounts.google.com/o/oauth2/v2/auth?"
+        ++ "client_id="
+        ++ googleClientId
+        ++ "&redirect_uri="
+        ++ googleRedirectUri
+        ++ "&response_type=code"
+        ++ "&scope=openid email profile"
+        ++ "&access_type=offline"
+        ++ "&prompt=consent"
+
+
+githubClientId : String
+githubClientId =
+    "Ov23lipFKY1qAxXvIpVE"
+
+
+githubRedirectUri : String
+githubRedirectUri =
+    baseUrl ++ "/auth/github/callback"
+
+
+githubOAuthUrl : String
+githubOAuthUrl =
+    "https://github.com/login/oauth/authorize?"
+        ++ "client_id="
+        ++ githubClientId
+        ++ "&redirect_uri="
+        ++ githubRedirectUri
+        ++ "&scope=read:user user:email"
 
 
 baseUrl : String
@@ -60,9 +101,9 @@ userResponseDecoder =
 userDecoder : Decode.Decoder User
 userDecoder =
     Decode.map4 User
-        (Decode.field "email" Decode.string)
-        (Decode.field "firstname" Decode.string)
-        (Decode.field "lastname" Decode.string)
+        (Decode.field "email" (Decode.maybe Decode.string))
+        (Decode.field "firstname" (Decode.maybe Decode.string))
+        (Decode.field "lastname" (Decode.maybe Decode.string))
         (Decode.field "createdAt" Decode.string)
 
 

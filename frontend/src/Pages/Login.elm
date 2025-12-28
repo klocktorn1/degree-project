@@ -12,7 +12,7 @@ import String
 
 
 type alias Model =
-    { email : String
+    { username : String
     , password : String
     , error : Maybe String
     , isSubmitting : Bool
@@ -20,15 +20,17 @@ type alias Model =
 
 
 type Msg
-    = SetEmail String
+    = SetUsername String
     | SetPassword String
     | Submit
     | LoginResult (Result Http.Error Auth.LoginResponse)
+    | GoogleLogin
+    | GithubLogin
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { email = ""
+    ( { username = ""
       , password = ""
       , error = Nothing
       , isSubmitting = False
@@ -40,11 +42,17 @@ init =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        SetEmail e ->
-            ( { model | email = e }, Cmd.none )
+        SetUsername u ->
+            ( { model | username = u }, Cmd.none )
 
         SetPassword p ->
             ( { model | password = p }, Cmd.none )
+
+        GoogleLogin ->
+            (model, Cmd.none)
+
+        GithubLogin ->
+            (model, Cmd.none)
 
         Submit ->
             if model.isSubmitting then
@@ -54,7 +62,7 @@ update msg model =
                 let
                     body =
                         Encode.object
-                            [ ( "email", Encode.string model.email )
+                            [ ( "username", Encode.string model.username )
                             , ( "password", Encode.string model.password )
                             ]
                 in
@@ -109,8 +117,8 @@ view model =
         , HE.preventDefaultOn "submit" (Decode.succeed ( Submit, True ))
         ]
         [ Html.div []
-            [ Html.label [] [ Html.text "Email" ]
-            , Html.input [ HA.type_ "text", HA.value model.email, HE.onInput SetEmail ] []
+            [ Html.label [] [ Html.text "Username" ]
+            , Html.input [ HA.type_ "text", HA.value model.username, HE.onInput SetUsername ] []
             ]
         , Html.div []
             [ Html.label [] [ Html.text "Password" ]
@@ -131,4 +139,6 @@ view model =
                     "Sign in"
                 )
             ]
+        , Html.button [ HE.onClick GoogleLogin ] [ Html.text "Login with Google" ]
+        , Html.button [ HE.onClick GithubLogin ] [ Html.text "Login with Github" ]
         ]

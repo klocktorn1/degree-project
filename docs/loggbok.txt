@@ -21,16 +21,16 @@ tisdag - Fick till inlogg för användare som redirectar till dashboard page och
 onsdag - Skrotade iden med att spara accesstoken i elm modellen och istället har jag både access och refresh token som cookie. Gick väldigt snabbt att implementera detta jämfört med att ha det i elm model. Implemenetrade ett isLoggedIn state för att rendera olika saker beroende på om man är inloggad. Gjorde ett register formulär.
 torsdag - tog ledigt denna dag pga sambons födelsedag
 fredag - började tänka om kring hur jag ska implementera level-systemet. Jag ska inte ha att en user kan "gå upp i level" utan jag skapar en ny table i min db som håller completed_exercises som bara förmedlar vilka övningar användaren gjort. med detta kan jag markera olika övningar som färdiga för användaren. Tog bort username field från users då den var överflödig, räcker med email.
-(jobbade på söndag för att kompensera för torsdag) - gjorde färdigt så när en user är färdig med en övning så sparas det i db att hen gjort den "sub-övningen" och på vilken svårighetsgrad. Sedan renderas en Completed text bredvid de sub-övningar som gjorts. Gjorde om hela min elm-struktur så att varje sida inte har en egen modell utan det finns en modell som overwritas i main istället. Det blev problematiskt när man till exempel gick in i en övning och gick till en annan länk så var den föregående modellen alltid sparad i memory så man började inte om från början. Kändes onaturligt att ha det såhär. Fick strukturera om hela mitt modell-system.
+extrapass söndag - gjorde färdigt så när en user är färdig med en övning så sparas det i db att hen gjort den "sub-övningen" och på vilken svårighetsgrad. Sedan renderas en Completed text bredvid de sub-övningar som gjorts. Gjorde om hela min elm-struktur så att varje sida inte har en egen modell utan det finns en modell som overwritas i main istället. Det blev problematiskt när man till exempel gick in i en övning och gick till en annan länk så var den föregående modellen alltid sparad i memory så man började inte om från början. Kändes onaturligt att ha det såhär. Fick strukturera om hela mitt modell-system.
 
 
 vecka 4
-måndag - Började sent denna dag då jag hade grejer att göra på förmiddagen. Fick strukturera om min routing litegranna. Skapade en ny modul - Router.elm - som fixar allt som har med routing att göra. Detta för att seperation of concerns och för att Elm är extremt strikt (jobbigt strikt) med hur man får skickia data från modul till modul. Fick problem med import cycles konstant (modul a kan importera från modul b men då kan inte modul b importera från a)
-tisdag -
-onsdag - 
-torsdag -
-fredag - 
-
+måndag - Började sent denna dag då jag hade grejer att göra på förmiddagen. Fick strukturera om min routing litegranna. Skapade en ny modul - Router.elm - som fixar allt som har med routing att göra. Detta för att seperation of concerns och för att Elm är extremt strikt (jobbigt strikt) med hur man får skicka data från modul till modul. Fick problem med import cycles konstant (modul a kan importera från modul b men då kan inte modul b importera från a)
+tisdag - ledigt
+onsdag - ledigt
+torsdag - ledigt
+fredag - ledigt
+extrapass söndag -
 
 
 
