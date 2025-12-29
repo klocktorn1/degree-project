@@ -5,8 +5,8 @@ import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
 import Http
-import Json.Encode as Encode
 import Json.Decode as Decode
+import Json.Encode as Encode
 import Platform.Cmd exposing (Cmd)
 import String
 
@@ -49,10 +49,10 @@ update msg model =
             ( { model | password = p }, Cmd.none )
 
         GoogleLogin ->
-            (model, Cmd.none)
+            ( model, Cmd.none )
 
         GithubLogin ->
-            (model, Cmd.none)
+            ( model, Cmd.none )
 
         Submit ->
             if model.isSubmitting then
@@ -112,32 +112,34 @@ httpErrorToString httpError =
 
 view : Model -> Html Msg
 view model =
-    Html.form
-        [ HA.class "login-form"
-        , HE.preventDefaultOn "submit" (Decode.succeed ( Submit, True ))
-        ]
-        [ Html.div []
-            [ Html.label [] [ Html.text "Username" ]
-            , Html.input [ HA.type_ "text", HA.value model.username, HE.onInput SetUsername ] []
+    Html.div []
+        [ Html.form
+            [ HA.class "login-form"
+            , HE.preventDefaultOn "submit" (Decode.succeed ( Submit, True ))
             ]
-        , Html.div []
-            [ Html.label [] [ Html.text "Password" ]
-            , Html.input [ HA.type_ "password", HA.value model.password, HE.onInput SetPassword ] []
-            ]
-        , case model.error of
-            Just e ->
-                Html.div [ HA.class "error" ] [ Html.text e ]
+            [ Html.div []
+                [ Html.label [] [ Html.text "Username" ]
+                , Html.input [ HA.type_ "text", HA.value model.username, HE.onInput SetUsername ] []
+                ]
+            , Html.div []
+                [ Html.label [] [ Html.text "Password" ]
+                , Html.input [ HA.type_ "password", HA.value model.password, HE.onInput SetPassword ] []
+                ]
+            , case model.error of
+                Just e ->
+                    Html.div [ HA.class "error" ] [ Html.text e ]
 
-            Nothing ->
-                Html.div [] []
-        , Html.button [ HA.disabled model.isSubmitting ]
-            [ Html.text
-                (if model.isSubmitting then
-                    "Signing in..."
+                Nothing ->
+                    Html.div [] []
+            , Html.button [ HA.disabled model.isSubmitting ]
+                [ Html.text
+                    (if model.isSubmitting then
+                        "Signing in..."
 
-                 else
-                    "Sign in"
-                )
+                     else
+                        "Sign in"
+                    )
+                ]
             ]
         , Html.button [ HE.onClick GoogleLogin ] [ Html.text "Login with Google" ]
         , Html.button [ HE.onClick GithubLogin ] [ Html.text "Login with Github" ]

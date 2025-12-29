@@ -161,6 +161,15 @@ main {
   }
 }
 
+/*width of score bar should be 95% when smaller and on larger screens not go above maybe max width / 1.5.*/
+
+.score-bar {
+  width: clamp( min(95%, 20rem), 95%, calc(var(--max-width) / 1.5));
+  height: 20px;
+  border: 2px solid black;
+}
+
+
 .completed {
   color: green;
 }

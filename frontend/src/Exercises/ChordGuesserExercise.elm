@@ -292,6 +292,14 @@ view model =
         else
             Html.div []
                 [ Html.text "Chord guesser"
+                , Html.div [ HA.class "score-bar" ]
+                    [ Html.div
+                        [ HA.style "height" "100%"
+                        , HA.style "width" (String.fromInt (model.score * 10) ++ "%")
+                        , HA.style "color" "green"
+                        ]
+                        []
+                    ]
                 , viewRandomizedChordNotes model
                 , viewChords model
                 , Html.p [] [ Html.text <| "Score:  " ++ String.fromInt model.score ++ "/10" ]

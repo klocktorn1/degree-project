@@ -4,4 +4,5 @@ run:
 	--pushstate \
 	--dir=public \
 	--watch=src \
+	--watch=public/**/*.css \
 	-- --output=public/elm.js --debug

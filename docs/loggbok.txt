@@ -30,7 +30,7 @@ tisdag - ledigt
 onsdag - ledigt
 torsdag - ledigt
 fredag - ledigt
-extrapass söndag -
+extrapass söndag - ändrat om lite i db struktur, fick lägga till en table auth_providers samt ändra columner i user table till NULLABLE då jag skulle kunna implementera SSO. SSO är implementerat för både github och Google.
 
 
 
