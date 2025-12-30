@@ -35,7 +35,7 @@ extrapass söndag - ändrat om lite i db struktur, fick lägga till en table aut
 
 
 vecka 5
-måndag - 
+måndag - Började med responsiv styling. Tänkte först försöka göra utan mediaqueries och använda mer Elm för att hämta pixelbredden på element och ge elementen olika klasser beroende på hur mycket plats de tog upp gentemot hur mycket plats som fanns. Höll på ett tag men tänkte att det går snabbare och lättare att bara köra med mediaqueries.
 tisdag -
 onsdag - 
 torsdag -

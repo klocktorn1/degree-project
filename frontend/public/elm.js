@@ -11562,6 +11562,7 @@ var $author$project$Main$init = F3(
 				auth: {refreshing: false, retryAfterRefresh: $elm$core$Maybe$Nothing},
 				isLoading: false,
 				isLoggedIn: false,
+				isMenuOpen: false,
 				key: key,
 				page: page,
 				stopwatchModel: $author$project$Exercises$Stopwatch$init,
@@ -13186,11 +13187,18 @@ var $author$project$Main$update = F2(
 									return $author$project$Main$LogoutCompleted;
 								})
 							])));
-			default:
+			case 'LogoutCompleted':
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{isLoggedIn: false}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var changeMenu = model.isMenuOpen ? false : true;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{isMenuOpen: changeMenu}),
 					$elm$core$Platform$Cmd$none);
 		}
 	});
@@ -13214,6 +13222,72 @@ var $elm$html$Html$Attributes$src = function (url) {
 		'src',
 		_VirtualDom_noJavaScriptOrHtmlUri(url));
 };
+var $author$project$Main$SetMenu = {$: 'SetMenu'};
+var $author$project$Main$viewHamMenuClosed = A2(
+	$elm$html$Html$div,
+	_List_fromArray(
+		[
+			$elm$html$Html$Events$onClick($author$project$Main$SetMenu),
+			$elm$html$Html$Attributes$class('hamburger-menu')
+		]),
+	_List_fromArray(
+		[
+			A2(
+			$elm$html$Html$span,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('menu-line-1')
+				]),
+			_List_Nil),
+			A2(
+			$elm$html$Html$span,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('menu-line-2')
+				]),
+			_List_Nil),
+			A2(
+			$elm$html$Html$span,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('menu-line-3')
+				]),
+			_List_Nil)
+		]));
+var $author$project$Main$viewHamMenuOpen = A2(
+	$elm$html$Html$div,
+	_List_fromArray(
+		[
+			$elm$html$Html$Events$onClick($author$project$Main$SetMenu),
+			$elm$html$Html$Attributes$class('hamburger-menu')
+		]),
+	_List_fromArray(
+		[
+			A2(
+			$elm$html$Html$span,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('menu-line-1'),
+					A2($elm$html$Html$Attributes$style, 'transform', 'translateY(16px) rotate(45deg)')
+				]),
+			_List_Nil),
+			A2(
+			$elm$html$Html$span,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('menu-line-2'),
+					A2($elm$html$Html$Attributes$style, 'opacity', '0')
+				]),
+			_List_Nil),
+			A2(
+			$elm$html$Html$span,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('menu-line-3'),
+					A2($elm$html$Html$Attributes$style, 'transform', 'translateY(-16px) rotate(-45deg)')
+				]),
+			_List_Nil)
+		]));
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
 		return A3(
@@ -13269,7 +13343,7 @@ var $author$project$Main$viewHeader = function (model) {
 		_List_Nil,
 		_List_fromArray(
 			[
-				model.isLoggedIn ? A2(
+				A2(
 				$elm$html$Html$nav,
 				_List_Nil,
 				_List_fromArray(
@@ -13318,81 +13392,13 @@ var $author$project$Main$viewHeader = function (model) {
 									[
 										A3($author$project$Main$viewLink, 'THEORY', '/theory', model.url.path)
 									])),
-								A2(
+								model.isLoggedIn ? A2(
 								$elm$html$Html$li,
 								_List_Nil,
 								_List_fromArray(
 									[
 										A3($author$project$Main$viewLink, 'DASHBOARD', '/dashboard', model.url.path)
-									])),
-								A2(
-								$elm$html$Html$li,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A3($author$project$Main$viewLink, 'ABOUT', '/about', model.url.path)
-									]))
-							])),
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Events$onClick($author$project$Main$Logout)
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('LOGOUT')
-							]))
-					])) : A2(
-				$elm$html$Html$nav,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$a,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('logo'),
-								$elm$html$Html$Attributes$href('/')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$img,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$src('/assets/logo.png'),
-										$elm$html$Html$Attributes$alt('TQ')
-									]),
-								_List_Nil)
-							])),
-						A2(
-						$elm$html$Html$ul,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$li,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A3($author$project$Main$viewLink, 'HOME', '/home', model.url.path)
-									])),
-								A2(
-								$elm$html$Html$li,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A3($author$project$Main$viewLink, 'EXERCISES', '/all-exercises', model.url.path)
-									])),
-								A2(
-								$elm$html$Html$li,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A3($author$project$Main$viewLink, 'THEORY', '/theory', model.url.path)
-									])),
-								A2(
+									])) : A2(
 								$elm$html$Html$li,
 								_List_Nil,
 								_List_fromArray(
@@ -13407,7 +13413,16 @@ var $author$project$Main$viewHeader = function (model) {
 										A3($author$project$Main$viewLink, 'ABOUT', '/about', model.url.path)
 									]))
 							])),
-						A2(
+						model.isLoggedIn ? A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onClick($author$project$Main$Logout)
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('LOGOUT')
+							])) : A2(
 						$elm$html$Html$button,
 						_List_fromArray(
 							[
@@ -13416,7 +13431,8 @@ var $author$project$Main$viewHeader = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$text('LOGIN')
-							]))
+							])),
+						model.isMenuOpen ? $author$project$Main$viewHamMenuOpen : $author$project$Main$viewHamMenuClosed
 					]))
 			]));
 };
@@ -14447,4 +14463,4 @@ var $author$project$Main$view = function (model) {
 var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$init, onUrlChange: $author$project$Main$UrlChanged, onUrlRequest: $author$project$Main$LinkClicked, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
-	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Db.Auth.LoginResponse":{"args":[],"type":"{ ok : Basics.Bool, message : String.String }"},"Db.Auth.RegisterResponse":{"args":[],"type":"{ ok : Basics.Bool, message : String.String }"},"Db.Auth.User":{"args":[],"type":"{ email : Maybe.Maybe String.String, firstname : Maybe.Maybe String.String, lastname : Maybe.Maybe String.String, createdAt : String.String }"},"Db.Auth.UserResponse":{"args":[],"type":"{ user : Maybe.Maybe Db.Auth.User }"},"Db.TheoryApi.Chord":{"args":[],"type":"{ chord : String.String, root : String.String, formula : List.List Basics.Int, degrees : List.List String.String, notes : List.List String.String }"},"Db.Exercises.CompletedResponse":{"args":[],"type":"{ ok : Basics.Bool, message : String.String }"},"Db.Exercises.CompletedSubExercise":{"args":[],"type":"{ id : Basics.Int, subExerciseId : Basics.Int, difficulty : Basics.Int, shuffled : Basics.Int }"},"Db.Exercises.CompletedSubExercises":{"args":[],"type":"{ completedSubExercises : List.List Db.Exercises.CompletedSubExercise }"},"Db.Exercises.SubExercise":{"args":[],"type":"{ id : Basics.Int, exerciseId : Basics.Int, name : String.String, endpoints : List.List String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UrlChanged":["Url.Url"],"LinkClicked":["Browser.UrlRequest"],"ExercisesMsg":["Pages.Exercises.Msg"],"LoginMsg":["Pages.Login.Msg"],"RegisterMsg":["Pages.Register.Msg"],"DashboardMsg":["Pages.Dashboard.Msg"],"StopwatchMsg":["Exercises.Stopwatch.Msg"],"AuthRefreshed":["Result.Result Http.Error ()"],"Logout":[],"LogoutCompleted":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Exercises.Stopwatch.Msg":{"args":[],"tags":{"Tick":["Time.Posix"],"Start":[],"Stop":[]}},"Pages.Dashboard.Msg":{"args":[],"tags":{"GotUser":["Result.Result Http.Error Db.Auth.UserResponse"]}},"Pages.Exercises.Msg":{"args":[],"tags":{"ChordGuesserMsg":["Exercises.ChordGuesserExercise.Msg"],"BackToList":[],"RequestNavigateToChordGuesser":[]}},"Pages.Login.Msg":{"args":[],"tags":{"SetUsername":["String.String"],"SetPassword":["String.String"],"Submit":[],"LoginResult":["Result.Result Http.Error Db.Auth.LoginResponse"],"GoogleLogin":[],"GithubLogin":[]}},"Pages.Register.Msg":{"args":[],"tags":{"SetUsername":["String.String"],"SetEmail":["String.String"],"SetFirstname":["String.String"],"SetLastname":["String.String"],"SetPassword":["String.String"],"SetRepeatPassword":["String.String"],"Submit":[],"RegisterResult":["Result.Result Http.Error Db.Auth.RegisterResponse"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Exercises.ChordGuesserExercise.Msg":{"args":[],"tags":{"GotChordData":["Result.Result Http.Error (List.List Db.TheoryApi.Chord)"],"GotSubExercises":["Result.Result Http.Error (List.List Db.Exercises.SubExercise)"],"GotCompletedSubExercises":["Result.Result Http.Error Db.Exercises.CompletedSubExercises"],"CompletedExerciseEntryResponse":["Result.Result Http.Error Db.Exercises.CompletedResponse"],"RandomChordPicked":["Basics.Int"],"DifficultyChosen":["Exercises.ChordGuesserExercise.Difficulty"],"ChordChosen":["Db.TheoryApi.Chord"],"ChordGroupChosen":["Db.Exercises.SubExercise"],"Shuffled":["List.List String.String"],"ToggleNotesShuffle":[],"GoBack":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Exercises.ChordGuesserExercise.Difficulty":{"args":[],"tags":{"Easy":[],"Medium":[],"Hard":[],"Advanced":[]}},"List.List":{"args":["a"],"tags":{}}}}})}});}(this));
+	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Url.Url":{"args":[],"type":"{ protocol : Url.Protocol, host : String.String, port_ : Maybe.Maybe Basics.Int, path : String.String, query : Maybe.Maybe String.String, fragment : Maybe.Maybe String.String }"},"Db.Auth.LoginResponse":{"args":[],"type":"{ ok : Basics.Bool, message : String.String }"},"Db.Auth.RegisterResponse":{"args":[],"type":"{ ok : Basics.Bool, message : String.String }"},"Db.Auth.User":{"args":[],"type":"{ email : Maybe.Maybe String.String, firstname : Maybe.Maybe String.String, lastname : Maybe.Maybe String.String, createdAt : String.String }"},"Db.Auth.UserResponse":{"args":[],"type":"{ user : Maybe.Maybe Db.Auth.User }"},"Db.TheoryApi.Chord":{"args":[],"type":"{ chord : String.String, root : String.String, formula : List.List Basics.Int, degrees : List.List String.String, notes : List.List String.String }"},"Db.Exercises.CompletedResponse":{"args":[],"type":"{ ok : Basics.Bool, message : String.String }"},"Db.Exercises.CompletedSubExercise":{"args":[],"type":"{ id : Basics.Int, subExerciseId : Basics.Int, difficulty : Basics.Int, shuffled : Basics.Int }"},"Db.Exercises.CompletedSubExercises":{"args":[],"type":"{ completedSubExercises : List.List Db.Exercises.CompletedSubExercise }"},"Db.Exercises.SubExercise":{"args":[],"type":"{ id : Basics.Int, exerciseId : Basics.Int, name : String.String, endpoints : List.List String.String }"}},"unions":{"Main.Msg":{"args":[],"tags":{"UrlChanged":["Url.Url"],"LinkClicked":["Browser.UrlRequest"],"ExercisesMsg":["Pages.Exercises.Msg"],"LoginMsg":["Pages.Login.Msg"],"RegisterMsg":["Pages.Register.Msg"],"DashboardMsg":["Pages.Dashboard.Msg"],"StopwatchMsg":["Exercises.Stopwatch.Msg"],"AuthRefreshed":["Result.Result Http.Error ()"],"Logout":[],"LogoutCompleted":[],"SetMenu":[]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Exercises.Stopwatch.Msg":{"args":[],"tags":{"Tick":["Time.Posix"],"Start":[],"Stop":[]}},"Pages.Dashboard.Msg":{"args":[],"tags":{"GotUser":["Result.Result Http.Error Db.Auth.UserResponse"]}},"Pages.Exercises.Msg":{"args":[],"tags":{"ChordGuesserMsg":["Exercises.ChordGuesserExercise.Msg"],"BackToList":[],"RequestNavigateToChordGuesser":[]}},"Pages.Login.Msg":{"args":[],"tags":{"SetUsername":["String.String"],"SetPassword":["String.String"],"Submit":[],"LoginResult":["Result.Result Http.Error Db.Auth.LoginResponse"],"GoogleLogin":[],"GithubLogin":[]}},"Pages.Register.Msg":{"args":[],"tags":{"SetUsername":["String.String"],"SetEmail":["String.String"],"SetFirstname":["String.String"],"SetLastname":["String.String"],"SetPassword":["String.String"],"SetRepeatPassword":["String.String"],"Submit":[],"RegisterResult":["Result.Result Http.Error Db.Auth.RegisterResponse"]}},"Url.Protocol":{"args":[],"tags":{"Http":[],"Https":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"Browser.UrlRequest":{"args":[],"tags":{"Internal":["Url.Url"],"External":["String.String"]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Exercises.ChordGuesserExercise.Msg":{"args":[],"tags":{"GotChordData":["Result.Result Http.Error (List.List Db.TheoryApi.Chord)"],"GotSubExercises":["Result.Result Http.Error (List.List Db.Exercises.SubExercise)"],"GotCompletedSubExercises":["Result.Result Http.Error Db.Exercises.CompletedSubExercises"],"CompletedExerciseEntryResponse":["Result.Result Http.Error Db.Exercises.CompletedResponse"],"RandomChordPicked":["Basics.Int"],"DifficultyChosen":["Exercises.ChordGuesserExercise.Difficulty"],"ChordChosen":["Db.TheoryApi.Chord"],"ChordGroupChosen":["Db.Exercises.SubExercise"],"Shuffled":["List.List String.String"],"ToggleNotesShuffle":[],"GoBack":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"Exercises.ChordGuesserExercise.Difficulty":{"args":[],"tags":{"Easy":[],"Medium":[],"Hard":[],"Advanced":[]}},"List.List":{"args":["a"],"tags":{}}}}})}});}(this));

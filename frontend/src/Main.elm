@@ -16,6 +16,8 @@ import Route exposing (ExercisesRoute(..), Route(..))
 import Time exposing (Posix)
 import Url
 import Url.Parser as UP exposing ((</>), (<?>))
+import Svg.Attributes exposing (rotate)
+import Browser.Events
 
 
 
@@ -30,6 +32,7 @@ type alias Model =
     , isLoggedIn : Bool
     , isLoading : Bool
     , stopwatchModel : Stopwatch.Model
+    , isMenuOpen : Bool
     }
 
 
@@ -62,6 +65,7 @@ type Msg
     | AuthRefreshed (Result Http.Error ())
     | Logout
     | LogoutCompleted
+    | SetMenu
 
 
 
@@ -97,6 +101,8 @@ subscriptions model =
 
             _ ->
                 Sub.none
+
+        , Browser.Events.onResize WindowResized
         ]
 
 
@@ -153,6 +159,7 @@ init _ url key =
       , isLoggedIn = False
       , isLoading = False
       , stopwatchModel = Stopwatch.init
+      , isMenuOpen = False
       }
     , Cmd.batch [ cmd, checkLoginCmd ]
     )
@@ -405,6 +412,17 @@ update msg model =
         LogoutCompleted ->
             ( { model | isLoggedIn = False }, Cmd.none )
 
+        SetMenu ->
+            let
+                changeMenu =
+                    if model.isMenuOpen then
+                        False
+
+                    else
+                        True
+            in
+            ( { model | isMenuOpen = changeMenu }, Cmd.none )
+
 
 
 -- VIEW
@@ -441,34 +459,51 @@ viewTitle page =
             "Dashboard"
 
 
+viewHamMenuClosed : Html Msg
+viewHamMenuClosed =
+    Html.div [ HE.onClick SetMenu, HA.class "hamburger-menu" ]
+        [ Html.span [ HA.class "menu-line-1" ] []
+        , Html.span [ HA.class "menu-line-2" ] []
+        , Html.span [ HA.class "menu-line-3" ] []
+        ]
+
+
+viewHamMenuOpen : Html Msg
+viewHamMenuOpen =
+    Html.div [ HE.onClick SetMenu, HA.class "hamburger-menu" ]
+        [ Html.span [ HA.class "menu-line-1", HA.style "transform" "translateY(16px) rotate(45deg)" ] []
+        , Html.span [ HA.class "menu-line-2", HA.style "opacity" "0" ] []
+        , Html.span [ HA.class "menu-line-3", HA.style "transform" "translateY(-16px) rotate(-45deg)" ] []
+        ]
+
+
 viewHeader : Model -> Html Msg
 viewHeader model =
     Html.header []
-        [ if model.isLoggedIn then
-            Html.nav []
-                [ Html.a [ HA.class "logo", HA.href "/" ] [ Html.img [ HA.src "/assets/logo.png", HA.alt "TQ" ] [] ]
-                , Html.ul []
-                    [ Html.li [] [ viewLink "HOME" "/home" model.url.path ]
-                    , Html.li [] [ viewLink "EXERCISES" "/all-exercises" model.url.path ]
-                    , Html.li [] [ viewLink "THEORY" "/theory" model.url.path ]
-                    , Html.li [] [ viewLink "DASHBOARD" "/dashboard" model.url.path ]
-                    , Html.li [] [ viewLink "ABOUT" "/about" model.url.path ]
-                    ]
-                , Html.button [ HE.onClick Logout ] [ Html.text "LOGOUT" ]
-                ]
+        [ Html.nav []
+            [ Html.a [ HA.class "logo", HA.href "/" ] [ Html.img [ HA.src "/assets/logo.png", HA.alt "TQ" ] [] ]
+            , Html.ul []
+                [ Html.li [] [ viewLink "HOME" "/home" model.url.path ]
+                , Html.li [] [ viewLink "EXERCISES" "/all-exercises" model.url.path ]
+                , Html.li [] [ viewLink "THEORY" "/theory" model.url.path ]
+                , if model.isLoggedIn then
+                    Html.li [] [ viewLink "DASHBOARD" "/dashboard" model.url.path ]
 
-          else
-            Html.nav []
-                [ Html.a [ HA.class "logo", HA.href "/" ] [ Html.img [ HA.src "/assets/logo.png", HA.alt "TQ" ] [] ]
-                , Html.ul []
-                    [ Html.li [] [ viewLink "HOME" "/home" model.url.path ]
-                    , Html.li [] [ viewLink "EXERCISES" "/all-exercises" model.url.path ]
-                    , Html.li [] [ viewLink "THEORY" "/theory" model.url.path ]
-                    , Html.li [] [ viewLink "REGISTER" "/register" model.url.path ]
-                    , Html.li [] [ viewLink "ABOUT" "/about" model.url.path ]
-                    ]
-                , Html.button [ HE.onClick Logout ] [ Html.text "LOGIN" ]
+                  else
+                    Html.li [] [ viewLink "REGISTER" "/register" model.url.path ]
+                , Html.li [] [ viewLink "ABOUT" "/about" model.url.path ]
                 ]
+            , if model.isLoggedIn then
+                Html.button [ HE.onClick Logout ] [ Html.text "LOGOUT" ]
+
+              else
+                Html.button [ HE.onClick Logout ] [ Html.text "LOGIN" ]
+            , if model.isMenuOpen then
+                viewHamMenuOpen
+
+              else
+                viewHamMenuClosed
+            ]
         ]
 
 

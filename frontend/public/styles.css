@@ -73,15 +73,16 @@ body {
   flex-direction: column;
   min-height: 100dvh;
   padding-inline: var(--site-gutter);
+  line-height: 1.5;
+
 
 }
 
 a {
   all: unset;
-  display: inline-flex;
   align-items: center;
-  line-height: 1;
   cursor: pointer;
+
   /* because all: unset removes it */
 }
 
@@ -93,31 +94,41 @@ header {
   border-radius: var(--radius-s);
   align-content: center;
   color: var(--text-secondary);
-  padding-inline: var(--space-m);
+
+
 
 
 
   nav {
+
     display: flex;
     font-size: var(--fs-200);
     justify-content: space-between;
+    align-items: center;
+    gap: var(--space-m);
+    padding-inline: clamp(var(--space-m), 4vw, var(--space-l));
 
 
     ul {
       display: flex;
-      justify-self: center;
-      gap: var(--space-m);
       height: 100%;
+      gap: var(--space-m);
 
       li {
+        place-self: center;
         list-style: none;
         transition: 0.4s;
+
 
         &:hover {
           cursor: pointer;
           scale: 1.05;
         }
       }
+    }
+
+    .hamburger-menu {
+      display: none;
     }
 
   }
@@ -164,7 +175,7 @@ main {
 /*width of score bar should be 95% when smaller and on larger screens not go above maybe max width / 1.5.*/
 
 .score-bar {
-  width: clamp( min(95%, 20rem), 95%, calc(var(--max-width) / 1.5));
+  width: clamp(min(95%, 20rem), 95%, calc(var(--max-width) / 1.5));
   height: 20px;
   border: 2px solid black;
 }
@@ -173,12 +184,123 @@ main {
 .completed {
   color: green;
 }
+
 footer {
   width: 100%;
   height: 18dvh;
   background: var(--bg-secondary);
   color: var(--text-secondary);
 }
+
+
+@media (width < 54rem) {
+  header {
+    nav {
+
+      display: flex;
+      font-size: var(--fs-200);
+      align-items: center;
+      gap: var(--space-m);
+      padding-inline: clamp(var(--space-m), 4vw, var(--space-l));
+      height: 100%;
+
+
+      ul {
+        display: none;
+
+        li {
+          place-self: center;
+          list-style: none;
+          transition: 0.4s;
+
+
+          &:hover {
+            cursor: pointer;
+            scale: 1.05;
+          }
+        }
+      }
+
+      button {
+        display: none;
+      }
+
+
+      .hamburger-menu {
+        position: relative;
+        display: block;
+        width: 40px;
+        height: 32px;
+
+        span {
+          position: absolute;
+          width: 100%;
+          height: 4px;
+          background: black;
+          transform-origin: center;
+          transition: transform 0.3s ease, opacity 0.3s ease;
+          border-radius: var(--radius-l);
+          transform-box: content-box;
+
+
+        }
+
+
+        .menu-line-2 {
+          top: 50%;
+        }
+
+        .menu-line-3 {
+          top: 100%;
+        }
+      }
+
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* ========== Mode Selection ========== */
 .mode-container {
@@ -197,6 +319,7 @@ footer {
 
   button {
     border: 1px solid black;
+
     padding: 10px;
     font-size: 1.2rem;
     text-align: center;
@@ -261,6 +384,8 @@ button {
   background: var(--button-bg);
   transition: 0.1s;
   border-radius: var(--radius-xs);
+  color: var(--text-primary);
+
 
   &:hover {
     cursor: pointer;
@@ -284,6 +409,32 @@ button {
 .correct {
   background-color: green !important;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* ========== Button Containers ========== */
 .note-buttons-container,
