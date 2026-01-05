@@ -36,10 +36,11 @@ extrapass söndag - ändrat om lite i db struktur, fick lägga till en table aut
 
 vecka 5
 måndag - Började med responsiv styling. Tänkte först försöka göra utan mediaqueries och använda mer Elm för att hämta pixelbredden på element och ge elementen olika klasser beroende på hur mycket plats de tog upp gentemot hur mycket plats som fanns. Höll på ett tag men tänkte att det går snabbare och lättare att bara köra med mediaqueries.
-tisdag -
-onsdag - 
-torsdag -
-fredag - 
+tisdag - fortsatt med styling för resterande sidor
+onsdag - ledig
+torsdag - ledig
+fredag - forstatt responsiv styling. insåg att jag måste begränsa antalet ackord som renderas på skärmen för alla svårighetsgrader. Detta för att när man är på advanced så hämtas det plötsligt väldigt många ackord och stylingen blev omöjlig att göra. så istället så randomizear jag vilka ackord som hämtas ut från listan och lägger det i en ny lista. Det korrekta ackordet är alltid i den nya listan. Så jobbade mycket med logik-ändring denna dag. Ändrade också om i API:et för att mina endpoints skulle bli bättre.
+extrapass lördag - Styleade login sidan
 
 vecka 6
 måndag - 

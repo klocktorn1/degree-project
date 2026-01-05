@@ -52,13 +52,18 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ChordGuesserMsg subMsg ->
-            let
-                ( updated, cmd ) =
-                    ChordGuesserExercise.update subMsg model.chordGuesserModel
-            in
-            ( { model | chordGuesserModel = updated }
-            , Cmd.map ChordGuesserMsg cmd
-            )
+            case subMsg of
+                ChordGuesserExercise.BackToList ->
+                    ( { model | currentGame = Nothing }, Cmd.none )
+
+                _ ->
+                    let
+                        ( updated, cmd ) =
+                            ChordGuesserExercise.update subMsg model.chordGuesserModel
+                    in
+                    ( { model | chordGuesserModel = updated }
+                    , Cmd.map ChordGuesserMsg cmd
+                    )
 
         BackToList ->
             ( { model | currentGame = Nothing }, Cmd.none )
@@ -71,25 +76,32 @@ view : Model -> Html Msg
 view model =
     case model.currentGame of
         Just ChordGuesser ->
-            if model.chordGuesserModel.isGameStarted then
-                Html.div []
-                    [ Html.map ChordGuesserMsg (ChordGuesserExercise.view model.chordGuesserModel)
-                    ]
-
-            else
-                Html.div []
-                    [ Html.map ChordGuesserMsg (ChordGuesserExercise.view model.chordGuesserModel)
-                    , Html.button [ HA.class "custom-button", HE.onClick BackToList ] [ Html.text "< Back to exercises" ]
-                    ]
+            Html.map ChordGuesserMsg (ChordGuesserExercise.view model.chordGuesserModel)
 
         Nothing ->
-            Html.div []
-                [ Html.h2 [] [ Html.text "Exercises" ]
-                , Html.ul []
-                    [ Html.li []
-                        [ Html.button
-                            [ HE.onClick RequestNavigateToChordGuesser, HA.class "custom-button" ]
-                            [ Html.text "Chord Guesser" ]
+            Html.section []
+                [ Html.h1 [] [ Html.text "Exercises" ]
+                , Html.ul [ HA.class "card-grid" ]
+                    [ Html.li [ HA.class "card" ]
+                        [ Html.div
+                            [ HE.onClick RequestNavigateToChordGuesser, HA.class "card-data"]
+                            [ Html.img [ HA.src "../assets/img/guitar3.png", HA.alt "guitar" ] []
+                            , Html.p [] [ Html.text "Chord Guesser" ]
+                            ]
+                        ]
+                    , Html.li [ HA.class "card" ]
+                        [ Html.div
+                            [ HE.onClick RequestNavigateToChordGuesser, HA.class "card-data" ]
+                            [ Html.img [ HA.src "../assets/img/guitar3.png", HA.alt "guitar" ] []
+                            , Html.p [] [ Html.text "Chord Guesser" ]
+                            ]
+                        ]
+                    , Html.li [ HA.class "card" ]
+                        [ Html.div
+                            [ HE.onClick RequestNavigateToChordGuesser, HA.class "card-data" ]
+                            [ Html.img [ HA.src "../assets/img/guitar3.png", HA.alt "guitar" ] []
+                            , Html.p [] [ Html.text "Chord Guesser" ]
+                            ]
                         ]
                     ]
                 ]

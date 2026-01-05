@@ -2,6 +2,7 @@ const db = require('../db/connection'); // mysql2 pool
 
 const getAllCompletedExercisesByUserId = async (req, res) => {
   const userId = req.user.id
+
   try {
     const [rows] = await db.query(
       'SELECT * FROM completed_exercises WHERE user_id = ?',
@@ -22,6 +23,7 @@ const getAllCompletedExercisesByUserId = async (req, res) => {
 
 const getCompletedExercise = async (req, res) => {
   const userId = req.user.id
+  
   try {
     const [rows] = await db.query(
       'SELECT * FROM completed_exercises WHERE user_id = ?',

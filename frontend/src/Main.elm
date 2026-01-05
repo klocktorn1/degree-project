@@ -4,7 +4,7 @@ import Browser exposing (UrlRequest(..))
 import Browser.Navigation as Nav
 import Db.Auth as Auth
 import Exercises.Stopwatch as Stopwatch
-import Html exposing (Html)
+import Html exposing (Html, th)
 import Html.Attributes as HA
 import Html.Events as HE
 import Http
@@ -13,11 +13,10 @@ import Pages.Exercises as Exercises
 import Pages.Login as Login
 import Pages.Register as Register
 import Route exposing (ExercisesRoute(..), Route(..))
+import Svg.Attributes exposing (rotate)
 import Time exposing (Posix)
 import Url
 import Url.Parser as UP exposing ((</>), (<?>))
-import Svg.Attributes exposing (rotate)
-import Browser.Events
 
 
 
@@ -65,7 +64,7 @@ type Msg
     | AuthRefreshed (Result Http.Error ())
     | Logout
     | LogoutCompleted
-    | SetMenu
+    | ToggleMenu
 
 
 
@@ -101,8 +100,6 @@ subscriptions model =
 
             _ ->
                 Sub.none
-
-        , Browser.Events.onResize WindowResized
         ]
 
 
@@ -161,7 +158,10 @@ init _ url key =
       , stopwatchModel = Stopwatch.init
       , isMenuOpen = False
       }
-    , Cmd.batch [ cmd, checkLoginCmd ]
+    , Cmd.batch
+        [ cmd
+        , checkLoginCmd
+        ]
     )
 
 
@@ -412,7 +412,7 @@ update msg model =
         LogoutCompleted ->
             ( { model | isLoggedIn = False }, Cmd.none )
 
-        SetMenu ->
+        ToggleMenu ->
             let
                 changeMenu =
                     if model.isMenuOpen then
@@ -459,51 +459,51 @@ viewTitle page =
             "Dashboard"
 
 
-viewHamMenuClosed : Html Msg
-viewHamMenuClosed =
-    Html.div [ HE.onClick SetMenu, HA.class "hamburger-menu" ]
-        [ Html.span [ HA.class "menu-line-1" ] []
-        , Html.span [ HA.class "menu-line-2" ] []
-        , Html.span [ HA.class "menu-line-3" ] []
+viewHamburger : Model -> Html Msg
+viewHamburger model =
+    Html.div [ HE.onClick ToggleMenu, HA.classList [ ( "hamburger-menu", True ) ] ]
+        [ Html.span [ HA.classList [ ( "menu-line-1", True ), ( "rotate-1", model.isMenuOpen ) ] ] []
+        , Html.span [ HA.classList [ ( "menu-line-2", True ), ( "hidden", model.isMenuOpen ) ] ] []
+        , Html.span [ HA.classList [ ( "menu-line-3", True ), ( "rotate-2", model.isMenuOpen ) ] ] []
         ]
 
 
-viewHamMenuOpen : Html Msg
-viewHamMenuOpen =
-    Html.div [ HE.onClick SetMenu, HA.class "hamburger-menu" ]
-        [ Html.span [ HA.class "menu-line-1", HA.style "transform" "translateY(16px) rotate(45deg)" ] []
-        , Html.span [ HA.class "menu-line-2", HA.style "opacity" "0" ] []
-        , Html.span [ HA.class "menu-line-3", HA.style "transform" "translateY(-16px) rotate(-45deg)" ] []
+viewMenu : Model -> Html Msg
+viewMenu model =
+    let
+        navClass =
+            if model.isMenuOpen then
+                "open"
+
+            else
+                ""
+    in
+    Html.nav [ HA.class navClass, HA.class "menu-items" ]
+        [ Html.a [ HA.class "logo", HA.href "/" ] [ Html.img [ HA.src "/assets/logo.png", HA.alt "TQ" ] [] ]
+        , Html.ul []
+            [ Html.li [ HE.onClick ToggleMenu ] [ viewLink "HOME" "/home" model.url.path ]
+            , Html.li [ HE.onClick ToggleMenu ] [ viewLink "EXERCISES" "/all-exercises" model.url.path ]
+            , Html.li [ HE.onClick ToggleMenu ] [ viewLink "THEORY" "/theory" model.url.path ]
+            , if model.isLoggedIn then
+                Html.li [ HE.onClick ToggleMenu ] [ viewLink "DASHBOARD" "/dashboard" model.url.path ]
+
+              else
+                Html.li [ HE.onClick ToggleMenu ] [ viewLink "REGISTER" "/register" model.url.path ]
+            , Html.li [ HE.onClick ToggleMenu ] [ viewLink "ABOUT" "/about" model.url.path ]
+            ]
+        , if model.isLoggedIn then
+            Html.button [ HE.onClick Logout,  HA.class "custom-button"] [ Html.text "LOGOUT" ]
+
+          else
+            Html.button [ HE.onClick Logout, HA.class "custom-button"] [ Html.text "LOGIN" ]
         ]
 
 
 viewHeader : Model -> Html Msg
 viewHeader model =
     Html.header []
-        [ Html.nav []
-            [ Html.a [ HA.class "logo", HA.href "/" ] [ Html.img [ HA.src "/assets/logo.png", HA.alt "TQ" ] [] ]
-            , Html.ul []
-                [ Html.li [] [ viewLink "HOME" "/home" model.url.path ]
-                , Html.li [] [ viewLink "EXERCISES" "/all-exercises" model.url.path ]
-                , Html.li [] [ viewLink "THEORY" "/theory" model.url.path ]
-                , if model.isLoggedIn then
-                    Html.li [] [ viewLink "DASHBOARD" "/dashboard" model.url.path ]
-
-                  else
-                    Html.li [] [ viewLink "REGISTER" "/register" model.url.path ]
-                , Html.li [] [ viewLink "ABOUT" "/about" model.url.path ]
-                ]
-            , if model.isLoggedIn then
-                Html.button [ HE.onClick Logout ] [ Html.text "LOGOUT" ]
-
-              else
-                Html.button [ HE.onClick Logout ] [ Html.text "LOGIN" ]
-            , if model.isMenuOpen then
-                viewHamMenuOpen
-
-              else
-                viewHamMenuClosed
-            ]
+        [ viewMenu model
+        , viewHamburger model
         ]
 
 

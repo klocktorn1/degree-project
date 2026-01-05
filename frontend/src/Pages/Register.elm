@@ -158,29 +158,30 @@ view model =
 
         Nothing ->
             Html.div
-                [ HA.class "login-form"
+                [ HA.class "login-register-container"
                 ]
-                [ Html.div []
+                [ Html.h1 [] [ Html.text "REGISTER" ]
+                , Html.div [ HA.class "input-group" ]
                     [ Html.label [] [ Html.text "Username" ]
                     , Html.input [ HA.required True, HA.type_ "text", HA.value model.username, HE.onInput SetUsername ] []
                     ]
-                , Html.div []
+                , Html.div [ HA.class "input-group" ]
                     [ Html.label [] [ Html.text "Email" ]
                     , Html.input [ HA.required True, HA.type_ "email", HA.value model.email, HE.onInput SetEmail ] []
                     ]
-                , Html.div []
+                , Html.div [ HA.class "input-group" ]
                     [ Html.label [] [ Html.text "First name" ]
                     , Html.input [ HA.required True, HA.type_ "text", HA.value model.firstname, HE.onInput SetFirstname ] []
                     ]
-                , Html.div []
+                , Html.div [ HA.class "input-group" ]
                     [ Html.label [] [ Html.text "Last name" ]
                     , Html.input [ HA.required True, HA.type_ "text", HA.value model.lastname, HE.onInput SetLastname ] []
                     ]
-                , Html.div []
+                , Html.div [ HA.class "input-group" ]
                     [ Html.label [] [ Html.text "Password" ]
                     , Html.input [ HA.required True, HA.type_ "password", HA.value model.password, HE.onInput SetPassword ] []
                     ]
-                , Html.div []
+                , Html.div [ HA.class "input-group" ]
                     [ Html.label [] [ Html.text "Repeat password" ]
                     , Html.input [ HA.required True, HA.type_ "password", HA.value model.repeatPassword, HE.onInput SetRepeatPassword ] []
                     ]
@@ -190,7 +191,7 @@ view model =
 
                     Nothing ->
                         Html.div [] []
-                , Html.button [ HA.disabled model.isSubmitting, HE.onClick Submit ]
+                , Html.button [ HA.class "custom-button", HA.class "submit-button", HA.disabled model.isSubmitting, HE.onClick Submit ]
                     [ Html.text
                         (if model.isSubmitting then
                             "Registering..."
