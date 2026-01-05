@@ -75,7 +75,7 @@ githubOAuthUrl =
 
 baseUrl : String
 baseUrl =
-    "http://localhost:3000"
+    "https://degree-project-xnqu-git-main-nicholas-snow-mattssons-projects.vercel.app"
 
 
 loginDecoder : Decode.Decoder LoginResponse

@@ -11083,7 +11083,7 @@ var $author$project$Route$fromUrl = function (url) {
 		$author$project$Route$NotFound,
 		A2($elm$url$Url$Parser$parse, $author$project$Route$parser, url));
 };
-var $author$project$Db$Auth$baseUrl = 'http://localhost:3000';
+var $author$project$Db$Auth$baseUrl = 'https://degree-project-xnqu-git-main-nicholas-snow-mattssons-projects.vercel.app';
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
 		return {$: 'BadStatus_', a: a, b: b};
@@ -11392,7 +11392,7 @@ var $author$project$Exercises$ChordGuesserExercise$Easy = {$: 'Easy'};
 var $author$project$Exercises$ChordGuesserExercise$GotCompletedSubExercises = function (a) {
 	return {$: 'GotCompletedSubExercises', a: a};
 };
-var $author$project$Db$Exercises$baseUrl = 'http://localhost:3000';
+var $author$project$Db$Exercises$baseUrl = 'https://degree-project-xnqu-git-main-nicholas-snow-mattssons-projects.vercel.app';
 var $author$project$Db$Exercises$CompletedSubExercises = function (completedSubExercises) {
 	return {completedSubExercises: completedSubExercises};
 };
@@ -13482,7 +13482,7 @@ var $elm$html$Html$Attributes$src = function (url) {
 };
 var $author$project$Main$viewLink = F3(
 	function (label, path, currentPath) {
-		var maybeUrl = $elm$url$Url$fromString('http://localhost:3000' + path);
+		var maybeUrl = $elm$url$Url$fromString('https://degree-project-xnqu-git-main-nicholas-snow-mattssons-projects.vercel.app' + path);
 		var isActive = _Utils_eq(path, currentPath);
 		if (maybeUrl.$ === 'Just') {
 			var url = maybeUrl.a;

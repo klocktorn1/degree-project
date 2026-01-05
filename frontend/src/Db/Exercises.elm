@@ -32,7 +32,7 @@ type alias CompletedSubExercise =
 
 baseUrl : String
 baseUrl =
-    "http://localhost:3000"
+    "https://degree-project-xnqu-git-main-nicholas-snow-mattssons-projects.vercel.app"
 
 
 completedDecoder : Decode.Decoder CompletedResponse
