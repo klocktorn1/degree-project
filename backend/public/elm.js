@@ -8873,7 +8873,7 @@ var $elm$html$Html$Attributes$src = function (url) {
 var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $author$project$Main$viewLink = F3(
 	function (label, path, currentPath) {
-		var maybeUrl = $elm$url$Url$fromString('https://degree-project-production-6775.up.railway.app' + path);
+		var maybeUrl = $elm$url$Url$fromString('http://localhost:3000' + path);
 		var isActive = _Utils_eq(path, currentPath);
 		if (maybeUrl.$ === 'Just') {
 			var url = maybeUrl.a;
@@ -8882,11 +8882,7 @@ var $author$project$Main$viewLink = F3(
 				_List_fromArray(
 					[
 						$elm$html$Html$Attributes$href(path),
-						$elm$html$Html$Attributes$classList(
-						_List_fromArray(
-							[
-								_Utils_Tuple2('active', isActive)
-							])),
+						$elm$html$Html$Attributes$class('nes-btn'),
 						$elm$html$Html$Events$onClick(
 						$author$project$Main$LinkClicked(
 							$elm$browser$Browser$Internal(url)))
@@ -9007,8 +9003,8 @@ var $author$project$Main$viewMenu = function (model) {
 				$elm$html$Html$button,
 				_List_fromArray(
 					[
-						$elm$html$Html$Events$onClick($author$project$Main$Logout),
-						$elm$html$Html$Attributes$class('nes-btn is-primary')
+						$elm$html$Html$Attributes$class('nes-btn is-primary'),
+						$elm$html$Html$Events$onClick($author$project$Main$Logout)
 					]),
 				_List_fromArray(
 					[
@@ -9722,7 +9718,8 @@ var $author$project$Pages$Login$githubButton = A2(
 	$elm$html$Html$button,
 	_List_fromArray(
 		[
-			$elm$html$Html$Events$onClick($author$project$Pages$Login$GithubLogin)
+			$elm$html$Html$Events$onClick($author$project$Pages$Login$GithubLogin),
+			$elm$html$Html$Attributes$class('button-unset')
 		]),
 	_List_fromArray(
 		[
@@ -9739,7 +9736,8 @@ var $author$project$Pages$Login$googleButton = A2(
 	$elm$html$Html$button,
 	_List_fromArray(
 		[
-			$elm$html$Html$Events$onClick($author$project$Pages$Login$GoogleLogin)
+			$elm$html$Html$Events$onClick($author$project$Pages$Login$GoogleLogin),
+			$elm$html$Html$Attributes$class('button-unset')
 		]),
 	_List_fromArray(
 		[

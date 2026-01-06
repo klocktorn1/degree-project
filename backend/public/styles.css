@@ -92,7 +92,9 @@ body {
 }
 
 
-
+.button-unset {
+  all: unset;
+}
 
 .custom-button {
   font-family: 'Press Start 2P', cursive;
@@ -338,6 +340,8 @@ footer {
       flex-direction: column;
       justify-content: space-around;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+
 
       ul {
         height: 40%;
@@ -363,6 +367,7 @@ footer {
     display: block;
     width: 40px;
     height: 32px;
+    z-index: 1000;
 
     span {
       position: absolute;
@@ -409,14 +414,6 @@ footer {
 
 
 
-.nes-icon.google.is-large {
-  border: none;
-  /* remove the border */
-  background: none;
-  /* remove any background */
-  box-shadow: none;
-  /* remove shadow if any */
-}
 
 
 .login-register-container {
@@ -440,18 +437,6 @@ footer {
 
 .submit-button {
   width: 100%;
-}
-
-.login-register-container::before {
-  content: '';
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  right: -6px;
-  bottom: -6px;
-  border: 1px solid var(--primary);
-  z-index: -1;
-  border-radius: 12px;
 }
 
 

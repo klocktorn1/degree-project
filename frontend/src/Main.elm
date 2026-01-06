@@ -492,10 +492,12 @@ viewMenu model =
             , Html.li [ HE.onClick ToggleMenu ] [ viewLink "ABOUT" "/about" model.url.path ]
             ]
         , if model.isLoggedIn then
-            Html.button [ HE.onClick Logout,  HA.class "custom-button"] [ Html.text "LOGOUT" ]
+            Html.button [ HE.onClick Logout, HA.class "custom-button" ] [ Html.text "LOGOUT" ]
 
           else
-            Html.button [ HE.onClick Logout, HA.class "nes-btn is-primary"] [ Html.text "LOGIN" ]
+            Html.button [ HA.class "nes-btn is-primary", HE.onClick Logout ]
+                [ Html.text "LOGIN"
+                ]
         ]
 
 
@@ -540,7 +542,7 @@ viewLink : String -> String -> String -> Html Msg
 viewLink label path currentPath =
     let
         maybeUrl =
-            Url.fromString ("https://degree-project-production-6775.up.railway.app" ++ path)
+            Url.fromString ("http://localhost:3000" ++ path)
 
         isActive =
             path == currentPath
@@ -549,7 +551,7 @@ viewLink label path currentPath =
         Just url ->
             Html.a
                 [ HA.href path
-                , HA.classList [ ( "active", isActive ) ]
+                , HA.class "nes-btn"
                 , HE.onClick (LinkClicked (Browser.Internal url))
                 ]
                 [ Html.text label ]

@@ -95,7 +95,10 @@ update msg model =
 
 googleButton : Html Msg
 googleButton =
-    Html.button [ HE.onClick GoogleLogin ]
+    Html.button
+        [ HE.onClick GoogleLogin
+        , HA.class "button-unset"
+        ]
         [ Html.i [ HA.class "nes-icon google is-large" ] []
         ]
 
@@ -104,6 +107,7 @@ githubButton : Html Msg
 githubButton =
     Html.button
         [ HE.onClick GithubLogin
+        , HA.class "button-unset"
         ]
         [ Html.i [ HA.class "nes-icon github is-large" ] []
         ]
