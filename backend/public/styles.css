@@ -30,7 +30,7 @@ choose the other value of max
 */
 
   --max-width: 93.75rem;
-  --site-gutter: max(clamp(1px, calc(4dvw - 14px), var(--space-xl)), calc((100vw - var(--max-width)) / 2));
+  --site-gutter: max(clamp(0px, calc(4dvw - 14px), var(--space-xl)), calc((100vw - var(--max-width)) / 2));
   --header-height: 4rem;
 
   /* Font configs */
@@ -81,8 +81,12 @@ body {
   flex-direction: column;
   justify-content: center;
   min-height: 100dvh;
-  padding-inline: var(--site-gutter);
   line-height: 1.5;
+
+  > header,
+  > main {
+    margin-inline: var(--site-gutter);
+  }
 
 
 }
