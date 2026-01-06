@@ -75,7 +75,7 @@ githubOAuthUrl =
 
 baseUrl : String
 baseUrl =
-    "http://localhost:3000"
+    "https://degree-project-production-6775.up.railway.app"
 
 
 loginDecoder : Decode.Decoder LoginResponse

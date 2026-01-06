@@ -6271,7 +6271,7 @@ var $author$project$Route$fromUrl = function (url) {
 		$author$project$Route$NotFound,
 		A2($elm$url$Url$Parser$parse, $author$project$Route$parser, url));
 };
-var $author$project$Db$Auth$baseUrl = 'http://localhost:3000';
+var $author$project$Db$Auth$baseUrl = 'https://degree-project-production-6775.up.railway.app';
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
 		return {$: 'BadStatus_', a: a, b: b};
@@ -6601,7 +6601,7 @@ var $author$project$Exercises$ChordGuesserExercise$Easy = {$: 'Easy'};
 var $author$project$Exercises$ChordGuesserExercise$GotCompletedSubExercises = function (a) {
 	return {$: 'GotCompletedSubExercises', a: a};
 };
-var $author$project$Db$Exercises$baseUrl = 'http://localhost:3000';
+var $author$project$Db$Exercises$baseUrl = 'https://degree-project-production-6775.up.railway.app';
 var $author$project$Db$Exercises$CompletedSubExercises = function (completedSubExercises) {
 	return {completedSubExercises: completedSubExercises};
 };
@@ -8873,7 +8873,7 @@ var $elm$html$Html$Attributes$src = function (url) {
 var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $author$project$Main$viewLink = F3(
 	function (label, path, currentPath) {
-		var maybeUrl = $elm$url$Url$fromString('http://localhost:3000' + path);
+		var maybeUrl = $elm$url$Url$fromString('https://degree-project-production-6775.up.railway.app' + path);
 		var isActive = _Utils_eq(path, currentPath);
 		if (maybeUrl.$ === 'Just') {
 			var url = maybeUrl.a;
@@ -8923,7 +8923,7 @@ var $author$project$Main$viewMenu = function (model) {
 						$elm$html$Html$img,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$src('/assets/logo.png'),
+								$elm$html$Html$Attributes$src('../assets/logo.png'),
 								$elm$html$Html$Attributes$alt('TQ')
 							]),
 						_List_Nil)

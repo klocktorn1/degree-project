@@ -479,7 +479,7 @@ viewMenu model =
                 ""
     in
     Html.nav [ HA.class navClass, HA.class "menu-items" ]
-        [ Html.a [ HA.class "logo", HA.href "/" ] [ Html.img [ HA.src "/assets/logo.png", HA.alt "TQ" ] [] ]
+        [ Html.a [ HA.class "logo", HA.href "/" ] [ Html.img [ HA.src "../assets/logo.png", HA.alt "TQ" ] [] ]
         , Html.ul []
             [ Html.li [ HE.onClick ToggleMenu ] [ viewLink "HOME" "/home" model.url.path ]
             , Html.li [ HE.onClick ToggleMenu ] [ viewLink "EXERCISES" "/all-exercises" model.url.path ]
@@ -540,7 +540,7 @@ viewLink : String -> String -> String -> Html Msg
 viewLink label path currentPath =
     let
         maybeUrl =
-            Url.fromString ("http://localhost:3000" ++ path)
+            Url.fromString ("https://degree-project-production-6775.up.railway.app" ++ path)
 
         isActive =
             path == currentPath
