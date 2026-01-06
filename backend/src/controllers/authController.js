@@ -354,7 +354,7 @@ const googleCallback = async (req, res) => {
     } catch (err) {
         console.log(err);
 
-        return res.status(500).send({message: 'Google login failed ', error: err});
+        return res.status(500).send({message: 'Google login failed ', error: err.message});
 
     }
 
@@ -471,7 +471,7 @@ const githubCallback = async (req, res) => {
     } catch (err) {
         console.log(err);
 
-        return res.status(500).send({message: 'Github login failed ', error: err});
+        return res.status(500).send({message: 'Github login failed ', error: err.message});
 
     }
 
