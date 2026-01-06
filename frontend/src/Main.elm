@@ -495,7 +495,7 @@ viewMenu model =
             Html.button [ HE.onClick Logout,  HA.class "custom-button"] [ Html.text "LOGOUT" ]
 
           else
-            Html.button [ HE.onClick Logout, HA.class "custom-button"] [ Html.text "LOGIN" ]
+            Html.button [ HE.onClick Logout, HA.class "nes-btn is-primary"] [ Html.text "LOGIN" ]
         ]
 
 

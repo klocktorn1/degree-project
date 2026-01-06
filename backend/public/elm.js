@@ -9008,7 +9008,7 @@ var $author$project$Main$viewMenu = function (model) {
 				_List_fromArray(
 					[
 						$elm$html$Html$Events$onClick($author$project$Main$Logout),
-						$elm$html$Html$Attributes$class('custom-button')
+						$elm$html$Html$Attributes$class('nes-btn is-primary')
 					]),
 				_List_fromArray(
 					[
@@ -9717,181 +9717,39 @@ var $author$project$Pages$Login$SetUsername = function (a) {
 var $author$project$Pages$Login$Submit = {$: 'Submit'};
 var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
 var $author$project$Pages$Login$GithubLogin = {$: 'GithubLogin'};
-var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
-var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
-var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
-var $elm$virtual_dom$VirtualDom$nodeNS = F2(
-	function (namespace, tag) {
-		return A2(
-			_VirtualDom_nodeNS,
-			namespace,
-			_VirtualDom_noScript(tag));
-	});
-var $elm$svg$Svg$node = $elm$virtual_dom$VirtualDom$nodeNS('http://www.w3.org/2000/svg');
-var $elm$svg$Svg$Attributes$style = _VirtualDom_attribute('style');
-var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
-var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
-var $elm$svg$Svg$Attributes$version = _VirtualDom_attribute('version');
-var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
-var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
-var $author$project$Pages$Login$githubSvgIcon = A2(
-	$elm$svg$Svg$svg,
-	_List_fromArray(
-		[
-			$elm$svg$Svg$Attributes$version('1.1'),
-			$elm$svg$Svg$Attributes$viewBox('0 0 512 512'),
-			$elm$svg$Svg$Attributes$style('width: 30px; vertical-align: middle; border-right:0.5px solid #aaa; border-top-left-radius: 15%; border-bottom-left-radius: 15%;')
-		]),
-	_List_fromArray(
-		[
-			A3(
-			$elm$svg$Svg$node,
-			'rect',
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$width('512'),
-					$elm$svg$Svg$Attributes$height('512'),
-					$elm$svg$Svg$Attributes$fill('#1B1817')
-				]),
-			_List_Nil),
-			A3(
-			$elm$svg$Svg$node,
-			'path',
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$fill('#fff'),
-					$elm$svg$Svg$Attributes$d('M335 499c14 0 12 17 12 17H165s-2-17 12-17c13 0 16-6 16-12l-1-50c-71 16-86-28-86-28-12-30-28-37-28-37-24-16 1-16 1-16 26 2 40 26 40 26 22 39 59 28 74 22 2-17 9-28 16-35-57-6-116-28-116-126 0-28 10-51 26-69-3-6-11-32 3-67 0 0 21-7 70 26 42-12 86-12 128 0 49-33 70-26 70-26 14 35 6 61 3 67 16 18 26 41 26 69 0 98-60 120-117 126 10 8 18 24 18 48l-1 70c0 6 3 12 16 12z')
-				]),
-			_List_Nil)
-		]));
+var $elm$html$Html$i = _VirtualDom_node('i');
 var $author$project$Pages$Login$githubButton = A2(
 	$elm$html$Html$button,
 	_List_fromArray(
 		[
-			$elm$html$Html$Events$onClick($author$project$Pages$Login$GithubLogin),
-			$elm$html$Html$Attributes$class('github-button')
+			$elm$html$Html$Events$onClick($author$project$Pages$Login$GithubLogin)
 		]),
 	_List_fromArray(
 		[
-			$author$project$Pages$Login$githubSvgIcon,
 			A2(
-			$elm$html$Html$span,
-			_List_Nil,
+			$elm$html$Html$i,
 			_List_fromArray(
 				[
-					$elm$html$Html$text('Continue with GitHub')
-				]))
-		]));
-var $author$project$Pages$Login$GoogleLogin = {$: 'GoogleLogin'};
-var $author$project$Pages$Login$googleSvgIcon = A2(
-	$elm$svg$Svg$svg,
-	_List_fromArray(
-		[
-			$elm$svg$Svg$Attributes$version('1.1'),
-			$elm$svg$Svg$Attributes$viewBox('0 0 48 48'),
-			$elm$svg$Svg$Attributes$style('display: block')
-		]),
-	_List_fromArray(
-		[
-			A3(
-			$elm$svg$Svg$node,
-			'path',
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$fill('#EA4335'),
-					$elm$svg$Svg$Attributes$d('M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z')
-				]),
-			_List_Nil),
-			A3(
-			$elm$svg$Svg$node,
-			'path',
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$fill('#4285F4'),
-					$elm$svg$Svg$Attributes$d('M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z')
-				]),
-			_List_Nil),
-			A3(
-			$elm$svg$Svg$node,
-			'path',
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$fill('#FBBC05'),
-					$elm$svg$Svg$Attributes$d('M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z')
-				]),
-			_List_Nil),
-			A3(
-			$elm$svg$Svg$node,
-			'path',
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$fill('#34A853'),
-					$elm$svg$Svg$Attributes$d('M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z')
-				]),
-			_List_Nil),
-			A3(
-			$elm$svg$Svg$node,
-			'path',
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$fill('none'),
-					$elm$svg$Svg$Attributes$d('M0 0h48v48H0z')
+					$elm$html$Html$Attributes$class('nes-icon github is-large')
 				]),
 			_List_Nil)
 		]));
+var $author$project$Pages$Login$GoogleLogin = {$: 'GoogleLogin'};
 var $author$project$Pages$Login$googleButton = A2(
 	$elm$html$Html$button,
 	_List_fromArray(
 		[
-			$elm$html$Html$Events$onClick($author$project$Pages$Login$GoogleLogin),
-			$elm$html$Html$Attributes$class('gsi-material-button')
+			$elm$html$Html$Events$onClick($author$project$Pages$Login$GoogleLogin)
 		]),
 	_List_fromArray(
 		[
 			A2(
-			$elm$html$Html$div,
+			$elm$html$Html$i,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('gsi-material-button-state')
+					$elm$html$Html$Attributes$class('nes-icon google is-large')
 				]),
-			_List_Nil),
-			A2(
-			$elm$html$Html$div,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('gsi-material-button-content-wrapper')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$div,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$class('gsi-material-button-icon')
-						]),
-					_List_fromArray(
-						[$author$project$Pages$Login$googleSvgIcon])),
-					A2(
-					$elm$html$Html$span,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$class('gsi-material-button-contents')
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text('Continue with Google')
-						])),
-					A2(
-					$elm$html$Html$span,
-					_List_fromArray(
-						[
-							A2($elm$html$Html$Attributes$style, 'display', 'none')
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text('Continue with Google')
-						]))
-				]))
+			_List_Nil)
 		]));
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
