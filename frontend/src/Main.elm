@@ -540,7 +540,7 @@ viewLink : String -> String -> String -> Html Msg
 viewLink label path currentPath =
     let
         maybeUrl =
-            Url.fromString ("https://degree-project-xnqu-git-main-nicholas-snow-mattssons-projects.vercel.app" ++ path)
+            Url.fromString ("http://localhost:3000" ++ path)
 
         isActive =
             path == currentPath

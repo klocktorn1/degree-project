@@ -15,7 +15,7 @@ type alias Chord =
 
 baseUrl : String
 baseUrl =
-    "http://localhost:5000/api/v1"
+    "https://music-theory-api-tuhh.onrender.com/api/v1"
 
 
 buildErrorMessage : Http.Error -> String
