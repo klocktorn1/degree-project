@@ -8866,7 +8866,7 @@ var $elm$html$Html$nav = _VirtualDom_node('nav');
 var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $author$project$Main$viewLink = F2(
 	function (label, path) {
-		var maybeUrl = $elm$url$Url$fromString('http://localhost:3000' + path);
+		var maybeUrl = $elm$url$Url$fromString('https://degree-project-production-6775.up.railway.app' + path);
 		if (maybeUrl.$ === 'Just') {
 			var url = maybeUrl.a;
 			return A2(

@@ -542,7 +542,7 @@ viewLink : String -> String -> Html Msg
 viewLink label path =
     let
         maybeUrl =
-            Url.fromString ("http://localhost:3000" ++ path)
+            Url.fromString ("https://degree-project-production-6775.up.railway.app" ++ path)
     in
     case maybeUrl of
         Just url ->
