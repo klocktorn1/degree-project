@@ -264,7 +264,7 @@ const googleCallback = async (req, res) => {
         params.append('code', code);
         params.append('client_id', process.env.GOOGLE_CLIENT_ID);
         params.append('client_secret', process.env.GOOGLE_CLIENT_SECRET);
-        params.append('redirect_uri', 'http://localhost:3000/auth/google/callback');
+        params.append('redirect_uri', 'https://degree-project-production-6775.up.railway.app/auth/google/callback');
         params.append('grant_type', 'authorization_code');
 
         const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
@@ -281,7 +281,6 @@ const googleCallback = async (req, res) => {
         const firstName = googleUser.given_name || '';
         const lastName = googleUser.family_name || '';
 
-        console.log(googleUser);
         
 
 
@@ -377,7 +376,7 @@ const githubCallback = async (req, res) => {
             client_id: process.env.GITHUB_CLIENT_ID,
             client_secret: process.env.GITHUB_CLIENT_SECRET,
             code: code,
-            redirect_uri: "http://localhost:3000/auth/github/callback"
+            redirect_uri: "https://degree-project-production-6775.up.railway.app/auth/github/callback"
         });
 
         const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
