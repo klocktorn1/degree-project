@@ -292,13 +292,13 @@ view : Model -> Html Msg
 view model =
     if model.isGameStarted then
         if model.hasUserWon then
-            Html.section []
+            Html.section [HA.class "nes-container is-rounded"]
                 [ Html.text "Good job! "
                 , Html.button [ HA.class "custom-button", HE.onClick GoBack ] [ Html.text "< Back to exercises" ]
                 ]
 
         else
-            Html.section []
+            Html.section [HA.class "nes-container is-rounded"]
                 [ viewCorrectChordNotes model
                 , viewChords model
                 , Html.p [ HA.class "score-bar" ]
@@ -312,7 +312,7 @@ view model =
                 ]
 
     else
-        Html.section []
+        Html.section [HA.class "nes-container is-rounded"]
             [ Html.h1 [] [ Html.text "Chord Guesser" ]
             , viewDifficultyButtons listOfDifficulities
             , Html.div []
@@ -386,6 +386,7 @@ viewDifficultyButtons difficulties =
             (\difficulty ->
                 Html.button
                     [ HE.onClick (DifficultyChosen difficulty)
+                    , HA.class "nes-btn"
                     ]
                     [ Html.text (difficultyToString difficulty) ]
             )

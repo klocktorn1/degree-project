@@ -2,10 +2,11 @@
 
 
   /* Colors */
-  --bg-primary: radial-gradient(73.72% 50% at 50% 50%, #5f215c 35.1%, #5e1564 100%);
+  --bg-primary2: radial-gradient(73.72% 50% at 50% 50%, #5f215c 35.1%, #5e1564 100%);
+  --bg-primary: #737896;
 
-  --bg-secondary: linear-gradient(270deg, #039998 0%, #008d8d 100%);
-  --bg-secondary2: #2eb8b8;
+  --bg-secondary2: linear-gradient(270deg, #039998 0%, #008d8d 100%);
+  --bg-secondary: #c2c2c2;
 
   --button-bg: #039998;
 
@@ -115,11 +116,7 @@ body {
   }
 }
 
-a {
-  all: unset;
-  align-items: center;
 
-}
 
 li {
   list-style: none;
@@ -130,6 +127,7 @@ li {
 header {
   height: 10dvh;
   background: var(--bg-secondary);
+  
   margin-top: 20px;
   border-radius: var(--radius-s);
   align-items: center;
@@ -152,6 +150,7 @@ header {
       display: flex;
       height: 100%;
       gap: var(--space-m);
+      margin: 0;
 
       li {
         place-self: center;
@@ -207,24 +206,7 @@ main {
       gap: var(--space-m);
       place-content: center;
 
-      a,
-      button {
-        font-family: 'Press Start 2P', cursive;
-        padding: 10px 1px;
-        background: var(--button-bg);
-        text-align: center;
-        border-radius: var(--radius-xs);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-        transition: all 0.3s ease;
-
-
-
-        &:hover {
-          cursor: pointer;
-          box-shadow: 4px 4px 0px var(--primary);
-          transform: translate(-2px, -2px);
-        }
-      }
+     
 
     }
 
@@ -325,7 +307,10 @@ footer {
 @media (width < 54rem) {
 
   header {
-    flex-direction: row-reverse;
+
+    a {
+      display: block !important;
+    }
 
     .menu-items {
       position: fixed;
@@ -629,6 +614,7 @@ label {
 
 .chords-container {
   display: flex;
+  flex-wrap: wrap;
   gap: 20px;
 
 }
@@ -787,9 +773,6 @@ label {
 }
 
 /* ========== Utilities ========== */
-.active {
-  color: rgb(255, 255, 255);
-}
 
 .not-visible {
   display: none;

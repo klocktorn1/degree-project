@@ -79,12 +79,12 @@ view model =
             Html.map ChordGuesserMsg (ChordGuesserExercise.view model.chordGuesserModel)
 
         Nothing ->
-            Html.section []
+            Html.section [HA.class "nes-container is-rounded"]
                 [ Html.h1 [] [ Html.text "Exercises" ]
                 , Html.ul [ HA.class "card-grid" ]
                     [ Html.li [ HA.class "card" ]
                         [ Html.div
-                            [ HE.onClick RequestNavigateToChordGuesser, HA.class "card-data"]
+                            [ HE.onClick RequestNavigateToChordGuesser, HA.class "card-data" ]
                             [ Html.img [ HA.src "../assets/img/guitar3.png", HA.alt "guitar" ] []
                             , Html.p [] [ Html.text "Chord Guesser" ]
                             ]

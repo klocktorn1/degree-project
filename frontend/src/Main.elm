@@ -479,17 +479,16 @@ viewMenu model =
                 ""
     in
     Html.nav [ HA.class navClass, HA.class "menu-items" ]
-        [ Html.a [ HA.class "logo", HA.href "/" ] [ Html.img [ HA.src "../assets/logo.png", HA.alt "TQ" ] [] ]
+        [ Html.a [ HA.href "/" ] [ Html.i [ HA.class "nes-logo" ] [] ]
         , Html.ul []
-            [ Html.li [ HE.onClick ToggleMenu ] [ viewLink "HOME" "/home" model.url.path ]
-            , Html.li [ HE.onClick ToggleMenu ] [ viewLink "EXERCISES" "/all-exercises" model.url.path ]
-            , Html.li [ HE.onClick ToggleMenu ] [ viewLink "THEORY" "/theory" model.url.path ]
+            [ Html.li [ HE.onClick ToggleMenu ] [ viewLink "HOME" "/home" ]
+            , Html.li [ HE.onClick ToggleMenu ] [ viewLink "EXERCISES" "/all-exercises" ]
             , if model.isLoggedIn then
-                Html.li [ HE.onClick ToggleMenu ] [ viewLink "DASHBOARD" "/dashboard" model.url.path ]
+                Html.li [ HE.onClick ToggleMenu ] [ viewLink "DASHBOARD" "/dashboard" ]
 
               else
-                Html.li [ HE.onClick ToggleMenu ] [ viewLink "REGISTER" "/register" model.url.path ]
-            , Html.li [ HE.onClick ToggleMenu ] [ viewLink "ABOUT" "/about" model.url.path ]
+                Html.li [ HE.onClick ToggleMenu ] [ viewLink "REGISTER" "/register" ]
+            , Html.li [ HE.onClick ToggleMenu ] [ viewLink "ABOUT" "/about" ]
             ]
         , if model.isLoggedIn then
             Html.button [ HE.onClick Logout, HA.class "custom-button" ] [ Html.text "LOGOUT" ]
@@ -504,7 +503,8 @@ viewMenu model =
 viewHeader : Model -> Html Msg
 viewHeader model =
     Html.header []
-        [ viewMenu model
+        [ Html.a [ HA.class "not-visible", HA.href "/" ] [ Html.i [ HA.class "nes-logo" ] [] ]
+        , viewMenu model
         , viewHamburger model
         ]
 
@@ -520,8 +520,8 @@ viewRoute model =
                 Html.section []
                     [ Html.h1 [] [ Html.text "MUSIC THEORY", Html.br [] [], Html.text "MADE EASY" ]
                     , Html.div []
-                        [ Html.a [ HA.href "/all-exercises" ] [ Html.text "Exercises" ]
-                        , Html.a [ HA.href "/theory" ] [ Html.text "Theory" ]
+                        [ Html.a [ HA.class "nes-btn", HA.href "/all-exercises" ] [ Html.text "Exercises" ]
+                        , Html.a [ HA.class "nes-btn", HA.href "/theory" ] [ Html.text "Theory" ]
                         ]
                     ]
 
@@ -538,14 +538,11 @@ viewRoute model =
                 Html.map DashboardMsg (Dashboard.view m model.isLoggedIn)
 
 
-viewLink : String -> String -> String -> Html Msg
-viewLink label path currentPath =
+viewLink : String -> String -> Html Msg
+viewLink label path =
     let
         maybeUrl =
             Url.fromString ("http://localhost:3000" ++ path)
-
-        isActive =
-            path == currentPath
     in
     case maybeUrl of
         Just url ->

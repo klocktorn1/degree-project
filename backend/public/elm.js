@@ -8760,8 +8760,7 @@ var $author$project$Main$viewFooter = A2(
 		[
 			$elm$html$Html$text('© 2025 Footer')
 		]));
-var $elm$html$Html$header = _VirtualDom_node('header');
-var $author$project$Main$ToggleMenu = {$: 'ToggleMenu'};
+var $elm$html$Html$a = _VirtualDom_node('a');
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
 		return A2(
@@ -8770,6 +8769,15 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $elm$html$Html$header = _VirtualDom_node('header');
+var $elm$html$Html$Attributes$href = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'href',
+		_VirtualDom_noJavaScriptUri(url));
+};
+var $elm$html$Html$i = _VirtualDom_node('i');
+var $author$project$Main$ToggleMenu = {$: 'ToggleMenu'};
 var $elm$html$Html$Attributes$classList = function (classes) {
 	return $elm$html$Html$Attributes$class(
 		A2(
@@ -8852,29 +8860,13 @@ var $author$project$Main$viewHamburger = function (model) {
 			]));
 };
 var $author$project$Main$Logout = {$: 'Logout'};
-var $elm$html$Html$a = _VirtualDom_node('a');
-var $elm$html$Html$Attributes$alt = $elm$html$Html$Attributes$stringProperty('alt');
 var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$html$Html$Attributes$href = function (url) {
-	return A2(
-		$elm$html$Html$Attributes$stringProperty,
-		'href',
-		_VirtualDom_noJavaScriptUri(url));
-};
-var $elm$html$Html$img = _VirtualDom_node('img');
 var $elm$html$Html$li = _VirtualDom_node('li');
 var $elm$html$Html$nav = _VirtualDom_node('nav');
-var $elm$html$Html$Attributes$src = function (url) {
-	return A2(
-		$elm$html$Html$Attributes$stringProperty,
-		'src',
-		_VirtualDom_noJavaScriptOrHtmlUri(url));
-};
 var $elm$html$Html$ul = _VirtualDom_node('ul');
-var $author$project$Main$viewLink = F3(
-	function (label, path, currentPath) {
+var $author$project$Main$viewLink = F2(
+	function (label, path) {
 		var maybeUrl = $elm$url$Url$fromString('http://localhost:3000' + path);
-		var isActive = _Utils_eq(path, currentPath);
 		if (maybeUrl.$ === 'Just') {
 			var url = maybeUrl.a;
 			return A2(
@@ -8910,17 +8902,15 @@ var $author$project$Main$viewMenu = function (model) {
 				$elm$html$Html$a,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('logo'),
 						$elm$html$Html$Attributes$href('/')
 					]),
 				_List_fromArray(
 					[
 						A2(
-						$elm$html$Html$img,
+						$elm$html$Html$i,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$src('../assets/logo.png'),
-								$elm$html$Html$Attributes$alt('TQ')
+								$elm$html$Html$Attributes$class('nes-logo')
 							]),
 						_List_Nil)
 					])),
@@ -8937,7 +8927,7 @@ var $author$project$Main$viewMenu = function (model) {
 							]),
 						_List_fromArray(
 							[
-								A3($author$project$Main$viewLink, 'HOME', '/home', model.url.path)
+								A2($author$project$Main$viewLink, 'HOME', '/home')
 							])),
 						A2(
 						$elm$html$Html$li,
@@ -8947,17 +8937,7 @@ var $author$project$Main$viewMenu = function (model) {
 							]),
 						_List_fromArray(
 							[
-								A3($author$project$Main$viewLink, 'EXERCISES', '/all-exercises', model.url.path)
-							])),
-						A2(
-						$elm$html$Html$li,
-						_List_fromArray(
-							[
-								$elm$html$Html$Events$onClick($author$project$Main$ToggleMenu)
-							]),
-						_List_fromArray(
-							[
-								A3($author$project$Main$viewLink, 'THEORY', '/theory', model.url.path)
+								A2($author$project$Main$viewLink, 'EXERCISES', '/all-exercises')
 							])),
 						model.isLoggedIn ? A2(
 						$elm$html$Html$li,
@@ -8967,7 +8947,7 @@ var $author$project$Main$viewMenu = function (model) {
 							]),
 						_List_fromArray(
 							[
-								A3($author$project$Main$viewLink, 'DASHBOARD', '/dashboard', model.url.path)
+								A2($author$project$Main$viewLink, 'DASHBOARD', '/dashboard')
 							])) : A2(
 						$elm$html$Html$li,
 						_List_fromArray(
@@ -8976,7 +8956,7 @@ var $author$project$Main$viewMenu = function (model) {
 							]),
 						_List_fromArray(
 							[
-								A3($author$project$Main$viewLink, 'REGISTER', '/register', model.url.path)
+								A2($author$project$Main$viewLink, 'REGISTER', '/register')
 							])),
 						A2(
 						$elm$html$Html$li,
@@ -8986,7 +8966,7 @@ var $author$project$Main$viewMenu = function (model) {
 							]),
 						_List_fromArray(
 							[
-								A3($author$project$Main$viewLink, 'ABOUT', '/about', model.url.path)
+								A2($author$project$Main$viewLink, 'ABOUT', '/about')
 							]))
 					])),
 				model.isLoggedIn ? A2(
@@ -9018,6 +8998,23 @@ var $author$project$Main$viewHeader = function (model) {
 		_List_Nil,
 		_List_fromArray(
 			[
+				A2(
+				$elm$html$Html$a,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('not-visible'),
+						$elm$html$Html$Attributes$href('/')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$i,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('nes-logo')
+							]),
+						_List_Nil)
+					])),
 				$author$project$Main$viewMenu(model),
 				$author$project$Main$viewHamburger(model)
 			]));
@@ -9095,6 +9092,14 @@ var $author$project$Pages$Dashboard$view = F2(
 				]));
 	});
 var $author$project$Pages$Exercises$RequestNavigateToChordGuesser = {$: 'RequestNavigateToChordGuesser'};
+var $elm$html$Html$Attributes$alt = $elm$html$Html$Attributes$stringProperty('alt');
+var $elm$html$Html$img = _VirtualDom_node('img');
+var $elm$html$Html$Attributes$src = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'src',
+		_VirtualDom_noJavaScriptOrHtmlUri(url));
+};
 var $author$project$Exercises$ChordGuesserExercise$BackToList = {$: 'BackToList'};
 var $author$project$Exercises$ChordGuesserExercise$GoBack = {$: 'GoBack'};
 var $author$project$Exercises$ChordGuesserExercise$ToggleNotesShuffle = {$: 'ToggleNotesShuffle'};
@@ -9288,7 +9293,8 @@ var $author$project$Exercises$ChordGuesserExercise$viewDifficultyButtons = funct
 					_List_fromArray(
 						[
 							$elm$html$Html$Events$onClick(
-							$author$project$Exercises$ChordGuesserExercise$DifficultyChosen(difficulty))
+							$author$project$Exercises$ChordGuesserExercise$DifficultyChosen(difficulty)),
+							$elm$html$Html$Attributes$class('nes-btn')
 						]),
 					_List_fromArray(
 						[
@@ -9444,7 +9450,10 @@ var $author$project$Exercises$ChordGuesserExercise$viewSubExercises = function (
 var $author$project$Exercises$ChordGuesserExercise$view = function (model) {
 	return model.isGameStarted ? (model.hasUserWon ? A2(
 		$elm$html$Html$section,
-		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('nes-container is-rounded')
+			]),
 		_List_fromArray(
 			[
 				$elm$html$Html$text('Good job! '),
@@ -9461,7 +9470,10 @@ var $author$project$Exercises$ChordGuesserExercise$view = function (model) {
 					]))
 			])) : A2(
 		$elm$html$Html$section,
-		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('nes-container is-rounded')
+			]),
 		_List_fromArray(
 			[
 				$author$project$Exercises$ChordGuesserExercise$viewCorrectChordNotes(model),
@@ -9499,7 +9511,10 @@ var $author$project$Exercises$ChordGuesserExercise$view = function (model) {
 					]))
 			]))) : A2(
 		$elm$html$Html$section,
-		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('nes-container is-rounded')
+			]),
 		_List_fromArray(
 			[
 				A2(
@@ -9580,7 +9595,10 @@ var $author$project$Pages$Exercises$view = function (model) {
 	} else {
 		return A2(
 			$elm$html$Html$section,
-			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('nes-container is-rounded')
+				]),
 			_List_fromArray(
 				[
 					A2(
@@ -9713,7 +9731,6 @@ var $author$project$Pages$Login$SetUsername = function (a) {
 var $author$project$Pages$Login$Submit = {$: 'Submit'};
 var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
 var $author$project$Pages$Login$GithubLogin = {$: 'GithubLogin'};
-var $elm$html$Html$i = _VirtualDom_node('i');
 var $author$project$Pages$Login$githubButton = A2(
 	$elm$html$Html$button,
 	_List_fromArray(
@@ -10197,6 +10214,7 @@ var $author$project$Main$viewRoute = function (model) {
 									$elm$html$Html$a,
 									_List_fromArray(
 										[
+											$elm$html$Html$Attributes$class('nes-btn'),
 											$elm$html$Html$Attributes$href('/all-exercises')
 										]),
 									_List_fromArray(
@@ -10207,6 +10225,7 @@ var $author$project$Main$viewRoute = function (model) {
 									$elm$html$Html$a,
 									_List_fromArray(
 										[
+											$elm$html$Html$Attributes$class('nes-btn'),
 											$elm$html$Html$Attributes$href('/theory')
 										]),
 									_List_fromArray(
