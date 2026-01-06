@@ -349,7 +349,7 @@ const googleCallback = async (req, res) => {
 
 
 
-        return res.redirect('http://localhost:3000/dashboard');
+        return res.redirect('https://degree-project-production-6775.up.railway.app/dashboard');
 
     } catch (err) {
         console.log(err);
@@ -466,7 +466,7 @@ const githubCallback = async (req, res) => {
         }
 
 
-        return res.redirect('http://localhost:3000/dashboard');
+        return res.redirect('https://degree-project-production-6775.up.railway.app/dashboard');
 
     } catch (err) {
         console.log(err);
