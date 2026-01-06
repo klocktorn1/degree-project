@@ -21,7 +21,7 @@ const requireAuth = require('./middleware/requireAuth')
 
 
 
-app.use(express.static(path.join(__dirname, "../../frontend/public")));
+app.use(express.static(path.join(__dirname, "../public")));
 app.use('/assets', express.static(path.join(__dirname, "../../frontend/assets")));
 
 app.use(cors())
