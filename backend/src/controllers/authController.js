@@ -281,6 +281,9 @@ const googleCallback = async (req, res) => {
         const firstName = googleUser.given_name || '';
         const lastName = googleUser.family_name || '';
 
+        console.log(googleUser);
+        
+
 
         const [authRow] = await db.query(
             'SELECT * FROM auth_providers WHERE provider_user_id = ? AND provider = ?',
