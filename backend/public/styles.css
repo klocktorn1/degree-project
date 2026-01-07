@@ -192,6 +192,9 @@ header {
 }
 
 
+.nes-btn.is-primary {
+  color: var(--primary);
+}
 
 main {
   flex: 1;
@@ -206,7 +209,7 @@ main {
     gap: var(--space-m);
     width: 100%;
     padding-inline: var(--space-s);
-    
+
 
 
     h1 {
@@ -328,7 +331,7 @@ main {
   /* Could be more or less, depending on screen size */
   display: flex;
   flex-direction: column;
-  gap: var(--space-l); 
+  gap: var(--space-l);
   align-items: center;
 
 }
@@ -385,9 +388,37 @@ footer {
   /* normal shadow */
   border-top: 4px solid black;
   width: 100%;
-  height: 18dvh;
+  height: fit-content;
   background: var(--bg-secondary);
   color: var(--text-primary);
+}
+
+.footer-social-icons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-m);
+  padding-block: var(--space-l);
+
+  i:hover {
+    cursor: url("../assets/img/pointer.png"), auto;
+  }
+
+}
+
+.footer-divider {
+  margin-inline: var(--space-l);
+  border-color: black;
+}
+
+.footer-links {
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-xl);
+  margin-block: var(--space-l);
+  padding: 0;
 }
 
 
@@ -441,6 +472,9 @@ footer {
       /* normal shadow */
     }
 
+
+
+
   }
 
 
@@ -474,6 +508,11 @@ footer {
     .menu-line-3 {
       top: 100%;
     }
+  }
+
+  .footer-links {
+    flex-direction: column;
+    gap: var(--space-s);
   }
 
 }
@@ -571,6 +610,7 @@ label {
   margin: 0 10px;
 }
 
+
 .social-login {
   display: flex;
   justify-content: center;
@@ -593,6 +633,8 @@ label {
   box-shadow: 4px 4px 0px var(--primary);
   transform: translate(-2px, -2px);
 }
+
+
 
 .footer {
   text-align: center;

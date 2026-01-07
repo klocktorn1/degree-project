@@ -8750,16 +8750,6 @@ var $author$project$Main$update = F2(
 		}
 	});
 var $elm$html$Html$main_ = _VirtualDom_node('main');
-var $elm$html$Html$footer = _VirtualDom_node('footer');
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $author$project$Main$viewFooter = A2(
-	$elm$html$Html$footer,
-	_List_Nil,
-	_List_fromArray(
-		[
-			$elm$html$Html$text('© 2025 Footer')
-		]));
 var $elm$html$Html$a = _VirtualDom_node('a');
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -8769,7 +8759,9 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
-var $elm$html$Html$header = _VirtualDom_node('header');
+var $elm$html$Html$div = _VirtualDom_node('div');
+var $elm$html$Html$footer = _VirtualDom_node('footer');
+var $elm$html$Html$hr = _VirtualDom_node('hr');
 var $elm$html$Html$Attributes$href = function (url) {
 	return A2(
 		$elm$html$Html$Attributes$stringProperty,
@@ -8777,6 +8769,142 @@ var $elm$html$Html$Attributes$href = function (url) {
 		_VirtualDom_noJavaScriptUri(url));
 };
 var $elm$html$Html$i = _VirtualDom_node('i');
+var $elm$html$Html$li = _VirtualDom_node('li');
+var $elm$html$Html$p = _VirtualDom_node('p');
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$ul = _VirtualDom_node('ul');
+var $author$project$Main$viewFooter = A2(
+	$elm$html$Html$footer,
+	_List_Nil,
+	_List_fromArray(
+		[
+			A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('footer-social-icons')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$i,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('nes-icon twitter is-large')
+						]),
+					_List_Nil),
+					A2(
+					$elm$html$Html$i,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('nes-icon facebook is-large')
+						]),
+					_List_Nil),
+					A2(
+					$elm$html$Html$i,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('nes-icon instagram is-large')
+						]),
+					_List_Nil),
+					A2(
+					$elm$html$Html$i,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('nes-icon linkedin is-large')
+						]),
+					_List_Nil)
+				])),
+			A2(
+			$elm$html$Html$hr,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('footer-divider')
+				]),
+			_List_Nil),
+			A2(
+			$elm$html$Html$ul,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('footer-links')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$li,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$a,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$href('/about')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('About')
+								]))
+						])),
+					A2(
+					$elm$html$Html$li,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$a,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$href('/contact')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Contact')
+								]))
+						])),
+					A2(
+					$elm$html$Html$li,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$a,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$href('/privacy')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Privacy Policy')
+								]))
+						])),
+					A2(
+					$elm$html$Html$li,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$a,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$href('/terms')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Terms of Service')
+								]))
+						]))
+				])),
+			A2(
+			$elm$html$Html$p,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text('© 2024 Music Theory App. All rights reserved.')
+				]))
+		]));
+var $elm$html$Html$header = _VirtualDom_node('header');
 var $author$project$Main$ToggleMenu = {$: 'ToggleMenu'};
 var $elm$html$Html$Attributes$classList = function (classes) {
 	return $elm$html$Html$Attributes$class(
@@ -8788,7 +8916,6 @@ var $elm$html$Html$Attributes$classList = function (classes) {
 				$elm$core$Tuple$first,
 				A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
 };
-var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -8860,10 +8987,7 @@ var $author$project$Main$viewHamburger = function (model) {
 			]));
 };
 var $author$project$Main$Logout = {$: 'Logout'};
-var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$html$Html$li = _VirtualDom_node('li');
 var $elm$html$Html$nav = _VirtualDom_node('nav');
-var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $author$project$Main$viewLink = F2(
 	function (label, path) {
 		var maybeUrl = $elm$url$Url$fromString('https://degree-project-production-6775.up.railway.app' + path);
@@ -8970,22 +9094,22 @@ var $author$project$Main$viewMenu = function (model) {
 							]))
 					])),
 				model.isLoggedIn ? A2(
-				$elm$html$Html$button,
+				$elm$html$Html$a,
 				_List_fromArray(
 					[
 						$elm$html$Html$Attributes$class('nes-btn is-primary'),
-						$elm$html$Html$Events$onClick($author$project$Main$Logout),
-						$elm$html$Html$Attributes$class('custom-button')
+						$elm$html$Html$Events$onClick($author$project$Main$Logout)
 					]),
 				_List_fromArray(
 					[
 						$elm$html$Html$text('LOGOUT')
 					])) : A2(
-				$elm$html$Html$button,
+				$elm$html$Html$a,
 				_List_fromArray(
 					[
 						$elm$html$Html$Attributes$class('nes-btn is-primary'),
-						$elm$html$Html$Events$onClick($author$project$Main$Logout)
+						$elm$html$Html$Events$onClick($author$project$Main$Logout),
+						$elm$html$Html$Attributes$href('/login')
 					]),
 				_List_fromArray(
 					[
@@ -9025,7 +9149,6 @@ var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
 var $elm$html$Html$map = $elm$virtual_dom$VirtualDom$map;
 var $elm$html$Html$section = _VirtualDom_node('section');
-var $elm$html$Html$p = _VirtualDom_node('p');
 var $author$project$Pages$Dashboard$view = F2(
 	function (model, isLoggedIn) {
 		return isLoggedIn ? A2(
@@ -9104,6 +9227,7 @@ var $elm$html$Html$Attributes$src = function (url) {
 var $author$project$Exercises$ChordGuesserExercise$BackToList = {$: 'BackToList'};
 var $author$project$Exercises$ChordGuesserExercise$GoBack = {$: 'GoBack'};
 var $author$project$Exercises$ChordGuesserExercise$ToggleNotesShuffle = {$: 'ToggleNotesShuffle'};
+var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$json$Json$Encode$bool = _Json_wrap;
 var $elm$html$Html$Attributes$boolProperty = F2(
 	function (key, bool) {

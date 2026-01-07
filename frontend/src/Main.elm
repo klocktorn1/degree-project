@@ -4,7 +4,7 @@ import Browser exposing (UrlRequest(..))
 import Browser.Navigation as Nav
 import Db.Auth as Auth
 import Exercises.Stopwatch as Stopwatch
-import Html exposing (Html, th)
+import Html exposing (Html, footer, th)
 import Html.Attributes as HA
 import Html.Events as HE
 import Http
@@ -491,10 +491,10 @@ viewMenu model =
             , Html.li [ HE.onClick ToggleMenu ] [ viewLink "ABOUT" "/about" ]
             ]
         , if model.isLoggedIn then
-            Html.button [ HA.class "nes-btn is-primary", HE.onClick Logout, HA.class "custom-button" ] [ Html.text "LOGOUT" ]
+            Html.a [ HA.class "nes-btn is-primary", HE.onClick Logout ] [ Html.text "LOGOUT" ]
 
           else
-            Html.button [ HA.class "nes-btn is-primary", HE.onClick Logout ]
+            Html.a [ HA.class "nes-btn is-primary", HE.onClick Logout, HA.href "/login" ]
                 [ Html.text "LOGIN"
                 ]
         ]
@@ -517,9 +517,9 @@ viewRoute model =
     else
         case model.page of
             HomePage ->
-                Html.section [HA.class "content-section"]
+                Html.section [ HA.class "content-section" ]
                     [ Html.h1 [] [ Html.text "MUSIC THEORY", Html.br [] [], Html.text "MADE EASY" ]
-                    , Html.div [HA.class "section-grid"]
+                    , Html.div [ HA.class "section-grid" ]
                         [ Html.a [ HA.class "nes-btn", HA.href "/all-exercises" ] [ Html.text "Exercises" ]
                         , Html.a [ HA.class "nes-btn", HA.href "/theory" ] [ Html.text "Theory" ]
                         ]
@@ -559,4 +559,19 @@ viewLink label path =
 
 viewFooter : Html Msg
 viewFooter =
-    Html.footer [] [ Html.text "© 2025 Footer" ]
+    Html.footer []
+        [ Html.div [ HA.class "footer-social-icons" ]
+            [ Html.i [ HA.class "nes-icon twitter is-large" ] []
+            , Html.i [ HA.class "nes-icon facebook is-large" ] []
+            , Html.i [ HA.class "nes-icon instagram is-large" ] []
+            , Html.i [ HA.class "nes-icon linkedin is-large" ] []
+            ]
+        , Html.hr [ HA.class "footer-divider" ] []
+        , Html.ul [ HA.class "footer-links" ]
+            [ Html.li [] [ Html.a [ HA.href "/about" ] [ Html.text "About" ] ]
+            , Html.li [] [ Html.a [ HA.href "/contact" ] [ Html.text "Contact" ] ]
+            , Html.li [] [ Html.a [ HA.href "/privacy" ] [ Html.text "Privacy Policy" ] ]
+            , Html.li [] [ Html.a [ HA.href "/terms" ] [ Html.text "Terms of Service" ] ]
+            ]
+        , Html.p [] [ Html.text "© 2024 Music Theory App. All rights reserved." ]
+        ]

@@ -77,3 +77,14 @@ and add them to List Chord. when i render the chords i map through these chords.
 a certain amount of chords and also make sure that one of the rendered chords is the correct answer.
 So i create a new list of Chords which includes  5 randomized chords from the original List Chord and 1 chord that is correct
 (total 6 chords) (maybe display more chords depending on difficulty chosen) 
+
+
+should change so that user practices on five different chord types instead, and they are all in same key. would change logic quite a bit.
+user chooses chord guesser -> render various chord types and keys -> user chooses chord types (minor7, major7, dom7, minor7b5 example) and key ->
+-> render start game where random chord notes are displayed and depending on key, Cm7, Cmaj7, C7 and Cm7b5 are rendered also
+
+LAST LIST OF TODOS
+
+-fix logo
+-footer
+-
