@@ -292,13 +292,27 @@ view : Model -> Html Msg
 view model =
     if model.isGameStarted then
         if model.hasUserWon then
-            Html.section [HA.class "nes-container is-rounded"]
-                [ Html.text "Good job! "
-                , Html.button [ HA.class "custom-button", HE.onClick GoBack ] [ Html.text "< Back to exercises" ]
+            Html.section [ HA.class "nes-container is-rounded" ]
+                [ Html.div [ HA.class "modal" ]
+                    [ Html.div [ HA.class "modal-content" ]
+                        [ Html.p [] [ Html.text "Congratulations! You have completed the exercise!" ]
+                        , Html.button [ HA.class "custom-button", HE.onClick GoBack ] [ Html.text "< Back to exercises" ]
+                        ]
+                    ]
+                , viewCorrectChordNotes model
+                , viewChords model
+                , Html.p [ HA.class "score-bar" ]
+                    [ Html.div
+                        [ HA.class "score-bar-fill"
+                        , HA.style "width" (String.fromInt (model.score * 10) ++ "%")
+                        ]
+                        []
+                    ]
+                , Html.button [ HA.class "custom-button", HE.onClick GoBack ] [ Html.text "< Back" ]
                 ]
 
         else
-            Html.section [HA.class "nes-container is-rounded"]
+            Html.section [ HA.class "nes-container is-rounded" ]
                 [ viewCorrectChordNotes model
                 , viewChords model
                 , Html.p [ HA.class "score-bar" ]
@@ -312,7 +326,7 @@ view model =
                 ]
 
     else
-        Html.section [HA.class "nes-container is-rounded"]
+        Html.section [ HA.class "nes-container is-rounded" ]
             [ Html.h1 [] [ Html.text "Chord Guesser" ]
             , viewDifficultyButtons listOfDifficulities
             , Html.div []
@@ -463,7 +477,7 @@ viewCorrectChordNotes model =
                         Html.p [ HA.class "chord-question" ]
                             [ Html.p [] [ Html.text "Which chord consists of these notes? " ]
                             , Html.br [] []
-                            , Html.p [ HA.class "correct-notes"] [ Html.text (String.join " " correctChordNotes) ]
+                            , Html.p [ HA.class "correct-notes" ] [ Html.text (String.join " " correctChordNotes) ]
                             ]
 
                 Nothing ->
@@ -543,7 +557,7 @@ checkIfChordIsCorrect model =
                         List.length (Maybe.withDefault [] model.maybeChords)
 
                     updatedModel =
-                        if newScore == 10 then
+                        if newScore == 1 then
                             let
                                 cmd =
                                     case model.chosenSubExercise of

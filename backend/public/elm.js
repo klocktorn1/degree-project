@@ -7515,7 +7515,7 @@ var $author$project$Exercises$ChordGuesserExercise$checkIfChordIsCorrect = funct
 			var chordCount = $elm$core$List$length(
 				A2($elm$core$Maybe$withDefault, _List_Nil, model.maybeChords));
 			var updatedModel = function () {
-				if (newScore === 10) {
+				if (newScore === 1) {
 					var cmd = function () {
 						var _v1 = model.chosenSubExercise;
 						if (_v1.$ === 'Just') {
@@ -9456,7 +9456,64 @@ var $author$project$Exercises$ChordGuesserExercise$view = function (model) {
 			]),
 		_List_fromArray(
 			[
-				$elm$html$Html$text('Good job! '),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('modal')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('modal-content')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$p,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Congratulations! You have completed the exercise!')
+									])),
+								A2(
+								$elm$html$Html$button,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('custom-button'),
+										$elm$html$Html$Events$onClick($author$project$Exercises$ChordGuesserExercise$GoBack)
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('< Back to exercises')
+									]))
+							]))
+					])),
+				$author$project$Exercises$ChordGuesserExercise$viewCorrectChordNotes(model),
+				$author$project$Exercises$ChordGuesserExercise$viewChords(model),
+				A2(
+				$elm$html$Html$p,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('score-bar')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('score-bar-fill'),
+								A2(
+								$elm$html$Html$Attributes$style,
+								'width',
+								$elm$core$String$fromInt(model.score * 10) + '%')
+							]),
+						_List_Nil)
+					])),
 				A2(
 				$elm$html$Html$button,
 				_List_fromArray(
@@ -9466,7 +9523,7 @@ var $author$project$Exercises$ChordGuesserExercise$view = function (model) {
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text('< Back to exercises')
+						$elm$html$Html$text('< Back')
 					]))
 			])) : A2(
 		$elm$html$Html$section,
