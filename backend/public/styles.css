@@ -231,7 +231,7 @@ main {
 
     .card-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(23rem, 0.8fr));
+      grid-template-columns: repeat(auto-fit, minmax(21rem, 0.8fr));
       justify-content: center;
       gap: var(--space-m);
 
