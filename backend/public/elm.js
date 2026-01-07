@@ -8904,6 +8904,14 @@ var $author$project$Main$viewFooter = A2(
 					$elm$html$Html$text('© 2024 Music Theory App. All rights reserved.')
 				]))
 		]));
+var $elm$virtual_dom$VirtualDom$attribute = F2(
+	function (key, value) {
+		return A2(
+			_VirtualDom_attribute,
+			_VirtualDom_noOnOrFormAction(key),
+			_VirtualDom_noJavaScriptOrHtmlUri(value));
+	});
+var $elm$html$Html$Attributes$attribute = $elm$virtual_dom$VirtualDom$attribute;
 var $elm$html$Html$header = _VirtualDom_node('header');
 var $author$project$Main$ToggleMenu = {$: 'ToggleMenu'};
 var $elm$html$Html$Attributes$classList = function (classes) {
@@ -9026,6 +9034,7 @@ var $author$project$Main$viewMenu = function (model) {
 				$elm$html$Html$a,
 				_List_fromArray(
 					[
+						A2($elm$html$Html$Attributes$attribute, 'aria-label', 'Home logo'),
 						$elm$html$Html$Attributes$href('/')
 					]),
 				_List_fromArray(
@@ -9127,6 +9136,7 @@ var $author$project$Main$viewHeader = function (model) {
 				$elm$html$Html$a,
 				_List_fromArray(
 					[
+						A2($elm$html$Html$Attributes$attribute, 'aria-label', 'Home logo'),
 						$elm$html$Html$Attributes$class('not-visible'),
 						$elm$html$Html$Attributes$href('/')
 					]),

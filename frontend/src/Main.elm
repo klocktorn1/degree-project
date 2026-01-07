@@ -479,7 +479,7 @@ viewMenu model =
                 ""
     in
     Html.nav [ HA.class navClass, HA.class "menu-items" ]
-        [ Html.a [ HA.href "/" ] [ Html.i [ HA.class "nes-logo" ] [] ]
+        [ Html.a [ HA.attribute "aria-label" "Home logo", HA.href "/" ] [ Html.i [ HA.class "nes-logo" ] [] ]
         , Html.ul []
             [ Html.li [ HE.onClick ToggleMenu ] [ viewLink "HOME" "/home" ]
             , Html.li [ HE.onClick ToggleMenu ] [ viewLink "EXERCISES" "/all-exercises" ]
@@ -503,7 +503,7 @@ viewMenu model =
 viewHeader : Model -> Html Msg
 viewHeader model =
     Html.header []
-        [ Html.a [ HA.class "not-visible", HA.href "/" ] [ Html.i [ HA.class "nes-logo" ] [] ]
+        [ Html.a [ HA.attribute "aria-label" "Home logo", HA.class "not-visible", HA.href "/" ] [ Html.i [ HA.class "nes-logo" ] [] ]
         , viewMenu model
         , viewHamburger model
         ]

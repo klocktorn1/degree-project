@@ -1,4 +1,4 @@
-port module Exercises.NoteExercise exposing (..)
+module Exercises.NoteExercise exposing (..)
 
 import Exercises.Stopwatch as Stopwatch
 import Exercises.TheoryApicopy as TheoryApi
@@ -70,14 +70,8 @@ type GameFinished
     | Lose
 
 
-port sendToLocalStorage : String -> Cmd msg
 
 
-saveWins : Int -> Cmd msg
-saveWins numberOfWins =
-    Encode.int numberOfWins
-        |> Encode.encode 0
-        |> sendToLocalStorage
 
 
 subscriptions : Model -> Sub Msg
@@ -401,7 +395,7 @@ checkClickedValues model =
                                     , gameOver = True
                                     , result = Just Win
                                   }
-                                , Cmd.batch [ saveWins newNumberOfWins ]
+                                , Cmd.none
                                 )
                 in
                 newModelAndCmd
