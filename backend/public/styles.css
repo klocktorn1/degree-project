@@ -201,7 +201,7 @@ main {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-block: var(--space-l);
+  padding-block: var(--space-xl);
 
   .content-section {
     color: var(--text-primary);
@@ -391,6 +391,7 @@ footer {
   height: fit-content;
   background: var(--bg-secondary);
   color: var(--text-primary);
+  padding-inline: var(--space-m)
 }
 
 .footer-social-icons {
@@ -419,6 +420,15 @@ footer {
   gap: var(--space-xl);
   margin-block: var(--space-l);
   padding: 0;
+
+  li {
+    a {
+      all: unset;
+      color: #209cee;
+    }
+  }
+
+  ;
 }
 
 
