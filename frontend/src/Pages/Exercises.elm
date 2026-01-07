@@ -79,7 +79,7 @@ view model =
             Html.map ChordGuesserMsg (ChordGuesserExercise.view model.chordGuesserModel)
 
         Nothing ->
-            Html.section [HA.class "nes-container is-rounded"]
+            Html.section [ HA.class "content-section" ]
                 [ Html.h1 [] [ Html.text "Exercises" ]
                 , Html.ul [ HA.class "card-grid" ]
                     [ Html.li [ HA.class "card" ]

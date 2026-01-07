@@ -292,10 +292,13 @@ view : Model -> Html Msg
 view model =
     if model.isGameStarted then
         if model.hasUserWon then
-            Html.section [ HA.class "nes-container is-rounded" ]
+            Html.section [ HA.class "content-section" ]
                 [ Html.div [ HA.class "modal" ]
                     [ Html.div [ HA.class "modal-content" ]
-                        [ Html.p [] [ Html.text "Congratulations! You have completed the exercise!" ]
+                        [ Html.i [ HA.class "nes-icon trophy is-large" ] []
+                        , Html.p []
+                            [ Html.text "Congratulations! You have completed the exercise!"
+                            ]
                         , Html.button [ HA.class "custom-button", HE.onClick GoBack ] [ Html.text "< Back to exercises" ]
                         ]
                     ]
@@ -312,7 +315,7 @@ view model =
                 ]
 
         else
-            Html.section [ HA.class "nes-container is-rounded" ]
+            Html.section [ HA.class "content-section" ]
                 [ viewCorrectChordNotes model
                 , viewChords model
                 , Html.p [ HA.class "score-bar" ]
@@ -326,7 +329,7 @@ view model =
                 ]
 
     else
-        Html.section [ HA.class "nes-container is-rounded" ]
+        Html.section [ HA.class "content-section" ]
             [ Html.h1 [] [ Html.text "Chord Guesser" ]
             , viewDifficultyButtons listOfDifficulities
             , Html.div []
@@ -395,7 +398,7 @@ viewSubExercise chosenDifficulty maybeCompleted subExercise =
 
 viewDifficultyButtons : List Difficulty -> Html Msg
 viewDifficultyButtons difficulties =
-    Html.div []
+    Html.div [ HA.class "section-grid" ]
         (List.map
             (\difficulty ->
                 Html.button
@@ -557,7 +560,7 @@ checkIfChordIsCorrect model =
                         List.length (Maybe.withDefault [] model.maybeChords)
 
                     updatedModel =
-                        if newScore == 1 then
+                        if newScore == 10 then
                             let
                                 cmd =
                                     case model.chosenSubExercise of

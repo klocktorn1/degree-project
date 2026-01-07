@@ -7515,7 +7515,7 @@ var $author$project$Exercises$ChordGuesserExercise$checkIfChordIsCorrect = funct
 			var chordCount = $elm$core$List$length(
 				A2($elm$core$Maybe$withDefault, _List_Nil, model.maybeChords));
 			var updatedModel = function () {
-				if (newScore === 1) {
+				if (newScore === 10) {
 					var cmd = function () {
 						var _v1 = model.chosenSubExercise;
 						if (_v1.$ === 'Just') {
@@ -8973,6 +8973,7 @@ var $author$project$Main$viewMenu = function (model) {
 				$elm$html$Html$button,
 				_List_fromArray(
 					[
+						$elm$html$Html$Attributes$class('nes-btn is-primary'),
 						$elm$html$Html$Events$onClick($author$project$Main$Logout),
 						$elm$html$Html$Attributes$class('custom-button')
 					]),
@@ -9284,7 +9285,10 @@ var $author$project$Exercises$ChordGuesserExercise$DifficultyChosen = function (
 var $author$project$Exercises$ChordGuesserExercise$viewDifficultyButtons = function (difficulties) {
 	return A2(
 		$elm$html$Html$div,
-		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('section-grid')
+			]),
 		A2(
 			$elm$core$List$map,
 			function (difficulty) {
@@ -9452,7 +9456,7 @@ var $author$project$Exercises$ChordGuesserExercise$view = function (model) {
 		$elm$html$Html$section,
 		_List_fromArray(
 			[
-				$elm$html$Html$Attributes$class('nes-container is-rounded')
+				$elm$html$Html$Attributes$class('content-section')
 			]),
 		_List_fromArray(
 			[
@@ -9472,6 +9476,13 @@ var $author$project$Exercises$ChordGuesserExercise$view = function (model) {
 							]),
 						_List_fromArray(
 							[
+								A2(
+								$elm$html$Html$i,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('nes-icon trophy is-large')
+									]),
+								_List_Nil),
 								A2(
 								$elm$html$Html$p,
 								_List_Nil,
@@ -9529,7 +9540,7 @@ var $author$project$Exercises$ChordGuesserExercise$view = function (model) {
 		$elm$html$Html$section,
 		_List_fromArray(
 			[
-				$elm$html$Html$Attributes$class('nes-container is-rounded')
+				$elm$html$Html$Attributes$class('content-section')
 			]),
 		_List_fromArray(
 			[
@@ -9570,7 +9581,7 @@ var $author$project$Exercises$ChordGuesserExercise$view = function (model) {
 		$elm$html$Html$section,
 		_List_fromArray(
 			[
-				$elm$html$Html$Attributes$class('nes-container is-rounded')
+				$elm$html$Html$Attributes$class('content-section')
 			]),
 		_List_fromArray(
 			[
@@ -9654,7 +9665,7 @@ var $author$project$Pages$Exercises$view = function (model) {
 			$elm$html$Html$section,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('nes-container is-rounded')
+					$elm$html$Html$Attributes$class('content-section')
 				]),
 			_List_fromArray(
 				[
@@ -10250,7 +10261,10 @@ var $author$project$Main$viewRoute = function (model) {
 			case 'HomePage':
 				return A2(
 					$elm$html$Html$section,
-					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('content-section')
+						]),
 					_List_fromArray(
 						[
 							A2(
@@ -10264,7 +10278,10 @@ var $author$project$Main$viewRoute = function (model) {
 								])),
 							A2(
 							$elm$html$Html$div,
-							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('section-grid')
+								]),
 							_List_fromArray(
 								[
 									A2(

@@ -491,7 +491,7 @@ viewMenu model =
             , Html.li [ HE.onClick ToggleMenu ] [ viewLink "ABOUT" "/about" ]
             ]
         , if model.isLoggedIn then
-            Html.button [ HE.onClick Logout, HA.class "custom-button" ] [ Html.text "LOGOUT" ]
+            Html.button [ HA.class "nes-btn is-primary", HE.onClick Logout, HA.class "custom-button" ] [ Html.text "LOGOUT" ]
 
           else
             Html.button [ HA.class "nes-btn is-primary", HE.onClick Logout ]
@@ -517,9 +517,9 @@ viewRoute model =
     else
         case model.page of
             HomePage ->
-                Html.section []
+                Html.section [HA.class "content-section"]
                     [ Html.h1 [] [ Html.text "MUSIC THEORY", Html.br [] [], Html.text "MADE EASY" ]
-                    , Html.div []
+                    , Html.div [HA.class "section-grid"]
                         [ Html.a [ HA.class "nes-btn", HA.href "/all-exercises" ] [ Html.text "Exercises" ]
                         , Html.a [ HA.class "nes-btn", HA.href "/theory" ] [ Html.text "Theory" ]
                         ]
