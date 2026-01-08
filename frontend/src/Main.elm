@@ -3,8 +3,7 @@ module Main exposing (..)
 import Browser exposing (UrlRequest(..))
 import Browser.Navigation as Nav
 import Db.Auth as Auth
-import Exercises.Stopwatch as Stopwatch
-import Html exposing (Html, footer, th)
+import Html exposing (Html)
 import Html.Attributes as HA
 import Html.Events as HE
 import Http
@@ -13,10 +12,8 @@ import Pages.Exercises as Exercises
 import Pages.Login as Login
 import Pages.Register as Register
 import Route exposing (ExercisesRoute(..), Route(..))
-import Svg.Attributes exposing (rotate)
-import Time exposing (Posix)
 import Url
-import Url.Parser as UP exposing ((</>), (<?>))
+import Url.Parser exposing ((</>), (<?>))
 
 
 
@@ -30,7 +27,6 @@ type alias Model =
     , auth : AuthState
     , isLoggedIn : Bool
     , isLoading : Bool
-    , stopwatchModel : Stopwatch.Model
     , isMenuOpen : Bool
     }
 
@@ -60,7 +56,6 @@ type Msg
     | LoginMsg Login.Msg
     | RegisterMsg Register.Msg
     | DashboardMsg Dashboard.Msg
-    | StopwatchMsg Stopwatch.Msg
     | AuthRefreshed (Result Http.Error ())
     | Logout
     | LogoutCompleted
@@ -90,8 +85,7 @@ main =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Sub.map StopwatchMsg (Stopwatch.subscriptions model.stopwatchModel)
-        , case model.page of
+        [ case model.page of
             ExercisesPage m ->
                 Sub.map ExercisesMsg (Exercises.subscriptions m)
 
@@ -155,7 +149,6 @@ init _ url key =
       , auth = { refreshing = False, retryAfterRefresh = Nothing }
       , isLoggedIn = False
       , isLoading = False
-      , stopwatchModel = Stopwatch.init
       , isMenuOpen = False
       }
     , Cmd.batch
@@ -393,14 +386,6 @@ update msg model =
                       }
                     , Cmd.none
                     )
-
-        StopwatchMsg subMsg ->
-            let
-                ( updated, cmd ) =
-                    Stopwatch.update subMsg model.stopwatchModel
-            in
-            ( { model | stopwatchModel = updated }, Cmd.map StopwatchMsg cmd )
-
         Logout ->
             ( model
             , Cmd.batch
