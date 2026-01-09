@@ -558,5 +558,4 @@ viewFooter =
             , Html.li [] [ Html.a [ HA.href "/privacy" ] [ Html.text "Privacy Policy" ] ]
             , Html.li [] [ Html.a [ HA.href "/terms" ] [ Html.text "Terms of Service" ] ]
             ]
-        , Html.p [] [ Html.text "© 2024 Music Theory App. All rights reserved." ]
         ]
