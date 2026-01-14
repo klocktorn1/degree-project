@@ -1,4 +1,4 @@
-module Db.TheoryApi exposing (Chord, buildErrorMessage, fetchChord, fetchChords)
+module Db.TheoryApi exposing (Chord, buildErrorMessage, fetchChord, fetchChords, fetchChords2)
 
 import Http
 import Json.Decode as Decode
@@ -85,6 +85,23 @@ fetchChords rootNotes chordTypes toMsg =
                 ++ parseChordTypes chordTypes
         , expect = Http.expectJson toMsg chordsDecoder
         }
+
+
+fetchChords2 : String -> List String -> (Result Http.Error (List Chord) -> msg) -> Cmd msg
+fetchChords2 key chordTypes toMsg =
+    Http.get
+        { url =
+            baseUrl
+                ++ "/chords/"
+                ++ key
+                ++ "?"
+                ++ parseChordTypes chordTypes
+        , expect = Http.expectJson toMsg chordsDecoder
+        }
+
+
+
+--http://localhost:5000/api/v1/chords/C?type=major&type=minor
 
 
 fetchChord : String -> String -> (Result Http.Error Chord -> msg) -> Cmd msg

@@ -4,4 +4,4 @@ run:
 	--pushstate \
 	--dir=../backend/public \
 	--watch=fontend/src \
-	-- --output=../backend/public/elm.js
+	-- --debug --output=../backend/public/elm.js

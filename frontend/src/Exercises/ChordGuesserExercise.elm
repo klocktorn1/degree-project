@@ -18,8 +18,10 @@ type alias Model =
     , maybeRandomizedChordList : Maybe (List TheoryApi.Chord)
     , isGameStarted : Bool
     , chosenDifficulty : Difficulty
+    , chosenKey : Maybe String
     , pendingFetches : Int
     , rootNotes : List String
+    , allKeys : List String
     , maybeChosenChord : Maybe TheoryApi.Chord
     , correctChord : Maybe TheoryApi.Chord
     , correctChordNotes : Maybe (List String)
@@ -43,6 +45,7 @@ type Msg
     | CompletedExerciseEntryResponse (Result Http.Error Exercises.CompletedResponse)
     | CorrectChordPicked Int
     | DifficultyChosen Difficulty
+    | KeyChosen String
     | ChordChosen TheoryApi.Chord
     | ChordGroupChosen Exercises.SubExercise
     | ChordNotesShuffled (List String)
@@ -67,8 +70,10 @@ init _ =
       , maybeChosenChord = Nothing
       , isGameStarted = False
       , chosenDifficulty = Easy
+      , chosenKey = Nothing
       , pendingFetches = 0
-      , rootNotes = [ "C", "G", "F" ]
+      , rootNotes = [ "C", "F", "G" ]
+      , allKeys = [ "C", "B#", "C#", "Db", "D", "D#", "Eb", "E", "Fb", "E#", "F", "F#", "Gb", "G", "G#", "Ab", "A", "A#", "Bb", "B", "Cb" ]
       , correctChord = Nothing
       , correctChordNotes = Nothing
       , randomizedChordNotesBeforeShuffle = Nothing
@@ -118,19 +123,34 @@ update msg model =
                 newDifficulty =
                     difficulty
             in
-            ( { model | chosenDifficulty = newDifficulty, rootNotes = setRootNotes newDifficulty }, Cmd.none )
+            ( { model | chosenDifficulty = newDifficulty, rootNotes = setRootNote newDifficulty }, Cmd.none )
+
+        KeyChosen key ->
+            let
+                newKey =
+                    key
+            in
+            ( { model | chosenKey = Just newKey }, Cmd.none )
 
         ChordGroupChosen subExercise ->
             let
                 fetchCount =
                     List.length model.rootNotes
+
+                fetchChordsCmd =
+                    case model.chosenKey of
+                        Just chosenKey ->
+                            TheoryApi.fetchChords2 chosenKey subExercise.endpoints GotChordData
+
+                        Nothing ->
+                            Cmd.none
             in
             ( { model
                 | isGameStarted = True
                 , pendingFetches = fetchCount
                 , chosenSubExercise = Just subExercise
               }
-            , TheoryApi.fetchChords model.rootNotes subExercise.endpoints GotChordData
+            , fetchChordsCmd
             )
 
         ChordNotesShuffled chordNotes ->
@@ -292,63 +312,104 @@ view : Model -> Html Msg
 view model =
     if model.isGameStarted then
         if model.hasUserWon then
-            Html.section [ HA.class "content-section" ]
-                [ Html.div [ HA.class "modal" ]
-                    [ Html.div [ HA.class "modal-content" ]
-                        [ Html.i [ HA.class "nes-icon trophy is-large" ] []
-                        , Html.p []
-                            [ Html.text "Congratulations! You have completed the exercise!"
-                            ]
-                        , Html.button [ HA.class "custom-button", HE.onClick GoBack ] [ Html.text "< Back to exercises" ]
-                        ]
-                    ]
-                , viewCorrectChordNotes model
-                , viewChords model
-                , Html.p [ HA.class "score-bar" ]
-                    [ Html.div
-                        [ HA.class "score-bar-fill"
-                        , HA.style "width" (String.fromInt (model.score * 10) ++ "%")
-                        ]
-                        []
-                    ]
-                , Html.button [ HA.class "custom-button", HE.onClick GoBack ] [ Html.text "< Back" ]
-                ]
+            viewUserWin model
 
         else
-            Html.section [ HA.class "content-section" ]
-                [ viewCorrectChordNotes model
-                , viewChords model
-                , Html.p [ HA.class "score-bar" ]
-                    [ Html.div
-                        [ HA.class "score-bar-fill"
-                        , HA.style "width" (String.fromInt (model.score * 10) ++ "%")
-                        ]
-                        []
-                    ]
-                , Html.button [ HA.class "custom-button", HE.onClick GoBack ] [ Html.text "< Back" ]
-                ]
+            viewGameStarted model
+
+    else if model.chosenKey == Nothing then
+        viewChooseKey model
 
     else
-        Html.section [ HA.class "content-section" ]
-            [ Html.h1 [] [ Html.text "Chord Guesser" ]
-            , viewDifficultyButtons listOfDifficulities
-            , Html.div []
-                [ Html.text ("Difficulty: " ++ difficultyToString model.chosenDifficulty)
-                ]
-            , Html.span [] [ Html.text "Toggle shuffle notes" ]
-            , Html.label [ HA.class "switch", HA.for "shuffle-notes-switch" ]
-                [ Html.input
-                    [ HA.type_ "checkbox"
-                    , HA.checked model.areNotesShuffled
-                    , HA.id "shuffle-notes-switch"
-                    , HE.onCheck (\checked -> ToggleNotesShuffle)
-                    ]
-                    []
-                , Html.span [ HA.class "slider" ] []
-                ]
-            , viewSubExercises model
-            , Html.button [ HA.class "custom-button", HE.onClick BackToList ] [ Html.text "< Back to exercises" ]
+        viewChooseSubExercises model
+
+
+viewChooseSubExercises : Model -> Html Msg
+viewChooseSubExercises model =
+    Html.section [ HA.class "content-section" ]
+        [ Html.h1 [] [ Html.text "Chord Guesser" ]
+        , viewDifficultyButtons listOfDifficulities
+        , Html.div []
+            [ Html.text ("Difficulty: " ++ difficultyToString model.chosenDifficulty)
             ]
+        , Html.span [] [ Html.text "Toggle shuffle notes" ]
+        , Html.label [ HA.class "switch", HA.for "shuffle-notes-switch" ]
+            [ Html.input
+                [ HA.type_ "checkbox"
+                , HA.checked model.areNotesShuffled
+                , HA.id "shuffle-notes-switch"
+                , HE.onCheck (\checked -> ToggleNotesShuffle)
+                ]
+                []
+            , Html.span [ HA.class "slider" ] []
+            ]
+        , viewSubExercises model
+        , Html.button [ HA.class "custom-button", HE.onClick BackToList ] [ Html.text "< Back to exercises" ]
+        ]
+
+
+viewChooseKey : Model -> Html Msg
+viewChooseKey model =
+    Html.div []
+        [ Html.text "Please choose a key"
+        , viewAllKeys model.allKeys
+        ]
+
+
+viewAllKeys : List String -> Html Msg
+viewAllKeys allKeys =
+    Html.div [ HA.class "section-grid" ]
+        (List.map
+            (\key ->
+                Html.button
+                    [ HE.onClick (KeyChosen key)
+                    , HA.class "nes-btn"
+                    ]
+                    [ Html.text key ]
+            )
+            allKeys
+        )
+
+
+viewGameStarted : Model -> Html Msg
+viewGameStarted model =
+    Html.section [ HA.class "content-section" ]
+        [ viewCorrectChordNotes model
+        , viewChords model
+        , Html.p [ HA.class "score-bar" ]
+            [ Html.div
+                [ HA.class "score-bar-fill"
+                , HA.style "width" (String.fromInt (model.score * 10) ++ "%")
+                ]
+                []
+            ]
+        , Html.button [ HA.class "custom-button", HE.onClick GoBack ] [ Html.text "< Back" ]
+        ]
+
+
+viewUserWin : Model -> Html Msg
+viewUserWin model =
+    Html.section [ HA.class "content-section" ]
+        [ Html.div [ HA.class "modal" ]
+            [ Html.div [ HA.class "modal-content" ]
+                [ Html.i [ HA.class "nes-icon trophy is-large" ] []
+                , Html.p []
+                    [ Html.text "Congratulations! You have completed the exercise!"
+                    ]
+                , Html.button [ HA.class "custom-button", HE.onClick GoBack ] [ Html.text "< Back to exercises" ]
+                ]
+            ]
+        , viewCorrectChordNotes model
+        , viewChords model
+        , Html.p [ HA.class "score-bar" ]
+            [ Html.div
+                [ HA.class "score-bar-fill"
+                , HA.style "width" (String.fromInt (model.score * 10) ++ "%")
+                ]
+                []
+            ]
+        , Html.button [ HA.class "custom-button", HE.onClick GoBack ] [ Html.text "< Back" ]
+        ]
 
 
 viewSubExercises : Model -> Html Msg
@@ -411,20 +472,18 @@ viewDifficultyButtons difficulties =
         )
 
 
-setRootNotes : Difficulty -> List String
-setRootNotes difficulty =
+setRootNote : Difficulty -> List String
+setRootNote difficulty =
     case difficulty of
         Easy ->
             [ "C", "G", "F" ]
 
-        -- Only C, G, F, notes are not shuffled, user can choose to shuffle notes maybe?
         Medium ->
             [ "C", "G", "F", "D", "A" ]
 
         Hard ->
             [ "C", "G", "F", "D", "A", "Bb", "Eb" ]
 
-        -- Notes are always shuffled
         Advanced ->
             [ "C", "G", "F", "D", "A", "Bb", "Eb", "E", "B", "Ab", "Db" ]
 
@@ -563,19 +622,20 @@ checkIfChordIsCorrect model =
                         if newScore == 10 then
                             let
                                 cmd =
-                                    case model.chosenSubExercise of
-                                        Just chosenSubExercise ->
+                                    case ( model.chosenSubExercise, model.chosenKey ) of
+                                        ( Just chosenSubExercise, Just chosenKey ) ->
                                             let
                                                 body =
                                                     Encode.object
                                                         [ ( "sub_exercise_id", Encode.int chosenSubExercise.id )
                                                         , ( "difficulty", Encode.int (difficultyToInt model.chosenDifficulty) )
                                                         , ( "shuffled", Encode.int (boolToInt model.areNotesShuffled) )
+                                                        , ( "chosen_key", Encode.string chosenKey )
                                                         ]
                                             in
                                             Exercises.createCompletedExerciseEntry body CompletedExerciseEntryResponse
 
-                                        Nothing ->
+                                        _ ->
                                             Cmd.none
                             in
                             ( { model | hasUserWon = True }, cmd )

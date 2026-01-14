@@ -27,6 +27,7 @@ type alias CompletedSubExercise =
     , subExerciseId : Int
     , difficulty : Int
     , shuffled : Int
+    , chosenKey : String
     }
 
 
@@ -62,11 +63,12 @@ completedExercisesDecoder =
 
 completedExerciseDecoder : Decode.Decoder CompletedSubExercise
 completedExerciseDecoder =
-    Decode.map4 CompletedSubExercise
+    Decode.map5 CompletedSubExercise
         (Decode.field "id" Decode.int)
         (Decode.field "sub_exercise_id" Decode.int)
         (Decode.field "difficulty" Decode.int)
         (Decode.field "shuffled" Decode.int)
+        (Decode.field "chosen_key" Decode.string)
 
 
 
