@@ -364,15 +364,15 @@ viewUserWin model =
 
 viewSubExercises : Model -> Html Msg
 viewSubExercises model =
-    case ( model.subExercises, model.chosenKey ) of
-        ( Just subExercises, Just chosenKey ) ->
-            Html.ul [ HA.class "card-grid" ] (List.map (viewSubExercise chosenKey model.completedSubExercises) subExercises)
+    case  model.subExercises of
+        Just subExercises ->
+            Html.ul [ HA.class "card-grid" ] (List.map (viewSubExercise model.chosenKey model.completedSubExercises) subExercises)
 
-        _ ->
+        Nothing ->
             Html.p [] [ Html.text "Error" ]
 
 
-viewSubExercise : String -> Maybe Exercises.CompletedSubExercises -> Exercises.SubExercise -> Html Msg
+viewSubExercise : Maybe String -> Maybe Exercises.CompletedSubExercises -> Exercises.SubExercise -> Html Msg
 viewSubExercise chosenKey maybeCompleted subExercise =
     let
         isCompleted =
@@ -562,7 +562,7 @@ checkIfChordIsCorrect model =
             ( model, Cmd.none )
 
 
-checkIfCompleted : String -> List Exercises.CompletedSubExercise -> Exercises.SubExercise -> Bool
+checkIfCompleted : Maybe String -> List Exercises.CompletedSubExercise -> Exercises.SubExercise -> Bool
 checkIfCompleted chosenKey completed subExercise =
     if
         List.any
@@ -580,7 +580,7 @@ checkIfCompleted chosenKey completed subExercise =
         False
 
 
-checkIfCompletedWithShuffle : String -> List Exercises.CompletedSubExercise -> Exercises.SubExercise -> Bool
+checkIfCompletedWithShuffle : Maybe String -> List Exercises.CompletedSubExercise -> Exercises.SubExercise -> Bool
 checkIfCompletedWithShuffle chosenKey completed subExercise =
     if
         List.any

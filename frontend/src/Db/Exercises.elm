@@ -18,16 +18,18 @@ type alias CompletedResponse =
     , message : String
     }
 
+
 type alias CompletedSubExercises =
-    {
-        completedSubExercises : List CompletedSubExercise
+    { completedSubExercises : List CompletedSubExercise
     }
+
+
 type alias CompletedSubExercise =
     { id : Int
     , subExerciseId : Int
-    , difficulty : Int
+    , difficulty : Maybe Int
     , shuffled : Int
-    , chosenKey : String
+    , chosenKey : Maybe String
     }
 
 
@@ -52,13 +54,10 @@ subExerciseDecoder =
         (Decode.field "endpoints" (Decode.list Decode.string))
 
 
-
-
 completedExercisesDecoder : Decode.Decoder CompletedSubExercises
 completedExercisesDecoder =
     Decode.map CompletedSubExercises
         (Decode.field "completed_exercises" (Decode.list completedExerciseDecoder))
-
 
 
 completedExerciseDecoder : Decode.Decoder CompletedSubExercise
@@ -66,10 +65,9 @@ completedExerciseDecoder =
     Decode.map5 CompletedSubExercise
         (Decode.field "id" Decode.int)
         (Decode.field "sub_exercise_id" Decode.int)
-        (Decode.field "difficulty" Decode.int)
+        (Decode.field "difficulty" (Decode.maybe Decode.int))
         (Decode.field "shuffled" Decode.int)
-        (Decode.field "chosen_key" Decode.string)
-
+        (Decode.field "chosen_key" (Decode.maybe Decode.string))
 
 
 fetchSubExercises : String -> (Result Http.Error (List SubExercise) -> msg) -> Cmd msg
@@ -80,7 +78,7 @@ fetchSubExercises exerciseId toMsg =
         }
 
 
-fetchCompletedExercises : (Result Http.Error  CompletedSubExercises -> msg) -> Cmd msg
+fetchCompletedExercises : (Result Http.Error CompletedSubExercises -> msg) -> Cmd msg
 fetchCompletedExercises toMsg =
     Http.request
         { method = "GET"
@@ -104,7 +102,6 @@ createCompletedExerciseEntry body toMsg =
         , timeout = Nothing
         , tracker = Nothing
         }
-
 
 
 buildErrorMessage : Http.Error -> String
