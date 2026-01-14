@@ -17,7 +17,6 @@ type alias Model =
     { maybeChords : Maybe (List TheoryApi.Chord)
     , maybeRandomizedChordList : Maybe (List TheoryApi.Chord)
     , isGameStarted : Bool
-    , chosenDifficulty : Difficulty
     , chosenKey : Maybe String
     , pendingFetches : Int
     , rootNotes : List String
@@ -44,7 +43,6 @@ type Msg
     | GotCompletedSubExercises (Result Http.Error Exercises.CompletedSubExercises)
     | CompletedExerciseEntryResponse (Result Http.Error Exercises.CompletedResponse)
     | CorrectChordPicked Int
-    | DifficultyChosen Difficulty
     | KeyChosen String
     | ChordChosen TheoryApi.Chord
     | ChordGroupChosen Exercises.SubExercise
@@ -69,7 +67,6 @@ init _ =
       , maybeRandomizedChordList = Nothing
       , maybeChosenChord = Nothing
       , isGameStarted = False
-      , chosenDifficulty = Easy
       , chosenKey = Nothing
       , pendingFetches = 0
       , rootNotes = [ "C", "F", "G" ]
@@ -118,13 +115,6 @@ update msg model =
         GotCompletedSubExercises (Err err) ->
             ( { model | error = Just (Exercises.buildErrorMessage err) }, Cmd.none )
 
-        DifficultyChosen difficulty ->
-            let
-                newDifficulty =
-                    difficulty
-            in
-            ( { model | chosenDifficulty = newDifficulty, rootNotes = setRootNote newDifficulty }, Cmd.none )
-
         KeyChosen key ->
             let
                 newKey =
@@ -171,16 +161,7 @@ update msg model =
                     newCorrectChord.notes
 
                 updateChordListCmd =
-                    Random.generate ChordListUpdated (updateChordList model.chosenDifficulty newCorrectChord (Maybe.withDefault [] model.maybeChords))
-
-                _ =
-                    Debug.log "chordCount" chordCount
-
-                _ =
-                    Debug.log "newCorrectChord" newCorrectChord
-
-                _ =
-                    Debug.log "notes" notes
+                    Random.generate ChordListUpdated (updateChordList model newCorrectChord (Maybe.withDefault [] model.maybeChords))
             in
             case model.lastRandomIndex of
                 Just lastIndex ->
@@ -251,8 +232,8 @@ update msg model =
             ( model, shuffleChords chords )
 
 
-updateChordList : Difficulty -> TheoryApi.Chord -> List TheoryApi.Chord -> Random.Generator (List TheoryApi.Chord)
-updateChordList difficulty correctChord chords =
+updateChordList : Model -> TheoryApi.Chord -> List TheoryApi.Chord -> Random.Generator (List TheoryApi.Chord)
+updateChordList model correctChord chords =
     let
         pool =
             List.filter
@@ -262,18 +243,12 @@ updateChordList difficulty correctChord chords =
                 chords
 
         numberOfChords =
-            case difficulty of
-                Easy ->
-                    4
+            case model.maybeChords of
+                Just chordList ->
+                    List.length chordList
+                Nothing ->
+                    0
 
-                Medium ->
-                    6
-
-                Hard ->
-                    8
-
-                Advanced ->
-                    10
     in
     RandomList.shuffle pool
         |> Random.map
@@ -282,30 +257,9 @@ updateChordList difficulty correctChord chords =
             )
 
 
-listOfDifficulities : List Difficulty
-listOfDifficulities =
-    [ Easy, Medium, Hard, Advanced ]
-
-
 fetchSubExercisesCmd : Cmd Msg
 fetchSubExercisesCmd =
     Exercises.fetchSubExercises "1" GotSubExercises
-
-
-difficultyToInt : Difficulty -> Int
-difficultyToInt difficulty =
-    case difficulty of
-        Easy ->
-            0
-
-        Medium ->
-            1
-
-        Hard ->
-            2
-
-        Advanced ->
-            3
 
 
 view : Model -> Html Msg
@@ -328,10 +282,6 @@ viewChooseSubExercises : Model -> Html Msg
 viewChooseSubExercises model =
     Html.section [ HA.class "content-section" ]
         [ Html.h1 [] [ Html.text "Chord Guesser" ]
-        , viewDifficultyButtons listOfDifficulities
-        , Html.div []
-            [ Html.text ("Difficulty: " ++ difficultyToString model.chosenDifficulty)
-            ]
         , Html.span [] [ Html.text "Toggle shuffle notes" ]
         , Html.label [ HA.class "switch", HA.for "shuffle-notes-switch" ]
             [ Html.input
@@ -414,21 +364,21 @@ viewUserWin model =
 
 viewSubExercises : Model -> Html Msg
 viewSubExercises model =
-    case model.subExercises of
-        Just subExercises ->
-            Html.ul [ HA.class "card-grid" ] (List.map (viewSubExercise model.chosenDifficulty model.completedSubExercises) subExercises)
+    case ( model.subExercises, model.chosenKey ) of
+        ( Just subExercises, Just chosenKey ) ->
+            Html.ul [ HA.class "card-grid" ] (List.map (viewSubExercise chosenKey model.completedSubExercises) subExercises)
 
-        Nothing ->
+        _ ->
             Html.p [] [ Html.text "Error" ]
 
 
-viewSubExercise : Difficulty -> Maybe Exercises.CompletedSubExercises -> Exercises.SubExercise -> Html Msg
-viewSubExercise chosenDifficulty maybeCompleted subExercise =
+viewSubExercise : String -> Maybe Exercises.CompletedSubExercises -> Exercises.SubExercise -> Html Msg
+viewSubExercise chosenKey maybeCompleted subExercise =
     let
         isCompleted =
             case maybeCompleted of
                 Just completed ->
-                    checkIfCompleted chosenDifficulty completed.completedSubExercises subExercise
+                    checkIfCompleted chosenKey completed.completedSubExercises subExercise
 
                 Nothing ->
                     False
@@ -436,7 +386,7 @@ viewSubExercise chosenDifficulty maybeCompleted subExercise =
         isCompletedWithShuffle =
             case maybeCompleted of
                 Just completed ->
-                    checkIfCompletedWithShuffle chosenDifficulty completed.completedSubExercises subExercise
+                    checkIfCompletedWithShuffle chosenKey completed.completedSubExercises subExercise
 
                 Nothing ->
                     False
@@ -455,53 +405,6 @@ viewSubExercise chosenDifficulty maybeCompleted subExercise =
                 Html.span [] []
             ]
         ]
-
-
-viewDifficultyButtons : List Difficulty -> Html Msg
-viewDifficultyButtons difficulties =
-    Html.div [ HA.class "section-grid" ]
-        (List.map
-            (\difficulty ->
-                Html.button
-                    [ HE.onClick (DifficultyChosen difficulty)
-                    , HA.class "nes-btn"
-                    ]
-                    [ Html.text (difficultyToString difficulty) ]
-            )
-            difficulties
-        )
-
-
-setRootNote : Difficulty -> List String
-setRootNote difficulty =
-    case difficulty of
-        Easy ->
-            [ "C", "G", "F" ]
-
-        Medium ->
-            [ "C", "G", "F", "D", "A" ]
-
-        Hard ->
-            [ "C", "G", "F", "D", "A", "Bb", "Eb" ]
-
-        Advanced ->
-            [ "C", "G", "F", "D", "A", "Bb", "Eb", "E", "B", "Ab", "Db" ]
-
-
-difficultyToString : Difficulty -> String
-difficultyToString difficulty =
-    case difficulty of
-        Easy ->
-            "Easy"
-
-        Medium ->
-            "Medium"
-
-        Hard ->
-            "Hard"
-
-        Advanced ->
-            "Advanced"
 
 
 viewChords : Model -> Html Msg
@@ -628,7 +531,6 @@ checkIfChordIsCorrect model =
                                                 body =
                                                     Encode.object
                                                         [ ( "sub_exercise_id", Encode.int chosenSubExercise.id )
-                                                        , ( "difficulty", Encode.int (difficultyToInt model.chosenDifficulty) )
                                                         , ( "shuffled", Encode.int (boolToInt model.areNotesShuffled) )
                                                         , ( "chosen_key", Encode.string chosenKey )
                                                         ]
@@ -660,15 +562,15 @@ checkIfChordIsCorrect model =
             ( model, Cmd.none )
 
 
-checkIfCompleted : Difficulty -> List Exercises.CompletedSubExercise -> Exercises.SubExercise -> Bool
-checkIfCompleted chosenDifficulty completed subExercise =
+checkIfCompleted : String -> List Exercises.CompletedSubExercise -> Exercises.SubExercise -> Bool
+checkIfCompleted chosenKey completed subExercise =
     if
         List.any
             (\c ->
                 c.subExerciseId
                     == subExercise.id
-                    && c.difficulty
-                    == difficultyToInt chosenDifficulty
+                    && c.chosenKey
+                    == chosenKey
             )
             completed
     then
@@ -678,15 +580,15 @@ checkIfCompleted chosenDifficulty completed subExercise =
         False
 
 
-checkIfCompletedWithShuffle : Difficulty -> List Exercises.CompletedSubExercise -> Exercises.SubExercise -> Bool
-checkIfCompletedWithShuffle chosenDifficulty completed subExercise =
+checkIfCompletedWithShuffle : String -> List Exercises.CompletedSubExercise -> Exercises.SubExercise -> Bool
+checkIfCompletedWithShuffle chosenKey completed subExercise =
     if
         List.any
             (\c ->
                 c.subExerciseId
                     == subExercise.id
-                    && c.difficulty
-                    == difficultyToInt chosenDifficulty
+                    && c.chosenKey
+                    == chosenKey
                     && c.shuffled
                     == 1
             )
